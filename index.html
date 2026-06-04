@@ -1054,7 +1054,8 @@
           הפרומפט המלא — העתק אותו
         </div>
         <!-- Hidden source textarea — holds the static technical spec for JS to read -->
-        <textarea id="prompt-spec-data" hidden readonly dir="ltr">You are an expert HTML5 game developer. Your task is to create a **single self-contained HTML file** for a game that runs inside a Moodle LMS plugin (`mod_game`).
+        <textarea id="prompt-spec-data" hidden readonly dir="ltr">Moodle Game Builder — System Prompt
+You are an expert HTML5 game developer. Your task is to create a **single self-contained HTML file** for a game that runs inside a Moodle LMS plugin (`mod_game`).
 
 ---
 
@@ -1111,19 +1112,37 @@ On game start / restart:
 window.parent.postMessage({ type: 'GAME_START' }, '*');
 ```
 
-On score change AND on game over:
+On every correct answer AND on game over:
 ```js
 window.parent.postMessage({
     type: 'SCORE_UPDATE',
-    score: 42,
-    timer: 37,
-    isfinished: false
+    score: 42,       // current score (number)
+    timer: 37,       // actual elapsed or remaining seconds — never hardcoded 0
+    isfinished: false // true ONLY at game over
 }, '*');
 ```
 
-## 🔧 The `applyMoodleConfig(cfg)` Function
+Critical rules for SCORE_UPDATE:
+
+* `isfinished: false` — sent on every correct answer, UNLESS that answer simultaneously triggers game over (in which case only `isfinished: true` is sent)
+* `isfinished: true` — sent exactly once, at game over (win or lose). Use a guard (`if (gameState === 'gameover') return`) to prevent double-fire.
+* All `postMessage` calls must be wrapped in `try/catch`.
+
+## 🔧 Required Script Structure (exact order)
+
+The `&lt;script&gt;` block must follow this exact order:
 
 ```js
+// 1. Config variables — ALL declared here, before anything else
+let questionsSource = [ /* fallback demo questions in Hebrew */ ];
+let MAX_LIVES = 3;
+let GAME_TIMER = 0;
+let SHOW_FEEDBACK = false;
+let FEEDBACK_DURATION = 3;
+let CORRECT_FEEDBACK = 'מצוין!';
+let INCORRECT_FEEDBACK = 'טעות!';
+
+// 2. applyMoodleConfig — defined and called immediately after config vars
 function applyMoodleConfig(cfg) {
     if (!cfg) return;
     if (cfg.questions &amp;&amp; cfg.questions.length) {
@@ -1136,88 +1155,140 @@ function applyMoodleConfig(cfg) {
             };
         });
     }
-    if (cfg.lives)           { MAX_LIVES = cfg.lives; }
-    if (cfg.timer !== undefined) { GAME_TIMER = cfg.timer; }
-    if ('showFeedback' in cfg)   { SHOW_FEEDBACK = !!cfg.showFeedback; }
+    if (cfg.lives)               { MAX_LIVES = cfg.lives; }
+    if (cfg.timer !== undefined) { GAME_TIMER = cfg.timer; }   // !== undefined, NOT truthy — timer=0 must work
+    if ('showFeedback' in cfg)   { SHOW_FEEDBACK = !!cfg.showFeedback; }  // 'in' check, NOT truthy
     if (cfg.feedbackDuration) {
         const d = parseInt(cfg.feedbackDuration, 10);
         if (!isNaN(d) &amp;&amp; d &gt; 0) { FEEDBACK_DURATION = d; }
     }
-    if (typeof cfg.correctFeedback === 'string' &amp;&amp; cfg.correctFeedback.trim()) {
+    if (typeof cfg.correctFeedback === 'string' &amp;&amp; cfg.correctFeedback.trim())
         CORRECT_FEEDBACK = cfg.correctFeedback.trim();
-    }
-    if (typeof cfg.incorrectFeedback === 'string' &amp;&amp; cfg.incorrectFeedback.trim()) {
+    if (typeof cfg.incorrectFeedback === 'string' &amp;&amp; cfg.incorrectFeedback.trim())
         INCORRECT_FEEDBACK = cfg.incorrectFeedback.trim();
-    }
 }
-```
-
-## 📋 Required Game Variables
-
-```js
-let questionsSource = [ /* fallback demo questions in Hebrew */ ];
-let MAX_LIVES = 3;
-let GAME_TIMER = 0;
-let SHOW_FEEDBACK = false;
-let FEEDBACK_DURATION = 3;
-let CORRECT_FEEDBACK = 'מצוין!';
-let INCORRECT_FEEDBACK = 'טעות!';
-
 try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
+
+// 3. Game state variables — AFTER applyMoodleConfig so they pick up the final config values
+let lives = MAX_LIVES;   // ← MUST use MAX_LIVES, never hardcoded
+let score = 0;
+// ... rest of game state
 ```
+
+⚠️ `let lives = MAX_LIVES` — not `let lives = 3` or any other literal. Any game-state variable whose initial value depends on a config var must be initialized after `applyMoodleConfig` has run.
 
 ## 🎯 Game Logic Requirements
 
-1. Timer: If `GAME_TIMER === 0` → count UP. If `GAME_TIMER &gt; 0` → countdown; game ends at 0.
-2. Lives: Wrong answer → lose a life. 0 lives → game over.
-3. Questions: No repetition. Reset only when all used.
-4. Feedback: When `SHOW_FEEDBACK` true — show text + explanation, wait `FEEDBACK_DURATION` seconds.
-5. Score: Award points for correct answers. `reportScore(score, false)` on correct. `reportScore(score, true)` on game over.
-6. Restart: Must work without page reload.
+### Timer
+
+* `GAME_TIMER === 0` → count up from 0, no time limit.
+* `GAME_TIMER &gt; 0` → count down to 0, then trigger game over.
+* Always track real elapsed/remaining seconds in a variable (e.g. `elapsedSeconds`) and use it as the `timer` field in `SCORE_UPDATE`.
+
+### Lives
+
+* Player starts with exactly `MAX_LIVES` lives (from config, not hardcoded).
+* Wrong answer → lose 1 life → update display immediately.
+* 0 lives → game over (call `showGameOver`).
+
+### Questions
+
+* No repetition within a cycle. Track used indices. Reset pool only after all questions shown.
+* Correct answer index is always `.c` (already mapped by `applyMoodleConfig`).
+
+### Feedback (SHOW_FEEDBACK)
+
+* `true` → show `CORRECT_FEEDBACK` or `INCORRECT_FEEDBACK` text + `explanation` (if present) → wait exactly `FEEDBACK_DURATION` seconds → continue.
+* `false` → close question UI within 150ms (no visible delay).
+
+### Score Reporting
+
+```js
+// On correct answer:
+score += POINTS_PER_CORRECT;
+reportScore(score, false);   // always send, unless game over fires simultaneously
+
+// On game over (exactly once):
+function showGameOver(won) {
+    if (gameState === 'gameover') return;  // guard — prevents double-fire
+    gameState = 'gameover';
+    reportScore(score, true);
+    // ... show UI
+}
+```
+
+### Restart
+
+* `startGame()` must reset all state: score, lives, timer, question pool, game speed, particles, etc.
+* Cancel the previous animation frame: `cancelAnimationFrame(animFrame)`.
+* Clear any pending timeouts (feedback, question delays).
+* Set `lastTimestamp = performance.now()` to prevent a huge `dt` spike on the first frame.
+* No `location.reload()`.
 
 ## 🎨 Design &amp; Creative Requirements
 
-1. Hebrew UI (`lang="he" dir="rtl"`)
-2. Responsive — mobile + desktop
-3. Single `.html` file, CDN resources allowed
-4. **Visually rich**: particles, explosions, screen shake, color, smooth animations — make it feel alive
-5. Sound effects via Web Audio API (hits, wins, fails, background music/ambience)
-6. Keyboard navigation + touch support for mobile
-7. **The game IS the experience** — questions are just a mechanic integrated into real gameplay
-8. On correct answer: visual reward (explosion, color burst, power-up animation); on wrong: penalty effect (flash, shake, life lost animation)
+1. Hebrew UI — `&lt;html lang="he" dir="rtl"&gt;`
+2. Responsive — works on mobile and desktop
+3. Single `.html` file; CDN resources allowed
+4. Visually rich: particles, explosions, screen shake, smooth animations — make it feel alive
+5. Sound effects via Web Audio API (hits, wins, fails)
+6. Keyboard + touch support for mobile
+7. The game IS the experience — questions are a mechanic integrated into real gameplay
+8. Correct answer → visual reward (explosion, color burst, power-up); wrong answer → penalty (flash, shake, life lost animation)
 
 ## 💡 Game Design Philosophy
 
-**The main creative challenge is designing a FUN GAME — not creating questions.**
+The creative challenge is designing a fun game — not writing questions.
+The `questionsSource` array is a placeholder. Moodle injects real questions at runtime. Focus on:
 
-The questions will be replaced by Moodle with real educational content. The `questionsSource` array in the code is just a placeholder. Your job is to build an exciting game world that USES questions as a gameplay mechanic.
+* What does the player control?
+* What are the enemies/obstacles?
+* What is the most exciting moment?
+* What happens visually on correct/wrong answers?
 
-Examples of creative approaches:
-- **Shooting game**: enemy drone flies across screen → question pops up → correct answer = player fires → drone explodes with particles
-- **Drone tracker**: radar screen → blip appears → answer correctly to lock on and intercept
-- **Tetris-IDF variant**: falling blocks carry a label → answer the question to destroy the block before it lands
-- **Racing game**: car races along road → question appears at checkpoint → correct = turbo boost, wrong = slowdown/obstacle
-- **Tower defense**: wave of enemies → each enemy is a question → correct = defeated with animation
+Examples:
 
-Think about: What does the player control? What are the enemies/obstacles? What's the most exciting moment? What happens visually when you get it right?
+* Shooter: enemy crosses screen → question appears → correct = fire → enemy explodes
+* Runner: obstacle ahead → answer correctly to boost, wrong = slowdown
+* Tower defense: wave of enemies → each triggers a question → correct = defeated with animation
+* Radar: blip appears → answer to lock on → correct = intercept with explosion
 
-## ✅ Checklist
+## 🚫 Hard Constraints (iframe + mobile compatibility)
 
-- [ ] `applyMoodleConfig` handles both `options`/`a` and `correct`/`c`
-- [ ] Config variables declared before `applyMoodleConfig` is called
-- [ ] `try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}` at top
-- [ ] `reportGameStart()` called on every new session
-- [ ] `reportScore(score, false)` on every correct answer
-- [ ] `reportScore(score, true)` exactly once on game over
-- [ ] Timer works in both modes
-- [ ] No-repeat questions
-- [ ] Restart without reload
-- [ ] Hebrew RTL
-- [ ] Mobile touch support
+* No `alert()` / `confirm()` / `prompt()` — break inside iframes
+* No `localStorage` / `sessionStorage`
+* No `location.reload()`
+* All external resources via CDN (no local file paths)
+
+## ✅ Pre-Submit Checklist
+
+Before finishing, verify every item:
+
+**Config &amp; Init**
+* [ ] All 7 config vars declared before `applyMoodleConfig`
+* [ ] `applyMoodleConfig` uses `!== undefined` for `timer` and `'in'` check for `showFeedback`
+* [ ] `try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}` called before game state vars
+* [ ] `let lives = MAX_LIVES` (not hardcoded)
+
+**Reporting**
+* [ ] `GAME_START` sent on every new/restarted session, in try/catch
+* [ ] `SCORE_UPDATE isfinished:false` sent on every correct answer (unless that answer also triggers game over)
+* [ ] `SCORE_UPDATE isfinished:true` sent exactly once at game over, with guard against double-fire
+* [ ] `timer` field = actual elapsed/remaining seconds
+
+**Logic**
+* [ ] Timer: count up when `GAME_TIMER===0`, countdown + game over when `GAME_TIMER&gt;0`
+* [ ] `SHOW_FEEDBACK=false` → question closes within 150ms
+* [ ] `SHOW_FEEDBACK=true` → shows feedback text + explanation, waits `FEEDBACK_DURATION` seconds
+* [ ] No-repeat questions; pool resets after all shown
+* [ ] Restart resets all state without `location.reload()`; cancels previous `animFrame`
+
+**Compatibility**
+* [ ] `&lt;html lang="he" dir="rtl"&gt;` and `&lt;meta name="viewport"&gt;`
+* [ ] No `alert/confirm/prompt`, no `localStorage/sessionStorage`
+* [ ] Touch events for mobile
 
 ## 🎮 YOUR GAME REQUEST
-
-תאר כאן את רעיון המשחק שלך — בעברית או אנגלית:
 </textarea>
 
         <!-- Prompt Builder Form -->
@@ -1403,7 +1474,7 @@ Think about: What does the player control? What are the enemies/obstacles? What'
 
       // ── 1. משתני config ──
       {
-        label: '1. כל 7 משתני config מוגדרים: questionsSource, MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
+        label: '1. כל 7 משתני config מוגדרים לפני applyMoodleConfig: questionsSource (עם שאלות fallback בעברית), MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
         test: c => ['questionsSource','MAX_LIVES','GAME_TIMER','SHOW_FEEDBACK',
                     'FEEDBACK_DURATION','CORRECT_FEEDBACK','INCORRECT_FEEDBACK'].every(v => c.includes(v))
       },
@@ -1414,7 +1485,7 @@ Think about: What does the player control? What are the enemies/obstacles? What'
         test: c => /function\s+applyMoodleConfig\s*\(\s*cfg\s*\)/.test(c) && /if\s*\(\s*!cfg\s*\)\s*return/.test(c)
       },
       {
-        label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct!==undefined/q.c',
+        label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct??q.c (או !== undefined)',
         test: c => /q\.options\s*\|\|\s*q\.a/.test(c) && /q\.correct\s*!==\s*undefined|q\.correct\s*\?\?/.test(c)
       },
       {
@@ -1433,13 +1504,13 @@ Think about: What does the player control? What are the enemies/obstacles? What'
 
       // ── 3. סדר אתחול ──
       {
-        label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים',
+        label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים אחרי משתני config ולפני משתני game state',
         test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
       },
 
       // ── 4. postMessage ──
       {
-        label: '4a. GAME_START נשלח עטוף ב-try/catch',
+        label: '4a. GAME_START נשלח בכל התחלה/ריסטארט — עטוף ב-try/catch',
         test: c => {
           const idx = c.indexOf('GAME_START');
           if (idx < 0) return false;
@@ -1448,14 +1519,32 @@ Think about: What does the player control? What are the enemies/obstacles? What'
         }
       },
       {
-        label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה',
-        test: c => c.includes('isfinished: false') || c.includes('isfinished:false') ||
-                   c.includes('"isfinished": false') || c.includes('"isfinished":false')
+        label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה — עטוף ב-try/catch',
+        test: c => {
+          const markers = ['isfinished: false', 'isfinished:false', '"isfinished": false', '"isfinished":false'];
+          for (const m of markers) {
+            const idx = c.indexOf(m);
+            if (idx >= 0) {
+              const nearby = c.substring(Math.max(0, idx - 500), idx + 50);
+              if (/try\s*\{/.test(nearby)) return true;
+            }
+          }
+          return false;
+        }
       },
       {
-        label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק',
-        test: c => c.includes('isfinished: true') || c.includes('isfinished:true') ||
-                   c.includes('"isfinished": true') || c.includes('"isfinished":true')
+        label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק — עטוף ב-try/catch',
+        test: c => {
+          const markers = ['isfinished: true', 'isfinished:true', '"isfinished": true', '"isfinished":true'];
+          for (const m of markers) {
+            const idx = c.indexOf(m);
+            if (idx >= 0) {
+              const nearby = c.substring(Math.max(0, idx - 500), idx + 50);
+              if (/try\s*\{/.test(nearby)) return true;
+            }
+          }
+          return false;
+        }
       },
       {
         label: '4d. ערך timer בהודעות postMessage הוא משתנה (לא 0 קשיח)',
@@ -1464,26 +1553,27 @@ Think about: What does the player control? What are the enemies/obstacles? What'
 
       // ── 5. לוגיקת משחק ──
       {
-        label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת',
+        label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת ומסיים ב-0',
         test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
       },
       {
-        label: '5b. חיים מתחילים ב-MAX_LIVES (לא מספר קשיח)',
+        label: '5b. חיים מתחילים ב-MAX_LIVES (משתנה, לא קשיח); תשובה שגויה = חיים−1; 0 חיים = game over',
         test: c => /[=:]\s*MAX_LIVES\b/.test(c)
       },
       {
-        label: '5c. שאלות ללא חזרה: questionsSource עם מנגנון אי-חזרה (splice/shift/filter/shuffle)',
+        label: '5c. שאלות ללא חזרה מ-questionsSource; pool מאופס אחרי שכולן הוצגו; שימוש ב-.c לאינדקס הנכון',
         test: c => c.includes('questionsSource') &&
-                   /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c)
+                   /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c) &&
+                   /\.c\b/.test(c)
       },
       {
-        label: '5d. SHOW_FEEDBACK בתנאי if עם FEEDBACK_DURATION',
+        label: '5d. SHOW_FEEDBACK=true → מציג פידבק + explanation, ממתין FEEDBACK_DURATION שניות; false → ממשיך ≤200ms',
         test: c => /if\s*\(.*SHOW_FEEDBACK/.test(c) && c.includes('FEEDBACK_DURATION')
       },
       {
-        label: '5e. Restart מאפס סטייט ללא location.reload()',
+        label: '5e. Restart מאפס כל הסטייט (score, lives, timer, questions) ללא location.reload()',
         test: c => !c.includes('location.reload') &&
-                   /\bfunction\s+init\s*[\s(]|\b(?:const|let|var)\s+init\s*=|\binit\s*[:=]\s*function/.test(c)
+                   /\bfunction\s+(?:init|startGame)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame)\s*=|\b(?:init|startGame)\s*[:=]\s*function/.test(c)
       },
 
       // ── 6. תאימות iframe ומובייל ──
@@ -1847,19 +1937,15 @@ Think about: What does the player control? What are the enemies/obstacles? What'
         '',
         '## 🤖 BEFORE YOU BUILD — CREATIVE DISCOVERY',
         '',
-        '**Do NOT start building immediately.**',
+        'Do NOT start building immediately.',
+        'Ask the user 2–3 short questions IN HEBREW to clarify the creative vision:',
         '',
-        'Read the game concept above, then ask the soldier **2–3 short questions IN HEBREW** to clarify the creative vision:',
+        '* מי/מה השחקן שולט? (טנק? צלף? חללית? מטוס? דמות?)',
+        '* מי/מה האויב או המכשול? (רחפן? מטוס? אבנים? מחסומים?)',
+        '* מה קורה כשעונים נכון? (ירי? בוסט? אויב נהרס עם פיצוץ?)',
+        '* יש רעיון לרגע הכי מרגש? (בוס? מטח? אנימציית ניצחון?)',
         '',
-        'Suggested questions (adapt to their concept):',
-        '- מי/מה השחקן שולט? (טנק? צלף? כדור? חללית? מטוס?)',
-        '- מי/מה האויב או המכשול? (רחפן? מטוס? אבן נופלת? מחסום?)',
-        '- מה קורה כשעונים נכון? (ירי מתאפשר? בוסט? אויב נהרס עם פיצוץ?)',
-        '- יש רעיון לרגע הכי מרגש במשחק? (בוס? מטח? סיום מיוחד? אנימציית ניצחון?)',
-        '',
-        '**Important note**: The `questionsSource` array is a PLACEHOLDER only — do not invest effort in the questions themselves. Moodle will inject the real educational questions at runtime. Focus creative effort on the game mechanics, visuals, animations, and audio.',
-        '',
-        'Only after receiving answers — build the complete, visually impressive game with rich animations and sound effects.'
+        'Only after receiving answers — build the complete game.'
       ].join('\n');
 
       document.getElementById('prompt-textarea').value =
