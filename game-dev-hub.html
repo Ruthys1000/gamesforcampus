@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מרכז פיתוח משחקי AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --color-teal-light: #00B4C6;
+      --color-teal-mid: #009BAE;
+      --color-teal-dark: #007A8A;
+      --color-teal-hover: #006070;
+      --color-bg: #F5F7F8;
+      --color-card-bg: #FFFFFF;
+      --color-text: #1A2B35;
+      --color-text-muted: #5A7080;
+      --color-border: #D0E4E8;
+      --color-border-light: #E6EFF1;
+      --color-success: #22C55E;
+      --color-success-bg: #DCFCE7;
+      --color-fail: #EF4444;
+      --color-fail-bg: #FEE2E2;
+      --color-warn: #F59E0B;
+      --color-code-bg: #1A2B35;
+      --color-code-text: #E2F4F7;
+
+      --radius-card: 16px;
+      --radius-btn: 10px;
+      --radius-sm: 8px;
+
+      --shadow-card: 0 4px 20px rgba(0, 122, 138, 0.10);
+      --shadow-hover: 0 8px 30px rgba(0, 122, 138, 0.18);
+      --shadow-nav: 0 2px 12px rgba(0, 0, 0, 0.12);
+
+      --font-main: 'Heebo', Arial, sans-serif;
+      --font-mono: 'Courier New', Monaco, monospace;
+
+      --nav-height: 64px;
+      --container-max: 1024px;
+
+      --spacing-xs: 8px;
+      --spacing-sm: 16px;
+      --spacing-md: 24px;
+      --spacing-lg: 40px;
+      --spacing-xl: 64px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      direction: rtl;
+      line-height: 1.7;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--spacing-sm);
+    }
+
+    /* ============ NAV ============ */
+    #main-nav {
+      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      height: var(--nav-height);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-nav);
+    }
+
+    .nav-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      height: 100%;
+      padding: 0 var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .nav-logo {
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--spacing-md);
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ============ SECTIONS ============ */
+    main {
+      padding-bottom: var(--spacing-xl);
+    }
+
+    section {
+      padding: var(--spacing-xl) 0 var(--spacing-md);
+      scroll-margin-top: calc(var(--nav-height) + 16px);
+    }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--color-text);
+      margin-bottom: var(--spacing-xs);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-subtitle {
+      font-size: 17px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .card {
+      background: var(--color-card-bg);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      transition: box-shadow 0.2s;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      text-align: center;
+      padding: var(--spacing-lg) 0 var(--spacing-md);
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--spacing-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ============ STEPS GRID ============ */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+
+    .step {
+      background: linear-gradient(135deg, rgba(0, 180, 198, 0.05), rgba(0, 122, 138, 0.08));
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-md);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .step:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .step-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-sm);
+    }
+
+    .step-icon i {
+      width: 28px;
+      height: 28px;
+    }
+
+    .step h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    /* ============ PROMPT CARD ============ */
+    .prompt-container {
+      position: relative;
+      margin-bottom: var(--spacing-md);
+    }
+
+    #prompt-textarea {
+      width: 100%;
+      height: 360px;
+      background: var(--color-code-bg);
+      color: var(--color-code-text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      resize: vertical;
+      direction: ltr;
+      text-align: left;
+      outline: none;
+    }
+
+    #prompt-textarea:focus {
+      box-shadow: 0 0 0 3px rgba(0, 180, 198, 0.3);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary i {
+      width: 18px;
+      height: 18px;
+    }
+
+    .tip-box {
+      background: rgba(0, 180, 198, 0.06);
+      border-right: 4px solid var(--color-teal-light);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+
+    .tip-box h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-xs);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-teal-dark);
+    }
+
+    .tip-box ul {
+      list-style: none;
+      padding-right: 0;
+    }
+
+    .tip-box li {
+      padding: 6px 0;
+      font-size: 14px;
+      color: var(--color-text);
+    }
+
+    .tip-box li strong {
+      color: var(--color-teal-dark);
+    }
+
+    /* ============ DROP ZONE ============ */
+    #drop-zone {
+      border: 2.5px dashed var(--color-teal-light);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-xl) var(--spacing-md);
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      background: var(--color-card-bg);
+    }
+
+    #drop-zone:hover, #drop-zone.dragover {
+      background: rgba(0, 180, 198, 0.07);
+      border-color: var(--color-teal-dark);
+    }
+
+    .drop-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto var(--spacing-sm);
+      color: var(--color-teal-light);
+    }
+
+    .drop-icon i {
+      width: 72px;
+      height: 72px;
+    }
+
+    #drop-zone p {
+      font-size: 16px;
+      color: var(--color-text);
+      margin: 4px 0;
+    }
+
+    #drop-zone .browse-link {
+      color: var(--color-teal-dark);
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #drop-zone .file-meta {
+      margin-top: var(--spacing-sm);
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    /* ============ RESULTS PANELS ============ */
+    #results-panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+
+    .panel {
+      background: var(--color-card-bg);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--spacing-md);
+    }
+
+    .panel h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-banner {
+      padding: 12px var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-banner.pass {
+      background: var(--color-success-bg);
+      color: #166534;
+    }
+
+    .summary-banner.fail {
+      background: var(--color-fail-bg);
+      color: #991B1B;
+    }
+
+    .summary-banner i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .checks-list {
+      list-style: none;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-light);
+      font-size: 14px;
+    }
+
+    .check-item:last-child {
+      border-bottom: none;
+    }
+
+    .check-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-icon.pass {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+    }
+
+    .check-icon.fail {
+      background: var(--color-fail-bg);
+      color: var(--color-fail);
+    }
+
+    .check-icon i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .manual-list {
+      list-style: none;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .manual-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .manual-item:last-child {
+      border-bottom: none;
+    }
+
+    .manual-item label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .manual-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--color-teal-dark);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ============ PREVIEW ============ */
+    #preview-container {
+      margin-top: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #preview-container h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-frame-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      padding: var(--spacing-sm);
+    }
+
+    #preview-frame {
+      border: 8px solid var(--color-code-bg);
+      border-radius: 32px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      background: white;
+      display: block;
+    }
+
+    /* ============ SUBMIT ============ */
+    #submit-locked {
+      background: var(--color-card-bg);
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-xl);
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+
+    #submit-locked .lock-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto var(--spacing-sm);
+      color: var(--color-text-muted);
+    }
+
+    #submit-locked .lock-icon i {
+      width: 56px;
+      height: 56px;
+    }
+
+    #submit-locked p {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    #submit-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .form-field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--color-text);
+    }
+
+    .form-field input[type="text"],
+    .form-field textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-main);
+      font-size: 15px;
+      background: white;
+      color: var(--color-text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      direction: rtl;
+    }
+
+    .form-field input[type="text"]:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--color-teal-light);
+      box-shadow: 0 0 0 3px rgba(0, 180, 198, 0.15);
+    }
+
+    .form-field textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    #success-msg {
+      background: var(--color-success-bg);
+      color: #166534;
+      border-radius: var(--radius-card);
+      padding: var(--spacing-lg);
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    #success-msg .success-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--color-success);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #success-msg .success-icon i {
+      width: 36px;
+      height: 36px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      text-align: center;
+      padding: var(--spacing-md);
+      color: var(--color-text-muted);
+      font-size: 13px;
+      border-top: 1px solid var(--color-border-light);
+      margin-top: var(--spacing-xl);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (min-width: 640px) {
+      .steps-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      #results-panel {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .nav-logo {
+        font-size: 15px;
+      }
+      .nav-links {
+        gap: 6px;
+      }
+      .nav-links a {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+      .nav-links a span {
+        display: none;
+      }
+      .card {
+        padding: var(--spacing-md);
+      }
+      .section-title {
+        font-size: 24px;
+      }
+      #prompt-textarea {
+        height: 280px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="main-nav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <i data-lucide="gamepad-2"></i>
+        <span>מרכז פיתוח משחקי AI</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#section-instructions"><i data-lucide="book-open"></i><span>הוראות</span></a></li>
+        <li><a href="#section-validator"><i data-lucide="flask-conical"></i><span>וולידטור</span></a></li>
+        <li><a href="#section-submit"><i data-lucide="send"></i><span>שליחה</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- ============ SECTION 1 — INSTRUCTIONS ============ -->
+    <section id="section-instructions">
+      <div class="hero">
+        <h1><i data-lucide="gamepad-2" style="width:40px;height:40px;color:var(--color-teal-dark)"></i> מרכז פיתוח משחקי AI</h1>
+        <p>פיתחת רעיון למשחק? תיצור, תבדוק, ותשלח — הכל כאן</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="rocket"></i>
+          איך זה עובד?
+        </div>
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-icon"><i data-lucide="pen-tool"></i></div>
+            <h3>1. צור</h3>
+            <p>העתק את הפרומפט, הדבק ב-Claude או Cursor, הוסף את רעיון המשחק שלך</p>
+          </div>
+          <div class="step">
+            <div class="step-icon"><i data-lucide="flask-conical"></i></div>
+            <h3>2. בדוק</h3>
+            <p>גרור את קובץ ה-HTML שקיבלת לוולידטור למטה</p>
+          </div>
+          <div class="step">
+            <div class="step-icon"><i data-lucide="send"></i></div>
+            <h3>3. שלח</h3>
+            <p>אם עבר בדיקה, מלא פרטים ושלח למנהלת המוצר</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="clipboard-copy"></i>
+          הפרומפט המלא — העתק אותו
+        </div>
+        <div class="prompt-container">
+          <textarea id="prompt-textarea" readonly dir="ltr">You are an expert HTML5 game developer. Your task is to create a **single self-contained HTML file** for a game that runs inside a Moodle LMS plugin (`mod_game`).
+
+---
+
+## 🏗️ Architecture Overview
+
+The game runs inside an **`&lt;iframe&gt;`** hosted by a Moodle page.
+
+The parent Moodle page communicates with the game through two channels:
+
+### 1. Receiving Configuration (Parent → Game)
+Before the iframe loads, the parent writes:
+```js
+window.moodleGameConfig = { /* config object — see below */ };
+```
+
+The game reads this synchronously at script startup with:
+```js
+try {
+    applyMoodleConfig(window.parent.moodleGameConfig);
+} catch(e) {}
+```
+
+### 2. Reporting Events (Game → Parent)
+The game posts messages to the parent using:
+```js
+window.parent.postMessage({ type: '...', ... }, '*');
+```
+
+## 📦 The `moodleGameConfig` Object
+
+```js
+{
+  questions: [
+    {
+      q: "Question text",
+      options: ["A", "B", "C", "D"],
+      correct: 0,
+      explanation: "Why A is correct"
+    },
+  ],
+  lives: 3,
+  timer: 0,
+  showFeedback: false,
+  feedbackDuration: 3,
+  correctFeedback: "מצוין!",
+  incorrectFeedback: "טעות!",
+}
+```
+
+## 📡 Messages the Game MUST Send
+
+On game start / restart:
+```js
+window.parent.postMessage({ type: 'GAME_START' }, '*');
+```
+
+On score change AND on game over:
+```js
+window.parent.postMessage({
+    type: 'SCORE_UPDATE',
+    score: 42,
+    timer: 37,
+    isfinished: false
+}, '*');
+```
+
+## 🔧 The `applyMoodleConfig(cfg)` Function
+
+```js
+function applyMoodleConfig(cfg) {
+    if (!cfg) return;
+    if (cfg.questions &amp;&amp; cfg.questions.length) {
+        questionsSource = cfg.questions.map(function(q) {
+            return {
+                q: q.q,
+                a: q.options || q.a,
+                c: (q.correct !== undefined ? q.correct : q.c),
+                explanation: q.explanation || ''
+            };
+        });
+    }
+    if (cfg.lives)           { MAX_LIVES = cfg.lives; }
+    if (cfg.timer !== undefined) { GAME_TIMER = cfg.timer; }
+    if ('showFeedback' in cfg)   { SHOW_FEEDBACK = !!cfg.showFeedback; }
+    if (cfg.feedbackDuration) {
+        const d = parseInt(cfg.feedbackDuration, 10);
+        if (!isNaN(d) &amp;&amp; d &gt; 0) { FEEDBACK_DURATION = d; }
+    }
+    if (typeof cfg.correctFeedback === 'string' &amp;&amp; cfg.correctFeedback.trim()) {
+        CORRECT_FEEDBACK = cfg.correctFeedback.trim();
+    }
+    if (typeof cfg.incorrectFeedback === 'string' &amp;&amp; cfg.incorrectFeedback.trim()) {
+        INCORRECT_FEEDBACK = cfg.incorrectFeedback.trim();
+    }
+}
+```
+
+## 📋 Required Game Variables
+
+```js
+let questionsSource = [ /* fallback demo questions in Hebrew */ ];
+let MAX_LIVES = 3;
+let GAME_TIMER = 0;
+let SHOW_FEEDBACK = false;
+let FEEDBACK_DURATION = 3;
+let CORRECT_FEEDBACK = 'מצוין!';
+let INCORRECT_FEEDBACK = 'טעות!';
+
+try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
+```
+
+## 🎯 Game Logic Requirements
+
+1. Timer: If `GAME_TIMER === 0` → count UP. If `GAME_TIMER &gt; 0` → countdown; game ends at 0.
+2. Lives: Wrong answer → lose a life. 0 lives → game over.
+3. Questions: No repetition. Reset only when all used.
+4. Feedback: When `SHOW_FEEDBACK` true — show text + explanation, wait `FEEDBACK_DURATION` seconds.
+5. Score: Award points for correct answers. `reportScore(score, false)` on correct. `reportScore(score, true)` on game over.
+6. Restart: Must work without page reload.
+
+## 🎨 Design Requirements
+
+1. Hebrew UI (`lang="he" dir="rtl"`)
+2. Responsive — mobile + desktop
+3. Single `.html` file, CDN resources allowed
+4. Polished UI — smooth animations
+5. Sound effects via Web Audio API
+6. Keyboard navigation
+
+## ✅ Checklist
+
+- [ ] `applyMoodleConfig` handles both `options`/`a` and `correct`/`c`
+- [ ] Config variables declared before `applyMoodleConfig` is called
+- [ ] `try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}` at top
+- [ ] `reportGameStart()` called on every new session
+- [ ] `reportScore(score, false)` on every correct answer
+- [ ] `reportScore(score, true)` exactly once on game over
+- [ ] Timer works in both modes
+- [ ] No-repeat questions
+- [ ] Restart without reload
+- [ ] Hebrew RTL
+- [ ] Mobile touch support
+
+## 🎮 YOUR GAME REQUEST
+
+תאר כאן את רעיון המשחק שלך — בעברית או אנגלית:
+</textarea>
+        </div>
+        <button id="copy-btn" class="btn-primary" onclick="copyPrompt()">
+          <i data-lucide="copy"></i>
+          <span>העתק פרומפט</span>
+        </button>
+
+        <div class="tip-box">
+          <h3><i data-lucide="lightbulb"></i> איפה להדביק?</h3>
+          <ul>
+            <li><strong>Claude.ai</strong> — כנס ל-claude.ai, פתח שיחה חדשה, הדבק את הפרומפט + תאר את המשחק שלך בסוף</li>
+            <li><strong>Cursor</strong> — פתח agent חדש, הדבק את הפרומפט + תאר את המשחק</li>
+            <li><strong>Bolt.new</strong> — הדבק ישירות בתיבת הצ'אט</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 2 — VALIDATOR ============ -->
+    <section id="section-validator">
+      <h2 class="section-title">
+        <i data-lucide="flask-conical" style="color:var(--color-teal-dark)"></i>
+        וולידטור — בדוק את המשחק שלך
+      </h2>
+      <p class="section-subtitle">גרור את קובץ ה-HTML שיצרת וקבל בדיקה מיידית</p>
+
+      <div id="drop-zone">
+        <div class="drop-icon"><i data-lucide="folder-up"></i></div>
+        <p><strong>גרור לכאן את קובץ ה-HTML שלך</strong></p>
+        <p>או <span class="browse-link">לחץ לבחירת קובץ</span></p>
+        <p class="file-meta" id="file-meta"></p>
+        <input type="file" id="file-input" accept=".html,.htm" hidden>
+      </div>
+
+      <div id="results-panel" class="hidden">
+        <div class="panel" id="auto-checks-panel">
+          <h3><i data-lucide="check-circle-2"></i> בדיקות אוטומטיות</h3>
+          <div id="auto-summary" class="summary-banner"></div>
+          <ul id="checks-list" class="checks-list"></ul>
+        </div>
+        <div class="panel" id="manual-checks-panel">
+          <h3><i data-lucide="list-checks"></i> בדיקה עצמית — חובה לסמן הכל</h3>
+          <ul id="manual-list" class="manual-list"></ul>
+          <button id="confirm-btn" class="btn-primary" disabled onclick="confirmManual()">
+            <i data-lucide="check"></i>
+            <span>אני מאשר את הבדיקה</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="preview-container" class="hidden">
+        <h3><i data-lucide="smartphone"></i> תצוגה מקדימה — מובייל</h3>
+        <div class="preview-frame-wrap">
+          <iframe id="preview-frame" width="390" height="700" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 3 — SUBMISSION ============ -->
+    <section id="section-submit">
+      <h2 class="section-title">
+        <i data-lucide="send" style="color:var(--color-teal-dark)"></i>
+        שלח למנהלת המוצר
+      </h2>
+      <p class="section-subtitle">סיימת את הבדיקה? זה הזמן לשלוח את המשחק</p>
+
+      <div id="submit-locked">
+        <div class="lock-icon"><i data-lucide="lock"></i></div>
+        <p>יש להשלים את הבדיקה לפני השליחה</p>
+      </div>
+
+      <div id="submit-form-container" class="hidden">
+        <div class="card">
+          <form id="submit-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+            <div class="form-field">
+              <label for="soldier-name">שם החייל/ת *</label>
+              <input type="text" id="soldier-name" name="soldier-name" required>
+            </div>
+            <div class="form-field">
+              <label for="game-name">שם המשחק *</label>
+              <input type="text" id="game-name" name="game-name" required>
+            </div>
+            <div class="form-field">
+              <label for="description">תיאור קצר — במה הוא שונה / מה רעיון המשחק *</label>
+              <textarea id="description" name="description" required></textarea>
+            </div>
+            <input type="hidden" name="validation-results" id="hidden-validation">
+            <input type="hidden" name="filename" id="hidden-filename">
+            <input type="hidden" name="game-html" id="hidden-game-html">
+            <button type="submit" class="btn-primary" id="submit-btn">
+              <span>שלח למנהלת המוצר</span>
+              <i data-lucide="send"></i>
+            </button>
+          </form>
+        </div>
+        <div id="success-msg" class="hidden">
+          <div class="success-icon"><i data-lucide="check"></i></div>
+          <div>נשלח בהצלחה!</div>
+          <div style="font-size:15px;font-weight:400">רותי סלומון תקבל את המשחק ותחזור אליך בהקדם.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>מרכז פיתוח משחקי AI · נבנה עבור פיתוח משחקים לימודיים</div>
+  </footer>
+
+  <script>
+    /* ============ STATE ============ */
+    const STATE = {
+      fileContent: null,
+      fileName: null,
+      autoCheckResults: [],
+      autoAllPassed: false,
+      manualAllChecked: false,
+      submissionUnlocked: false
+    };
+
+    /* ============ AUTO-CHECKS ============ */
+    const AUTO_CHECKS = [
+      {
+        label: 'פונקציית applyMoodleConfig מוגדרת',
+        test: c => /function\s+applyMoodleConfig|applyMoodleConfig\s*[=:]\s*(function|\()/.test(c)
+      },
+      {
+        label: 'קריאה ל-window.parent.moodleGameConfig בהפעלה',
+        test: c => c.includes('window.parent.moodleGameConfig')
+      },
+      {
+        label: 'הודעת GAME_START נשלחת ב-postMessage',
+        test: c => c.includes('GAME_START')
+      },
+      {
+        label: 'הודעת SCORE_UPDATE נשלחת ב-postMessage',
+        test: c => c.includes('SCORE_UPDATE')
+      },
+      {
+        label: 'דיווח סיום משחק: isfinished: true',
+        test: c => c.includes('isfinished: true') || c.includes('isfinished:true') || c.includes('"isfinished":true') || c.includes('"isfinished": true')
+      },
+      {
+        label: 'משתני config: MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK',
+        test: c => c.includes('MAX_LIVES') && c.includes('GAME_TIMER') && c.includes('SHOW_FEEDBACK')
+      },
+      {
+        label: 'תמיכת RTL: dir="rtl" או direction: rtl',
+        test: c => c.includes('dir="rtl"') || c.includes("dir='rtl'") || /direction\s*:\s*rtl/.test(c)
+      },
+      {
+        label: 'רספונסיביות: תג viewport קיים',
+        test: c => /<meta[^>]+name=["']viewport["']/i.test(c)
+      },
+      {
+        label: 'restart ללא reload: אין location.reload + קיימת פונקציית init',
+        test: c => !c.includes('location.reload') && (/\bfunction\s+init\s*\(/.test(c) || /\b(?:const|let|var)\s+init\s*=/.test(c) || /\binit\s*[:=]\s*function/.test(c))
+      }
+    ];
+
+    const MANUAL_CHECKS = [
+      'ניסיתי את המשחק ועובד מלא לסוף',
+      'בדקתי על מובייל (או דפדפן מצומצם לרוחב 375px)',
+      'חווית המשחק מובנת — ידעתי מה לעשות בלי הסבר',
+      'אין שגיאות console (F12 → Console — נקי)',
+      'הציון מוצג בסוף המשחק'
+    ];
+
+    /* ============ COPY PROMPT ============ */
+    function copyPrompt() {
+      const ta = document.getElementById('prompt-textarea');
+      const text = ta.value;
+      const btn = document.getElementById('copy-btn');
+      const setSuccess = () => {
+        btn.innerHTML = '<i data-lucide="check"></i><span>הועתק!</span>';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="copy"></i><span>העתק פרומפט</span>';
+          lucide.createIcons();
+        }, 2500);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(setSuccess).catch(() => fallbackCopy(ta, setSuccess));
+      } else {
+        fallbackCopy(ta, setSuccess);
+      }
+    }
+
+    function fallbackCopy(ta, onSuccess) {
+      try {
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        document.execCommand('copy');
+        onSuccess();
+      } catch (e) {
+        alert('לא הצלחנו להעתיק אוטומטית. סמן את הטקסט בתיבה והעתק ידנית (Ctrl+C).');
+      }
+    }
+
+    /* ============ DROP ZONE ============ */
+    function initDropZone() {
+      const zone = document.getElementById('drop-zone');
+      const input = document.getElementById('file-input');
+
+      zone.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        input.click();
+      });
+
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('dragover');
+      });
+
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) processFile(file);
+      });
+
+      input.addEventListener('change', () => {
+        if (input.files[0]) processFile(input.files[0]);
+      });
+    }
+
+    function processFile(file) {
+      if (!/\.html?$/i.test(file.name)) {
+        alert('יש להעלות קובץ HTML בלבד');
+        return;
+      }
+      STATE.fileName = file.name;
+      document.getElementById('file-meta').textContent = '📄 ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        STATE.fileContent = e.target.result;
+        STATE.manualAllChecked = false;
+        runValidation();
+        renderResults();
+        renderManualChecklist();
+        renderPreview();
+        updateSubmitState();
+      };
+      reader.readAsText(file);
+    }
+
+    /* ============ VALIDATION ============ */
+    function runValidation() {
+      const c = STATE.fileContent || '';
+      STATE.autoCheckResults = AUTO_CHECKS.map(({ label, test }) => ({
+        label,
+        passed: test(c)
+      }));
+      STATE.autoAllPassed = STATE.autoCheckResults.every(r => r.passed);
+    }
+
+    function renderResults() {
+      document.getElementById('results-panel').classList.remove('hidden');
+      document.getElementById('preview-container').classList.remove('hidden');
+
+      const list = document.getElementById('checks-list');
+      list.innerHTML = STATE.autoCheckResults.map(r => `
+        <li class="check-item">
+          <span class="check-icon ${r.passed ? 'pass' : 'fail'}">
+            <i data-lucide="${r.passed ? 'check' : 'x'}"></i>
+          </span>
+          <span>${r.label}</span>
+        </li>
+      `).join('');
+
+      const summaryEl = document.getElementById('auto-summary');
+      if (STATE.autoAllPassed) {
+        summaryEl.className = 'summary-banner pass';
+        summaryEl.innerHTML = '<i data-lucide="check-circle-2"></i> עבר בדיקה טכנית — כל הבדיקות עברו!';
+      } else {
+        const failCount = STATE.autoCheckResults.filter(r => !r.passed).length;
+        summaryEl.className = 'summary-banner fail';
+        summaryEl.innerHTML = `<i data-lucide="x-circle"></i> נכשל בבדיקה — ${failCount} בדיקות נכשלו`;
+      }
+
+      lucide.createIcons();
+    }
+
+    function renderManualChecklist() {
+      const ul = document.getElementById('manual-list');
+      ul.innerHTML = MANUAL_CHECKS.map((label, i) => `
+        <li class="manual-item">
+          <label>
+            <input type="checkbox" class="manual-check" id="manual-${i}">
+            <span>${label}</span>
+          </label>
+        </li>
+      `).join('');
+
+      const btn = document.getElementById('confirm-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="check"></i><span>אני מאשר את הבדיקה</span>';
+      lucide.createIcons();
+
+      ul.querySelectorAll('.manual-check').forEach(cb => {
+        cb.addEventListener('change', checkManualState);
+      });
+    }
+
+    function checkManualState() {
+      const boxes = document.querySelectorAll('.manual-check');
+      const allChecked = Array.from(boxes).every(b => b.checked);
+      const btn = document.getElementById('confirm-btn');
+      if (STATE.manualAllChecked && !allChecked) {
+        STATE.manualAllChecked = false;
+        btn.innerHTML = '<i data-lucide="check"></i><span>אני מאשר את הבדיקה</span>';
+        lucide.createIcons();
+        updateSubmitState();
+      }
+      btn.disabled = !allChecked || STATE.manualAllChecked;
+    }
+
+    function confirmManual() {
+      STATE.manualAllChecked = true;
+      const btn = document.getElementById('confirm-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="check-circle-2"></i><span>מאושר</span>';
+      lucide.createIcons();
+      updateSubmitState();
+    }
+
+    /* ============ PREVIEW ============ */
+    function renderPreview() {
+      const frame = document.getElementById('preview-frame');
+      frame.srcdoc = STATE.fileContent;
+    }
+
+    /* ============ SUBMIT STATE ============ */
+    function updateSubmitState() {
+      const unlocked = STATE.autoAllPassed && STATE.manualAllChecked;
+      const wasUnlocked = STATE.submissionUnlocked;
+      STATE.submissionUnlocked = unlocked;
+
+      document.getElementById('submit-locked').classList.toggle('hidden', unlocked);
+      document.getElementById('submit-form-container').classList.toggle('hidden', !unlocked);
+
+      if (unlocked) {
+        document.getElementById('hidden-validation').value = JSON.stringify(STATE.autoCheckResults);
+        document.getElementById('hidden-filename').value = STATE.fileName || '';
+        const html = STATE.fileContent || '';
+        document.getElementById('hidden-game-html').value = html.length > 100000 ? '[קובץ גדול מדי לכלול במייל - ' + STATE.fileName + ']' : html;
+        if (!wasUnlocked) {
+          setTimeout(() => {
+            document.getElementById('section-submit').scrollIntoView({ behavior: 'smooth' });
+          }, 200);
+        }
+      }
+    }
+
+    /* ============ FORM ============ */
+    function initForm() {
+      const form = document.getElementById('submit-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>שולח...</span>';
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          });
+          if (response.ok) {
+            form.parentElement.classList.add('hidden');
+            document.getElementById('success-msg').classList.remove('hidden');
+            lucide.createIcons();
+            document.getElementById('success-msg').scrollIntoView({ behavior: 'smooth' });
+          } else {
+            const data = await response.json().catch(() => ({}));
+            const msg = data.errors ? data.errors.map(x => x.message).join(', ') : 'שגיאה בשליחה';
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            lucide.createIcons();
+            alert('שגיאה: ' + msg + '\n\nאם הטופס לא מוגדר עדיין, רותי תקבל ID חדש מ-formspree.io.');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          lucide.createIcons();
+          alert('שגיאת רשת. אנא נסה שנית.');
+        }
+      });
+    }
+
+    /* ============ INIT ============ */
+    document.addEventListener('DOMContentLoaded', () => {
+      initDropZone();
+      initForm();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
