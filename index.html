@@ -1536,21 +1536,14 @@ Think about: What does the player control? What are the enemies/obstacles? What'
       if (!failed.length) return;
 
       const failList = failed.map(r => '❌ ' + r.label).join('\n');
-      const code = STATE.fileContent || '';
 
       const prompt = [
-        'המשחק שלי לא עבר את הבדיקות הטכניות הנדרשות לשילוב ב-Moodle LMS. אנא תקן את הבעיות הבאות:',
+        'יש כמה בעיות טכניות בקוד שצריך לתקן.',
+        'אל תשנה כלום אחר במשחק — לא עיצוב, לא לוגיקה, רק תקן את הנקודות הבאות:',
         '',
-        'בדיקות שנכשלו:',
         failList,
         '',
-        'הוראות לתיקון:',
-        '- החזר את הקוד המלא של הקובץ עם כל התיקונים',
-        '- אל תשנה את לוגיקת המשחק ועיצוב — רק תקן את הבעיות הטכניות',
-        '- הקוד רץ כ-iframe בתוך Moodle ומתקשר איתו דרך postMessage ו-window.parent.moodleGameConfig',
-        '',
-        '--- קוד המשחק הנוכחי ---',
-        code
+        'החזר את הקובץ המלא המתוקן.'
       ].join('\n');
 
       const btn = document.querySelector('#fix-prompt-container .btn-fix');
@@ -1661,8 +1654,8 @@ Think about: What does the player control? What are the enemies/obstacles? What'
         fixContainer.innerHTML = `
           <div class="fix-prompt-bar">
             <div class="fix-prompt-bar-text">
-              <strong>שלח לAI לתיקון</strong>
-              <span>פרומפט עם הקוד + ${failCount} הבעיות — הדבק ב-Claude או Cursor</span>
+              <strong>חזור לAI לתיקון</strong>
+              <span>הדבק בשיחה עם ה-AI שבנה את המשחק — תיקון ממוקד בלבד</span>
             </div>
             <button class="btn-fix" onclick="copyFixPrompt()">
               <i data-lucide="copy"></i>
