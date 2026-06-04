@@ -1168,42 +1168,112 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 
     /* ============ AUTO-CHECKS ============ */
     const AUTO_CHECKS = [
+
+      // ── 1. משתני config ──
       {
-        label: 'פונקציית applyMoodleConfig מוגדרת',
-        test: c => /function\s+applyMoodleConfig|applyMoodleConfig\s*[=:]\s*(function|\()/.test(c)
+        label: '1. כל 7 משתני config מוגדרים: questionsSource, MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
+        test: c => ['questionsSource','MAX_LIVES','GAME_TIMER','SHOW_FEEDBACK',
+                    'FEEDBACK_DURATION','CORRECT_FEEDBACK','INCORRECT_FEEDBACK'].every(v => c.includes(v))
+      },
+
+      // ── 2. applyMoodleConfig ──
+      {
+        label: '2a. applyMoodleConfig(cfg) מוגדרת עם if (!cfg) return',
+        test: c => /function\s+applyMoodleConfig\s*\(\s*cfg\s*\)/.test(c) && /if\s*\(\s*!cfg\s*\)\s*return/.test(c)
       },
       {
-        label: 'קריאה ל-window.parent.moodleGameConfig בהפעלה',
-        test: c => c.includes('window.parent.moodleGameConfig')
+        label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct!==undefined/q.c',
+        test: c => /q\.options\s*\|\|\s*q\.a/.test(c) && /q\.correct\s*!==\s*undefined|q\.correct\s*\?\?/.test(c)
       },
       {
-        label: 'הודעת GAME_START נשלחת ב-postMessage',
-        test: c => c.includes('GAME_START')
+        label: '2c. cfg.timer מוחל עם בדיקת !== undefined (כדי שטיימר=0 יעבוד)',
+        test: c => /cfg\.timer\s*!==\s*undefined/.test(c)
       },
       {
-        label: 'הודעת SCORE_UPDATE נשלחת ב-postMessage',
-        test: c => c.includes('SCORE_UPDATE')
+        label: "2d. cfg.showFeedback מוחל עם 'showFeedback' in cfg (לא בדיקת truthy)",
+        test: c => /['"]showFeedback['"]\s+in\s+cfg/.test(c)
       },
       {
-        label: 'דיווח סיום משחק: isfinished: true',
-        test: c => c.includes('isfinished: true') || c.includes('isfinished:true') || c.includes('"isfinished":true') || c.includes('"isfinished": true')
+        label: '2e. feedbackDuration מוחל עם parseInt; correctFeedback ו-incorrectFeedback מוחלים',
+        test: c => c.includes('feedbackDuration') && c.includes('parseInt') &&
+                   c.includes('correctFeedback') && c.includes('incorrectFeedback')
+      },
+
+      // ── 3. סדר אתחול ──
+      {
+        label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים',
+        test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
+      },
+
+      // ── 4. postMessage ──
+      {
+        label: '4a. GAME_START נשלח עטוף ב-try/catch',
+        test: c => {
+          const idx = c.indexOf('GAME_START');
+          if (idx < 0) return false;
+          const nearby = c.substring(Math.max(0, idx - 400), idx + 50);
+          return /try\s*\{/.test(nearby);
+        }
       },
       {
-        label: 'משתני config: MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK',
-        test: c => c.includes('MAX_LIVES') && c.includes('GAME_TIMER') && c.includes('SHOW_FEEDBACK')
+        label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה',
+        test: c => c.includes('isfinished: false') || c.includes('isfinished:false') ||
+                   c.includes('"isfinished": false') || c.includes('"isfinished":false')
       },
       {
-        label: 'תמיכת RTL: dir="rtl" או direction: rtl',
-        test: c => c.includes('dir="rtl"') || c.includes("dir='rtl'") || /direction\s*:\s*rtl/.test(c)
+        label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק',
+        test: c => c.includes('isfinished: true') || c.includes('isfinished:true') ||
+                   c.includes('"isfinished": true') || c.includes('"isfinished":true')
       },
       {
-        label: 'רספונסיביות: תג viewport קיים',
-        test: c => /<meta[^>]+name=["']viewport["']/i.test(c)
+        label: '4d. ערך timer בהודעות postMessage הוא משתנה (לא 0 קשיח)',
+        test: c => /timer\s*:\s*[a-zA-Z_$][a-zA-Z0-9_$.]*/.test(c)
+      },
+
+      // ── 5. לוגיקת משחק ──
+      {
+        label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת',
+        test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
       },
       {
-        label: 'restart ללא reload: אין location.reload + קיימת פונקציית init',
-        test: c => !c.includes('location.reload') && (/\bfunction\s+init\s*\(/.test(c) || /\b(?:const|let|var)\s+init\s*=/.test(c) || /\binit\s*[:=]\s*function/.test(c))
+        label: '5b. חיים מתחילים ב-MAX_LIVES (לא מספר קשיח)',
+        test: c => /[=:]\s*MAX_LIVES\b/.test(c)
+      },
+      {
+        label: '5c. שאלות ללא חזרה: questionsSource עם מנגנון אי-חזרה (splice/shift/filter/shuffle)',
+        test: c => c.includes('questionsSource') &&
+                   /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c)
+      },
+      {
+        label: '5d. SHOW_FEEDBACK בתנאי if עם FEEDBACK_DURATION',
+        test: c => /if\s*\(.*SHOW_FEEDBACK/.test(c) && c.includes('FEEDBACK_DURATION')
+      },
+      {
+        label: '5e. Restart מאפס סטייט ללא location.reload()',
+        test: c => !c.includes('location.reload') &&
+                   /\bfunction\s+init\s*[\s(]|\b(?:const|let|var)\s+init\s*=|\binit\s*[:=]\s*function/.test(c)
+      },
+
+      // ── 6. תאימות iframe ומובייל ──
+      {
+        label: '6a. <html lang="he" dir="rtl"> ו-<meta name="viewport"...> קיימים',
+        test: c => (c.includes('lang="he"') || c.includes("lang='he'")) &&
+                   (c.includes('dir="rtl"') || c.includes("dir='rtl'")) &&
+                   /meta[^>]+viewport/i.test(c)
+      },
+      {
+        label: '6b. אין alert() / confirm() / prompt() — לא עובדים ב-iframe',
+        test: c => !/\balert\s*\(/.test(c) && !/\bconfirm\s*\(/.test(c) && !/\bprompt\s*\(/.test(c)
+      },
+      {
+        label: '6c. אין localStorage / sessionStorage',
+        test: c => !c.includes('localStorage') && !c.includes('sessionStorage')
+      },
+      {
+        label: '6d. תמיכת מובייל: touch events ו/או @media responsive',
+        test: c => /touchstart|touchend|ontouchstart|touch-action/.test(c) || c.includes('@media')
       }
+
     ];
 
     const MANUAL_CHECKS = [
