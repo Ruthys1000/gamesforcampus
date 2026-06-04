@@ -1293,8 +1293,8 @@
           <i data-lucide="target"></i>
           <span>פעילות חדשה בקמפוס הדיגיטלי</span>
         </div>
-        <h1>המשימה: <span class="hero-highlight">להפוך רעיון למשחק עובד</span></h1>
-        <p class="hero-tagline">בנה משחק לימודי עם AI — ואם יעבור בדיקה, הוא ייכנס לקמפוס הדיגיטלי</p>
+        <h1>בנה משחק <span class="hero-highlight">שאלפי חניכים ישחקו בו</span></h1>
+        <p class="hero-tagline">AI בנה. הוולידטור בדק. הקמפוס מחכה.</p>
       </div>
 
       <!-- WOW CONTEXT SECTION -->
@@ -1322,7 +1322,7 @@
             <div class="wow-icon" style="background:var(--color-teal-light);">
               <i data-lucide="check-circle-2" style="width:20px;height:20px;color:#fff;"></i>
             </div>
-            <span>רותי בודקת<br>ומאשרת</span>
+            <span>הצוות בודק<br>ומאשר</span>
           </div>
           <span class="wow-arrow">←</span>
           <div class="wow-step">
@@ -1365,57 +1365,26 @@
 
       <div class="card">
         <div class="card-title">
-          <i data-lucide="rocket"></i>
-          איך זה עובד?
+          <i data-lucide="list-ordered"></i>
+          מה עושים — ומה לצפות
         </div>
         <div class="steps-grid">
           <div class="step">
             <div class="step-icon"><i data-lucide="pen-tool"></i></div>
-            <h3>1. צור</h3>
-            <p>העתק את הפרומפט, הדבק ב-Claude או Cursor, הוסף את רעיון המשחק שלך</p>
+            <h3>1. פיתוח עם AI</h3>
+            <p>הדבק פרומפט ב-Claude / Cursor / Bolt. ענה על שאלות ה-AI.<br><strong>שמור על שיחה אחת לאורך כל הדרך</strong></p>
           </div>
           <div class="step">
             <div class="step-icon"><i data-lucide="flask-conical"></i></div>
-            <h3>2. בדוק</h3>
-            <p>גרור קובץ ה-HTML לוולידטור. אם נכשל — תקן עם AI ובדוק שוב</p>
+            <h3>2. בדיקה ← תיקון ↺</h3>
+            <p>גרור קובץ HTML לוולידטור. נכשל? ספר ל-AI בדיוק מה — תקן, גרור שוב.<br><strong>2–4 סיבובים זה נורמלי לגמרי</strong></p>
           </div>
           <div class="step">
             <div class="step-icon"><i data-lucide="send"></i></div>
-            <h3>3. שלח</h3>
-            <p>אם עבר בדיקה, מלא פרטים ושלח — ואם תקין, ייכנס לקמפוס הדיגיטלי</p>
+            <h3>3. שליחה</h3>
+            <p>עברת את כל הבדיקות? מלא פרטים ושלח לצוות הפיתוח</p>
           </div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <i data-lucide="repeat-2"></i>
-          מה לצפות — הפעם הראשונה
-        </div>
-        <div class="journey-loop">
-          <div class="journey-node">
-            <div class="journey-bubble dev"><i data-lucide="pen-tool" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">פיתוח<br>עם AI</span>
-          </div>
-          <span class="journey-arrow">›</span>
-          <div class="journey-node">
-            <div class="journey-bubble fix"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">בדיקה + תיקון<br><span style="font-size:10px;color:var(--color-warn);">↺ כמה סיבובים</span></span>
-          </div>
-          <span class="journey-arrow">›</span>
-          <div class="journey-node">
-            <div class="journey-bubble done"><i data-lucide="send" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">עובר!<br>שליחה ✓</span>
-          </div>
-        </div>
-        <div style="text-align:center;">
-          <span class="journey-tagline">⏱ לרוב לוקח 2–4 סיבובים — זה נורמלי לגמרי</span>
-        </div>
-        <ul class="journey-tips">
-          <li>אם המשחק לא מרשים — תגיד ל-AI <strong>בדיוק</strong> מה חסר: "הוסף פיצוץ בתשובה נכונה", "שפר את ה-UI"</li>
-          <li>אם הוולידטור נכשל — <strong>אל תפתח שיחה חדשה</strong>. המשך באותה שיחה, ה-AI כבר מכיר את הקוד</li>
-          <li>אחרי כל תיקון — הורד קובץ מחדש וגרור שוב לוולידטור</li>
-        </ul>
       </div>
 
       <div class="card" id="prompt-card">
@@ -1736,15 +1705,6 @@ Before finishing, verify every item:
           </ul>
         </div>
 
-        <div class="tip-box" style="margin-top:var(--spacing-sm);">
-          <h3><i data-lucide="message-circle"></i> איך לעבוד עם ה-AI לאורך הדרך</h3>
-          <ul>
-            <li><strong>שיחה אחת לאורך כל הדרך</strong> — אל תפתח שיחה חדשה לכל תיקון. ה-AI זוכר את הקוד</li>
-            <li><strong>אם המשחק לא טוב</strong> — כתוב בדיוק מה לא עבד: "הסמן זזה לאט", "הפיצוץ קטן מדי", "לא ברור מה לעשות"</li>
-            <li><strong>פלואו טיפוסי:</strong> פרומפט ← AI שואל שאלות ← ענה ← AI בונה ← הורד ← בדוק ← תקן</li>
-            <li><strong>AI מחזיר קוד?</strong> — העתק את כל הטקסט, הדבק בקובץ .html חדש, שמור, גרור לוולידטור</li>
-          </ul>
-        </div>
       </div>
     </section>
 
@@ -1805,7 +1765,7 @@ Before finishing, verify every item:
         <i data-lucide="send"></i>
         שלח את המשחק לקמפוס הדיגיטלי
       </h2>
-      <p class="section-subtitle">עבר את הבדיקה? שלח לרותי — ואם המשחק תקין, הוא ייכנס לספריית משחקי ה-AI</p>
+      <p class="section-subtitle">עבר את הבדיקה? שלח לצוות — ואם המשחק תקין, הוא ייכנס לספריית משחקי ה-AI</p>
 
       <div id="submit-locked">
         <div class="lock-icon"><i data-lucide="lock"></i></div>
