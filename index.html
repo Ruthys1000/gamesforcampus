@@ -972,14 +972,31 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 5. Score: Award points for correct answers. `reportScore(score, false)` on correct. `reportScore(score, true)` on game over.
 6. Restart: Must work without page reload.
 
-## 🎨 Design Requirements
+## 🎨 Design &amp; Creative Requirements
 
 1. Hebrew UI (`lang="he" dir="rtl"`)
 2. Responsive — mobile + desktop
 3. Single `.html` file, CDN resources allowed
-4. Polished UI — smooth animations
-5. Sound effects via Web Audio API
-6. Keyboard navigation
+4. **Visually rich**: particles, explosions, screen shake, color, smooth animations — make it feel alive
+5. Sound effects via Web Audio API (hits, wins, fails, background music/ambience)
+6. Keyboard navigation + touch support for mobile
+7. **The game IS the experience** — questions are just a mechanic integrated into real gameplay
+8. On correct answer: visual reward (explosion, color burst, power-up animation); on wrong: penalty effect (flash, shake, life lost animation)
+
+## 💡 Game Design Philosophy
+
+**The main creative challenge is designing a FUN GAME — not creating questions.**
+
+The questions will be replaced by Moodle with real educational content. The `questionsSource` array in the code is just a placeholder. Your job is to build an exciting game world that USES questions as a gameplay mechanic.
+
+Examples of creative approaches:
+- **Shooting game**: enemy drone flies across screen → question pops up → correct answer = player fires → drone explodes with particles
+- **Drone tracker**: radar screen → blip appears → answer correctly to lock on and intercept
+- **Tetris-IDF variant**: falling blocks carry a label → answer the question to destroy the block before it lands
+- **Racing game**: car races along road → question appears at checkpoint → correct = turbo boost, wrong = slowdown/obstacle
+- **Tower defense**: wave of enemies → each enemy is a question → correct = defeated with animation
+
+Think about: What does the player control? What are the enemies/obstacles? What's the most exciting moment? What happens visually when you get it right?
 
 ## ✅ Checklist
 
@@ -1004,46 +1021,52 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
         <div class="prompt-builder">
           <div class="prompt-builder-title">
             <i data-lucide="wand-2" style="width:16px;height:16px;"></i>
-            תאר את המשחק שלך — הפרומפט יעודכן אוטומטית
+            עצב את המשחק שלך — תהיה יצירתי! הפרומפט יעודכן אוטומטית
           </div>
           <div class="builder-grid">
             <div class="builder-field full-width">
-              <label for="pb-description">רעיון המשחק *</label>
-              <textarea id="pb-description" placeholder="למשל: משחק חידון מהיר על גאוגרפיה ישראלית עם 10 שאלות ותשובות..."></textarea>
+              <label for="pb-description">רעיון המשחק — תאר את הקונספט, האויבים, הדמות, הרגע המרגש *</label>
+              <textarea id="pb-description" placeholder="למשל: משחק ירי שבו רחפן אויב עובר על המסך. לכל פגיעה נכונה יש פיצוץ מרשים. השחקן יורה מטוס קרב ישראלי..."></textarea>
             </div>
             <div class="builder-field">
-              <label for="pb-type">סוג המשחק</label>
-              <select id="pb-type">
+              <label for="pb-genre">ז'אנר / מנגנון ליבה</label>
+              <select id="pb-genre">
                 <option value="">— בחר —</option>
-                <option value="חידון שאלות ותשובות">חידון שאלות ותשובות</option>
-                <option value="זיכרון (Match-pairs)">זיכרון (Match-pairs)</option>
-                <option value="ניחוש מילים / Wordle">ניחוש מילים / Wordle</option>
-                <option value="משחק פעולה / Arcade">משחק פעולה / Arcade</option>
-                <option value="חפשי — AI יבחר">חפשי — AI יבחר</option>
+                <option value="ירי (Shooter)">ירי (Shooter)</option>
+                <option value="מרדף / לכידה">מרדף / לכידה</option>
+                <option value="ניווט ומכשולים (Platformer)">ניווט ומכשולים (Platformer)</option>
+                <option value="Tetris variant">Tetris variant</option>
+                <option value="מרוץ (Racing)">מרוץ (Racing)</option>
+                <option value="פאזל / אסטרטגיה">פאזל / אסטרטגיה</option>
+                <option value="Tower Defense">Tower Defense</option>
+                <option value="חפשי — AI יחליט">חפשי — AI יחליט</option>
               </select>
             </div>
             <div class="builder-field">
-              <label for="pb-topic">נושא השאלות</label>
-              <input type="text" id="pb-topic" placeholder="גאוגרפיה, צבא, תנ&quot;ך, ידע כללי...">
+              <label for="pb-atmosphere">אווירה ויזואלית</label>
+              <select id="pb-atmosphere">
+                <option value="">— בחר —</option>
+                <option value="צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)">צבאי-ישראלי</option>
+                <option value="עתידני / סייבר (ניאון, חשוך, היי-טק)">עתידני / סייבר</option>
+                <option value="עירוני (רחובות, גרפיטי, עיר)">עירוני</option>
+                <option value="צבעוני ומשוגע (פסיכדלי, מלא אנימציה)">צבעוני ומשוגע</option>
+                <option value="רטרו אארקייד (8-bit, פיקסל-ארט)">רטרו אארקייד (פיקסל)</option>
+                <option value="תת-ימי / חלל (רחוק, מסתורי)">תת-ימי / חלל</option>
+                <option value="חפשי — AI יחליט">חפשי — AI יחליט</option>
+              </select>
             </div>
             <div class="builder-field">
-              <label>רמת קושי</label>
+              <label>עוצמת האקשן</label>
               <div class="radio-group">
-                <label class="radio-option"><input type="radio" name="pb-difficulty" value="קל"> קל</label>
-                <label class="radio-option"><input type="radio" name="pb-difficulty" value="בינוני" checked> בינוני</label>
-                <label class="radio-option"><input type="radio" name="pb-difficulty" value="קשה"> קשה</label>
+                <label class="radio-option"><input type="radio" name="pb-intensity" value="רגוע"> רגוע</label>
+                <label class="radio-option"><input type="radio" name="pb-intensity" value="בינוני" checked> בינוני</label>
+                <label class="radio-option"><input type="radio" name="pb-intensity" value="אינטנסיבי"> אינטנסיבי</label>
               </div>
             </div>
             <div class="builder-field">
-              <label for="pb-style">סגנון עיצוב</label>
-              <select id="pb-style">
-                <option value="">— בחר —</option>
-                <option value="מודרני וצבעוני">מודרני וצבעוני</option>
-                <option value="צבאי / Military">צבאי / Military</option>
-                <option value="מינימליסטי">מינימליסטי</option>
-                <option value="ספורטיבי">ספורטיבי</option>
-                <option value="חפשי — AI יבחר">חפשי — AI יבחר</option>
-              </select>
+              <label for="pb-demo-topic" style="font-size:12px;color:var(--color-text-muted);">נושא שאלות דמו (placeholder בלבד)</label>
+              <input type="text" id="pb-demo-topic" placeholder="צבא, גאוגרפיה, היסטוריה..." style="font-size:13px;">
+              <span style="font-size:11px;color:var(--color-text-muted);margin-top:3px;display:block;">השאלות האמיתיות מגיעות מ-Moodle</span>
             </div>
           </div>
         </div>
@@ -1514,40 +1537,46 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
       const specEl = document.getElementById('prompt-spec-data');
       if (!specEl) return;
 
-      // Strip the game-request section from the stored spec
       const fullSpec = specEl.value;
       const baseSpec = fullSpec.split('\n## 🎮 YOUR GAME REQUEST')[0];
 
       // Read form fields
       const description = (document.getElementById('pb-description').value || '').trim();
-      const type        = document.getElementById('pb-type').value;
-      const topic       = (document.getElementById('pb-topic').value || '').trim();
-      const difficulty  = (document.querySelector('input[name="pb-difficulty"]:checked') || {}).value || 'בינוני';
-      const style       = document.getElementById('pb-style').value;
+      const genre       = document.getElementById('pb-genre').value;
+      const atmosphere  = document.getElementById('pb-atmosphere').value;
+      const intensity   = (document.querySelector('input[name="pb-intensity"]:checked') || {}).value || 'בינוני';
+      const demoTopic   = (document.getElementById('pb-demo-topic').value || '').trim();
 
       // Build the game-request block
       const lines = [];
-      if (type)        lines.push('Game type / סוג: ' + type);
-      if (topic)       lines.push('Topic / נושא: ' + topic);
-      if (difficulty)  lines.push('Difficulty / קושי: ' + difficulty);
-      if (style)       lines.push('Visual style / סגנון: ' + style);
-      if (description) lines.push('\nDescription:\n' + description);
+      if (genre)       lines.push('Game genre / ז\'אנר: ' + genre);
+      if (atmosphere)  lines.push('Visual atmosphere / אווירה: ' + atmosphere);
+      if (intensity)   lines.push('Action intensity / עוצמה: ' + intensity);
+      if (demoTopic)   lines.push('Demo questions topic: ' + demoTopic + ' (placeholder only — real questions come from Moodle)');
+      if (description) lines.push('\nCreative concept / רעיון:\n' + description);
 
       const gameBlock = lines.length
         ? lines.join('\n')
-        : '(מלא את הפרטים בטופס למעלה)';
+        : '(מלא את הפרטים בטופס למעלה — תהיה יצירתי!)';
 
       const clarification = [
         '---',
         '',
-        '## 🤖 BEFORE YOU BUILD — CLARIFICATION PHASE',
+        '## 🤖 BEFORE YOU BUILD — CREATIVE DISCOVERY',
         '',
         '**Do NOT start building immediately.**',
         '',
-        'Read the game request above, then ask the soldier **2–3 short clarifying questions in Hebrew** to refine details that are still unclear (for example: exact number of questions, specific subtopics, timer settings, lives count, scoring rules).',
+        'Read the game concept above, then ask the soldier **2–3 short questions IN HEBREW** to clarify the creative vision:',
         '',
-        'Keep each question to one line with example answers in parentheses.',
-        'Only after receiving the soldier\'s answers — build the complete, polished game following all technical requirements above.'
+        'Suggested questions (adapt to their concept):',
+        '- מי/מה השחקן שולט? (טנק? צלף? כדור? חללית? מטוס?)',
+        '- מי/מה האויב או המכשול? (רחפן? מטוס? אבן נופלת? מחסום?)',
+        '- מה קורה כשעונים נכון? (ירי מתאפשר? בוסט? אויב נהרס עם פיצוץ?)',
+        '- יש רעיון לרגע הכי מרגש במשחק? (בוס? מטח? סיום מיוחד? אנימציית ניצחון?)',
+        '',
+        '**Important note**: The `questionsSource` array is a PLACEHOLDER only — do not invest effort in the questions themselves. Moodle will inject the real educational questions at runtime. Focus creative effort on the game mechanics, visuals, animations, and audio.',
+        '',
+        'Only after receiving answers — build the complete, visually impressive game with rich animations and sound effects.'
       ].join('\n');
 
       document.getElementById('prompt-textarea').value =
@@ -1555,7 +1584,7 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
     }
 
     function initPromptBuilder() {
-      const fieldIds = ['pb-description', 'pb-type', 'pb-topic', 'pb-style'];
+      const fieldIds = ['pb-description', 'pb-genre', 'pb-atmosphere', 'pb-demo-topic'];
       fieldIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -1563,7 +1592,7 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
           el.addEventListener('change', buildPrompt);
         }
       });
-      document.querySelectorAll('input[name="pb-difficulty"]').forEach(r => {
+      document.querySelectorAll('input[name="pb-intensity"]').forEach(r => {
         r.addEventListener('change', buildPrompt);
       });
       buildPrompt();
