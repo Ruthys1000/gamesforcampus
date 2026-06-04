@@ -1138,6 +1138,132 @@
       align-items: center;
       gap: 5px;
     }
+
+    /* ============ HOW-TO FILE BOX ============ */
+    .how-to-file-box {
+      background: rgba(245,158,11,0.07);
+      border-right: 4px solid var(--color-warn);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: var(--spacing-md);
+      font-size: 13px;
+      color: var(--color-text);
+    }
+
+    .how-to-file-box strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--color-navy);
+    }
+
+    .how-to-file-box ol {
+      padding-right: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      line-height: 1.5;
+    }
+
+    .how-to-file-box code {
+      background: rgba(15,26,43,0.08);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* ============ VALIDATION SUCCESS BANNER ============ */
+    .validation-success-banner {
+      background: var(--color-success-bg);
+      color: #166534;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: var(--spacing-md);
+      animation: fadeInDown 0.4s ease;
+    }
+
+    .validation-success-banner a {
+      color: #166534;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === WOW CONTEXT SECTION === */
+    .wow-context-section {
+      background: linear-gradient(135deg, rgba(15,26,43,0.03) 0%, rgba(245,158,11,0.06) 100%);
+      border: 1px solid var(--color-border-light);
+      border-right: 4px solid var(--color-warn);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+    .wow-headline {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .wow-headline h2 {
+      font-size: 20px; font-weight: 700; color: var(--color-navy); margin: 0;
+    }
+    .wow-intro {
+      font-size: 15px; line-height: 1.7; color: var(--color-text);
+      margin-bottom: var(--spacing-md);
+    }
+    .wow-flow {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; flex-wrap: wrap;
+      background: var(--color-bg); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: var(--spacing-md);
+    }
+    .wow-step {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--color-navy); font-weight: 600;
+      text-align: center; line-height: 1.4;
+    }
+    .wow-icon {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wow-arrow {
+      color: var(--color-border); font-size: 20px; font-weight: 300; flex-shrink: 0;
+    }
+    .wow-cards {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+    }
+    .wow-card {
+      background: #fff; border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      font-size: 13px; line-height: 1.6; color: var(--color-text);
+    }
+    .wow-card strong {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; color: var(--color-navy); margin-bottom: 4px;
+    }
+    .wow-cta-text {
+      text-align: center; font-size: 15px; color: var(--color-navy);
+      font-weight: 600; padding: 10px;
+      background: rgba(245,158,11,0.08); border-radius: var(--radius-sm);
+    }
+    @media (max-width: 639px) {
+      .wow-cards { grid-template-columns: 1fr; }
+      .wow-headline h2 { font-size: 17px; }
+      .wow-flow { gap: 6px; padding: 12px 8px; }
+      .wow-icon { width: 36px; height: 36px; }
+      .wow-step { font-size: 11px; }
+      .wow-arrow { font-size: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -1163,11 +1289,81 @@
       <div class="hero">
         <div class="hero-badge">
           <i data-lucide="target"></i>
-          <span>פיתוח משחקי לימוד עם AI</span>
+          <span>פעילות חדשה בקמפוס הדיגיטלי</span>
         </div>
         <h1>המשימה: <span class="hero-highlight">להפוך רעיון למשחק עובד</span></h1>
-        <p class="hero-tagline">כמה סיבובי פיתוח קצרים. תוצאה אחת: משחק עובד.</p>
+        <p class="hero-tagline">בנה משחק לימודי עם AI — ואם יעבור בדיקה, הוא ייכנס לקמפוס הדיגיטלי</p>
+        <a href="#prompt-card" class="btn-primary" style="margin-top:20px;text-decoration:none;">
+          <i data-lucide="arrow-left"></i>
+          <span>התחל כאן — צור פרומפט</span>
+        </a>
       </div>
+
+      <!-- WOW CONTEXT SECTION -->
+      <section class="wow-context-section">
+        <div class="wow-headline">
+          <i data-lucide="rocket" style="width:28px;height:28px;color:var(--color-warn);flex-shrink:0;"></i>
+          <h2>פעילות חדשה בקמפוס הדיגיטלי — <span style="color:var(--color-warn);">משחק AI</span></h2>
+        </div>
+
+        <p class="wow-intro">
+          הקמפוס הדיגיטלי מוסיף פעילות חדשה בשם <strong>משחק AI</strong> — ספריית משחקים לימודיים שנבנו בבינה מלאכותית.
+          כל מנהל קורס יוכל לבחור משחק מהספרייה ולהוסיפו לקורס שלו. ה-AI שבפעילות יבנה שאלות
+          מותאמות לתוכן הקורס — אוטומטית, בכל פעם שהמשחק נטען.
+        </p>
+
+        <div class="wow-flow">
+          <div class="wow-step">
+            <div class="wow-icon" style="background:var(--color-navy);">
+              <i data-lucide="pen-tool" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <span>אתה בונה<br>משחק עם AI</span>
+          </div>
+          <span class="wow-arrow">←</span>
+          <div class="wow-step">
+            <div class="wow-icon" style="background:var(--color-teal-light);">
+              <i data-lucide="check-circle-2" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <span>רותי בודקת<br>ומאשרת</span>
+          </div>
+          <span class="wow-arrow">←</span>
+          <div class="wow-step">
+            <div class="wow-icon" style="background:#7c3aed;">
+              <i data-lucide="book-open" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <span>המשחק נכנס<br>לקמפוס</span>
+          </div>
+          <span class="wow-arrow">←</span>
+          <div class="wow-step">
+            <div class="wow-icon" style="background:var(--color-warn);">
+              <i data-lucide="wand-2" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <span>AI מזריק<br>שאלות אמיתיות</span>
+          </div>
+          <span class="wow-arrow">←</span>
+          <div class="wow-step">
+            <div class="wow-icon" style="background:#16a34a;">
+              <i data-lucide="gamepad-2" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <span>חניכים<br>משחקים ✓</span>
+          </div>
+        </div>
+
+        <div class="wow-cards">
+          <div class="wow-card">
+            <strong><i data-lucide="lightbulb" style="width:14px;height:14px;"></i> למה שאלות דמה?</strong>
+            <p>השאלות שתיצור הן <em>שאלות לדוגמה</em>. כשמנהל בוחר את המשחק לקורסו, ה-AI בקמפוס מחליף אותן בשאלות שנגזרות מתוכן הקורס — אוטומטית.</p>
+          </div>
+          <div class="wow-card">
+            <strong><i data-lucide="list-checks" style="width:14px;height:14px;"></i> ניקוד ותחרות</strong>
+            <p>מנהל הקורס מחליט: האם המשחק יהיה תחרותי, עצמאי, ואם הציון ייכנס לעץ ההערכה של החניך.</p>
+          </div>
+        </div>
+
+        <div class="wow-cta-text">
+          🎯 המשחק שלך עשוי לשמש <strong>אלפי חניכים</strong> בקמפוס הדיגיטלי
+        </div>
+      </section>
 
       <div class="card">
         <div class="card-title">
@@ -1188,7 +1384,7 @@
           <div class="step">
             <div class="step-icon"><i data-lucide="send"></i></div>
             <h3>3. שלח</h3>
-            <p>אם עבר בדיקה, מלא פרטים ושלח למנהלת המוצר</p>
+            <p>אם עבר בדיקה, מלא פרטים ושלח — ואם תקין, ייכנס לקמפוס הדיגיטלי</p>
           </div>
         </div>
       </div>
@@ -1224,7 +1420,7 @@
         </ul>
       </div>
 
-      <div class="card">
+      <div class="card" id="prompt-card">
         <div class="card-title">
           <i data-lucide="clipboard-copy"></i>
           הפרומפט המלא — העתק אותו
@@ -1562,6 +1758,16 @@ Before finishing, verify every item:
       </h2>
       <p class="section-subtitle">גרור את קובץ ה-HTML שיצרת וקבל בדיקה מיידית</p>
 
+      <div class="how-to-file-box">
+        <strong>📄 קיבלת קוד מ-AI? כך הופכים אותו לקובץ:</strong>
+        <ol>
+          <li>סמן את כל הקוד שה-AI נתן (לחץ בתוך הקוד ← Ctrl+A)</li>
+          <li>העתק (Ctrl+C)</li>
+          <li>פתח Notepad / TextEdit ← הדבק ← שמור בשם <code>game.html</code></li>
+          <li>גרור את הקובץ לתיבה למטה ↓</li>
+        </ol>
+      </div>
+
       <div id="drop-zone">
         <div class="drop-icon"><i data-lucide="folder-up"></i></div>
         <p><strong>גרור לכאן את קובץ ה-HTML שלך</strong></p>
@@ -1599,13 +1805,13 @@ Before finishing, verify every item:
     <section id="section-submit">
       <h2 class="section-title">
         <i data-lucide="send"></i>
-        שלח למנהלת המוצר
+        שלח את המשחק לקמפוס הדיגיטלי
       </h2>
-      <p class="section-subtitle">סיימת את הבדיקה? זה הזמן לשלוח את המשחק</p>
+      <p class="section-subtitle">עבר את הבדיקה? שלח לרותי — ואם המשחק תקין, הוא ייכנס לספריית משחקי ה-AI</p>
 
       <div id="submit-locked">
         <div class="lock-icon"><i data-lucide="lock"></i></div>
-        <p>יש להשלים את הבדיקה לפני השליחה</p>
+        <p>יש להשלים את הבדיקה לפני השליחה — <a href="#section-validator" style="color:var(--color-teal-light);font-weight:700;">עבור לוולידטור ↑</a></p>
       </div>
 
       <div id="submit-form-container" class="hidden">
@@ -1667,6 +1873,7 @@ Before finishing, verify every item:
       // ── 1. משתני config ──
       {
         label: '1. כל 7 משתני config מוגדרים לפני applyMoodleConfig: questionsSource (עם שאלות fallback בעברית), MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
+        shortLabel: 'כל 7 משתני ההגדרה מוגדרים',
         test: c => ['questionsSource','MAX_LIVES','GAME_TIMER','SHOW_FEEDBACK',
                     'FEEDBACK_DURATION','CORRECT_FEEDBACK','INCORRECT_FEEDBACK'].every(v => c.includes(v))
       },
@@ -1674,22 +1881,27 @@ Before finishing, verify every item:
       // ── 2. applyMoodleConfig ──
       {
         label: '2a. applyMoodleConfig(cfg) מוגדרת עם if (!cfg) return',
+        shortLabel: 'פונקציית טעינת ההגדרות קיימת ומוגנת',
         test: c => /function\s+applyMoodleConfig\s*\(\s*cfg\s*\)/.test(c) && /if\s*\(\s*!cfg\s*\)\s*return/.test(c)
       },
       {
         label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct??q.c (או !== undefined)',
+        shortLabel: 'מיפוי השאלות מ-Moodle תקין',
         test: c => /q\.options\s*\|\|\s*q\.a/.test(c) && /q\.correct\s*!==\s*undefined|q\.correct\s*\?\?/.test(c)
       },
       {
         label: '2c. cfg.timer מוחל עם בדיקת !== undefined (כדי שטיימר=0 יעבוד)',
+        shortLabel: 'הטיימר מוגדר נכון (כולל ערך 0)',
         test: c => /cfg\.timer\s*!==\s*undefined/.test(c)
       },
       {
         label: "2d. cfg.showFeedback מוחל עם 'showFeedback' in cfg (לא בדיקת truthy)",
+        shortLabel: 'הגדרת הפידבק מיושמת נכון',
         test: c => /['"]showFeedback['"]\s+in\s+cfg/.test(c)
       },
       {
         label: '2e. feedbackDuration מוחל עם parseInt; correctFeedback ו-incorrectFeedback מוחלים',
+        shortLabel: 'משך הפידבק ומלל התגובות מוגדרים',
         test: c => c.includes('feedbackDuration') && c.includes('parseInt') &&
                    c.includes('correctFeedback') && c.includes('incorrectFeedback')
       },
@@ -1697,12 +1909,14 @@ Before finishing, verify every item:
       // ── 3. סדר אתחול ──
       {
         label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים אחרי משתני config ולפני משתני game state',
+        shortLabel: 'טעינת ההגדרות מ-Moodle מוגנת ב-try/catch',
         test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
       },
 
       // ── 4. postMessage ──
       {
         label: '4a. GAME_START נשלח בכל התחלה/ריסטארט — עטוף ב-try/catch',
+        shortLabel: 'אות התחלת משחק (GAME_START) נשלח ל-Moodle',
         test: c => {
           const idx = c.indexOf('GAME_START');
           if (idx < 0) return false;
@@ -1712,6 +1926,7 @@ Before finishing, verify every item:
       },
       {
         label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה — עטוף ב-try/catch',
+        shortLabel: 'ניקוד על תשובה נכונה נשלח ל-Moodle',
         test: c => {
           const markers = ['isfinished: false', 'isfinished:false', '"isfinished": false', '"isfinished":false'];
           for (const m of markers) {
@@ -1726,6 +1941,7 @@ Before finishing, verify every item:
       },
       {
         label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק — עטוף ב-try/catch',
+        shortLabel: 'ניקוד סיום משחק נשלח ל-Moodle',
         test: c => {
           const markers = ['isfinished: true', 'isfinished:true', '"isfinished": true', '"isfinished":true'];
           for (const m of markers) {
@@ -1740,30 +1956,36 @@ Before finishing, verify every item:
       },
       {
         label: '4d. ערך timer בהודעות postMessage הוא משתנה (לא 0 קשיח)',
+        shortLabel: 'שדה הטיימר בדיווח הוא משתנה (לא 0 קשיח)',
         test: c => /timer\s*:\s*[a-zA-Z_$][a-zA-Z0-9_$.]*/.test(c)
       },
 
       // ── 5. לוגיקת משחק ──
       {
         label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת ומסיים ב-0',
+        shortLabel: 'לוגיקת הטיימר (ספירה עולה/יורדת) מיושמת',
         test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
       },
       {
         label: '5b. חיים מתחילים ב-MAX_LIVES (משתנה, לא קשיח); תשובה שגויה = חיים−1; 0 חיים = game over',
+        shortLabel: 'מספר החיים נלקח מההגדרות (לא ספרה קשיחה)',
         test: c => /[=:]\s*MAX_LIVES\b/.test(c)
       },
       {
         label: '5c. שאלות ללא חזרה מ-questionsSource; pool מאופס אחרי שכולן הוצגו; שימוש ב-.c לאינדקס הנכון',
+        shortLabel: 'שאלות ללא חזרה; אינדקס תשובה נכונה תקין',
         test: c => c.includes('questionsSource') &&
                    /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c) &&
                    /\.c\b/.test(c)
       },
       {
         label: '5d. SHOW_FEEDBACK=true → מציג פידבק + explanation, ממתין FEEDBACK_DURATION שניות; false → ממשיך ≤200ms',
+        shortLabel: 'לוגיקת הפידבק (הצגה/דילוג) מיושמת',
         test: c => /if\s*\(.*SHOW_FEEDBACK/.test(c) && c.includes('FEEDBACK_DURATION')
       },
       {
         label: '5e. Restart מאפס כל הסטייט (score, lives, timer, questions) ללא location.reload()',
+        shortLabel: 'ריסטארט מאפס את כל הסטייט ללא location.reload()',
         test: c => !c.includes('location.reload') &&
                    /\bfunction\s+(?:init|startGame)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame)\s*=|\b(?:init|startGame)\s*[:=]\s*function/.test(c)
       },
@@ -1771,20 +1993,24 @@ Before finishing, verify every item:
       // ── 6. תאימות iframe ומובייל ──
       {
         label: '6a. <html lang="he" dir="rtl"> ו-<meta name="viewport"...> קיימים',
+        shortLabel: 'תגית HTML בעברית (RTL) + viewport למובייל',
         test: c => (c.includes('lang="he"') || c.includes("lang='he'")) &&
                    (c.includes('dir="rtl"') || c.includes("dir='rtl'")) &&
                    /meta[^>]+viewport/i.test(c)
       },
       {
         label: '6b. אין alert() / confirm() / prompt() — לא עובדים ב-iframe',
+        shortLabel: 'ללא alert/confirm/prompt (לא עובדים ב-iframe)',
         test: c => !/\balert\s*\(/.test(c) && !/\bconfirm\s*\(/.test(c) && !/\bprompt\s*\(/.test(c)
       },
       {
         label: '6c. אין localStorage / sessionStorage',
+        shortLabel: 'ללא localStorage / sessionStorage',
         test: c => !c.includes('localStorage') && !c.includes('sessionStorage')
       },
       {
         label: '6d. תמיכת מובייל: touch events ו/או @media responsive',
+        shortLabel: 'תמיכת מגע (touch) ו/או עיצוב responsive',
         test: c => /touchstart|touchend|ontouchstart|touch-action/.test(c) || c.includes('@media')
       }
 
@@ -1932,8 +2158,9 @@ Before finishing, verify every item:
     /* ============ VALIDATION ============ */
     function runValidation() {
       const c = STATE.fileContent || '';
-      STATE.autoCheckResults = AUTO_CHECKS.map(({ label, test }) => ({
+      STATE.autoCheckResults = AUTO_CHECKS.map(({ label, shortLabel, test }) => ({
         label,
+        shortLabel,
         passed: test(c)
       }));
       STATE.autoAllPassed = STATE.autoCheckResults.every(r => r.passed);
@@ -1949,7 +2176,7 @@ Before finishing, verify every item:
           <span class="check-icon ${r.passed ? 'pass' : 'fail'}">
             <i data-lucide="${r.passed ? 'check' : 'x'}"></i>
           </span>
-          <span>${r.label}</span>
+          <span>${r.shortLabel || r.label}</span>
         </li>
       `).join('');
 
@@ -2068,6 +2295,10 @@ Before finishing, verify every item:
 
       if (unlocked) {
         if (!wasUnlocked) {
+          const banner = document.createElement('div');
+          banner.className = 'validation-success-banner';
+          banner.innerHTML = '✅ עברת את כל הבדיקות! <a href="#section-submit">לחץ לשליחה ↓</a>';
+          document.getElementById('section-validator').prepend(banner);
           setTimeout(() => {
             document.getElementById('section-submit').scrollIntoView({ behavior: 'smooth' });
           }, 200);
