@@ -645,6 +645,107 @@
       display: none !important;
     }
 
+    /* ============ PROMPT BUILDER ============ */
+    .prompt-builder {
+      background: linear-gradient(135deg, rgba(0,180,198,0.05), rgba(0,122,138,0.07));
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .prompt-builder-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-teal-dark);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .builder-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-sm);
+    }
+
+    .builder-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .builder-field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .builder-field > label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .builder-field input[type="text"],
+    .builder-field select,
+    .builder-field textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-main);
+      font-size: 14px;
+      background: white;
+      color: var(--color-text);
+      direction: rtl;
+      transition: border-color 0.2s;
+    }
+
+    .builder-field input:focus,
+    .builder-field select:focus,
+    .builder-field textarea:focus {
+      outline: none;
+      border-color: var(--color-teal-light);
+      box-shadow: 0 0 0 2px rgba(0,180,198,0.12);
+    }
+
+    .builder-field textarea {
+      min-height: 68px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: 8px 0;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .radio-option input[type="radio"] {
+      accent-color: var(--color-teal-dark);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .prompt-hint {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     /* ============ FOOTER ============ */
     footer {
       text-align: center;
@@ -662,6 +763,12 @@
       }
       #results-panel {
         grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 580px) {
+      .builder-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -746,8 +853,8 @@
           <i data-lucide="clipboard-copy"></i>
           הפרומפט המלא — העתק אותו
         </div>
-        <div class="prompt-container">
-          <textarea id="prompt-textarea" readonly dir="ltr">You are an expert HTML5 game developer. Your task is to create a **single self-contained HTML file** for a game that runs inside a Moodle LMS plugin (`mod_game`).
+        <!-- Hidden source textarea — holds the static technical spec for JS to read -->
+        <textarea id="prompt-spec-data" hidden readonly dir="ltr">You are an expert HTML5 game developer. Your task is to create a **single self-contained HTML file** for a game that runs inside a Moodle LMS plugin (`mod_game`).
 
 ---
 
@@ -895,6 +1002,61 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 
 תאר כאן את רעיון המשחק שלך — בעברית או אנגלית:
 </textarea>
+
+        <!-- Prompt Builder Form -->
+        <div class="prompt-builder">
+          <div class="prompt-builder-title">
+            <i data-lucide="wand-2" style="width:16px;height:16px;"></i>
+            תאר את המשחק שלך — הפרומפט יעודכן אוטומטית
+          </div>
+          <div class="builder-grid">
+            <div class="builder-field full-width">
+              <label for="pb-description">רעיון המשחק *</label>
+              <textarea id="pb-description" placeholder="למשל: משחק חידון מהיר על גאוגרפיה ישראלית עם 10 שאלות ותשובות..."></textarea>
+            </div>
+            <div class="builder-field">
+              <label for="pb-type">סוג המשחק</label>
+              <select id="pb-type">
+                <option value="">— בחר —</option>
+                <option value="חידון שאלות ותשובות">חידון שאלות ותשובות</option>
+                <option value="זיכרון (Match-pairs)">זיכרון (Match-pairs)</option>
+                <option value="ניחוש מילים / Wordle">ניחוש מילים / Wordle</option>
+                <option value="משחק פעולה / Arcade">משחק פעולה / Arcade</option>
+                <option value="חפשי — AI יבחר">חפשי — AI יבחר</option>
+              </select>
+            </div>
+            <div class="builder-field">
+              <label for="pb-topic">נושא השאלות</label>
+              <input type="text" id="pb-topic" placeholder="גאוגרפיה, צבא, תנ&quot;ך, ידע כללי...">
+            </div>
+            <div class="builder-field">
+              <label>רמת קושי</label>
+              <div class="radio-group">
+                <label class="radio-option"><input type="radio" name="pb-difficulty" value="קל"> קל</label>
+                <label class="radio-option"><input type="radio" name="pb-difficulty" value="בינוני" checked> בינוני</label>
+                <label class="radio-option"><input type="radio" name="pb-difficulty" value="קשה"> קשה</label>
+              </div>
+            </div>
+            <div class="builder-field">
+              <label for="pb-style">סגנון עיצוב</label>
+              <select id="pb-style">
+                <option value="">— בחר —</option>
+                <option value="מודרני וצבעוני">מודרני וצבעוני</option>
+                <option value="צבאי / Military">צבאי / Military</option>
+                <option value="מינימליסטי">מינימליסטי</option>
+                <option value="ספורטיבי">ספורטיבי</option>
+                <option value="חפשי — AI יבחר">חפשי — AI יבחר</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p class="prompt-hint">
+          <i data-lucide="info" style="width:13px;height:13px;color:var(--color-teal-light);"></i>
+          הפרומפט למטה מתעדכן אוטומטית — העתק אותו לאחר מילוי הפרטים
+        </p>
+        <div class="prompt-container">
+          <textarea id="prompt-textarea" readonly dir="ltr"></textarea>
         </div>
         <button id="copy-btn" class="btn-primary" onclick="copyPrompt()">
           <i data-lucide="copy"></i>
@@ -904,9 +1066,9 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
         <div class="tip-box">
           <h3><i data-lucide="lightbulb"></i> איפה להדביק?</h3>
           <ul>
-            <li><strong>Claude.ai</strong> — כנס ל-claude.ai, פתח שיחה חדשה, הדבק את הפרומפט + תאר את המשחק שלך בסוף</li>
-            <li><strong>Cursor</strong> — פתח agent חדש, הדבק את הפרומפט + תאר את המשחק</li>
-            <li><strong>Bolt.new</strong> — הדבק ישירות בתיבת הצ'אט</li>
+            <li><strong>Claude.ai</strong> — פתח שיחה חדשה, הדבק את הפרומפט. ה-AI ישאל אותך 2–3 שאלות — ענה עליהן, ואז הוא יבנה את המשחק</li>
+            <li><strong>Cursor</strong> — פתח agent חדש, הדבק את הפרומפט, ענה על שאלות ההבהרה</li>
+            <li><strong>Bolt.new</strong> — הדבק בצ'אט, ענה על שאלות ה-AI ואז הוא יתחיל לבנות</li>
           </ul>
         </div>
       </div>
@@ -1292,10 +1454,71 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
       });
     }
 
+    /* ============ PROMPT BUILDER ============ */
+    function buildPrompt() {
+      const specEl = document.getElementById('prompt-spec-data');
+      if (!specEl) return;
+
+      // Strip the game-request section from the stored spec
+      const fullSpec = specEl.value;
+      const baseSpec = fullSpec.split('\n## 🎮 YOUR GAME REQUEST')[0];
+
+      // Read form fields
+      const description = (document.getElementById('pb-description').value || '').trim();
+      const type        = document.getElementById('pb-type').value;
+      const topic       = (document.getElementById('pb-topic').value || '').trim();
+      const difficulty  = (document.querySelector('input[name="pb-difficulty"]:checked') || {}).value || 'בינוני';
+      const style       = document.getElementById('pb-style').value;
+
+      // Build the game-request block
+      const lines = [];
+      if (type)        lines.push('Game type / סוג: ' + type);
+      if (topic)       lines.push('Topic / נושא: ' + topic);
+      if (difficulty)  lines.push('Difficulty / קושי: ' + difficulty);
+      if (style)       lines.push('Visual style / סגנון: ' + style);
+      if (description) lines.push('\nDescription:\n' + description);
+
+      const gameBlock = lines.length
+        ? lines.join('\n')
+        : '(מלא את הפרטים בטופס למעלה)';
+
+      const clarification = [
+        '---',
+        '',
+        '## 🤖 BEFORE YOU BUILD — CLARIFICATION PHASE',
+        '',
+        '**Do NOT start building immediately.**',
+        '',
+        'Read the game request above, then ask the soldier **2–3 short clarifying questions in Hebrew** to refine details that are still unclear (for example: exact number of questions, specific subtopics, timer settings, lives count, scoring rules).',
+        '',
+        'Keep each question to one line with example answers in parentheses.',
+        'Only after receiving the soldier\'s answers — build the complete, polished game following all technical requirements above.'
+      ].join('\n');
+
+      document.getElementById('prompt-textarea').value =
+        baseSpec + '\n\n## 🎮 YOUR GAME REQUEST\n\n' + gameBlock + '\n\n' + clarification;
+    }
+
+    function initPromptBuilder() {
+      const fieldIds = ['pb-description', 'pb-type', 'pb-topic', 'pb-style'];
+      fieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', buildPrompt);
+          el.addEventListener('change', buildPrompt);
+        }
+      });
+      document.querySelectorAll('input[name="pb-difficulty"]').forEach(r => {
+        r.addEventListener('change', buildPrompt);
+      });
+      buildPrompt();
+    }
+
     /* ============ INIT ============ */
     document.addEventListener('DOMContentLoaded', () => {
       initDropZone();
       initForm();
+      initPromptBuilder();
       if (window.lucide) lucide.createIcons();
     });
   </script>
