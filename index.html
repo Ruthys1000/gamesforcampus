@@ -929,13 +929,15 @@
         flex-direction: column;
         align-items: center;
         gap: var(--spacing-sm);
-        padding: 14px 20px;
+        padding: 18px 24px;
         width: 100%;
         box-sizing: border-box;
       }
       .hero-stat {
-        justify-content: center;
-        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        text-align: center;
       }
       .hero-stat-sep {
         width: 40px;
@@ -1005,18 +1007,18 @@
         <h1>המשימה: <span class="hero-highlight">להפוך רעיון למשחק עובד</span></h1>
         <div class="hero-stats">
           <div class="hero-stat">
-            <span>מתארים רעיון</span>
             <span class="hero-step-num s1">1</span>
+            <span>מתארים רעיון</span>
           </div>
           <div class="hero-stat-sep"></div>
           <div class="hero-stat">
-            <span>נותנים ל־AI לבנות</span>
             <span class="hero-step-num s2">2</span>
+            <span>נותנים ל־AI לבנות</span>
           </div>
           <div class="hero-stat-sep"></div>
           <div class="hero-stat">
-            <span>בודקים, משפרים ושולחים</span>
             <span class="hero-step-num s3">3</span>
+            <span>בודקים, משפרים ושולחים</span>
           </div>
         </div>
         <p class="hero-tagline">משחק HTML5 אחד. קובץ אחד. בדיקה אחת לפני עלייה לקמפוס הדיגיטלי.</p>
