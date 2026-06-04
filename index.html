@@ -977,6 +977,151 @@
         font-size: 12px;
       }
     }
+
+    /* ============ JOURNEY CARD ============ */
+    .journey-loop {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0;
+      margin: var(--spacing-sm) 0;
+    }
+
+    .journey-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 72px;
+    }
+
+    .journey-bubble {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .journey-bubble.dev  { background: rgba(255,101,53,0.12); border: 2px solid var(--color-orange); color: var(--color-orange); }
+    .journey-bubble.test { background: rgba(0,196,212,0.12);  border: 2px solid var(--color-teal-light); color: var(--color-teal-dark); }
+    .journey-bubble.fix  { background: rgba(245,158,11,0.12); border: 2px dashed var(--color-warn); color: var(--color-warn); }
+    .journey-bubble.done { background: var(--color-success-bg); border: 2px solid var(--color-success); color: var(--color-success); }
+
+    .journey-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .journey-arrow {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      margin: 0 2px;
+      padding-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .journey-arrow.loop-back { color: var(--color-warn); }
+
+    .journey-tagline {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-warn);
+      background: rgba(245,158,11,0.08);
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      margin: var(--spacing-xs) 0 var(--spacing-sm);
+    }
+
+    .journey-tips {
+      list-style: none;
+      margin-top: var(--spacing-xs);
+    }
+
+    .journey-tips li {
+      font-size: 14px;
+      color: var(--color-text);
+      padding: 5px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .journey-tips li::before {
+      content: '→';
+      color: var(--color-teal-light);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ============ FIX GUIDE ============ */
+    .fix-guide {
+      margin-top: 12px;
+      border: 1px solid rgba(0, 196, 212, 0.22);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 196, 212, 0.04);
+      padding: 14px 16px;
+    }
+
+    .fix-guide-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-teal-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fix-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .fix-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+
+    .fix-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--color-teal-light);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .fix-step strong { color: var(--color-navy); }
+
+    .fix-round-note {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
   </style>
 </head>
 <body>
@@ -1046,6 +1191,47 @@
             <p>אם עבר בדיקה, מלא פרטים ושלח למנהלת המוצר</p>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="repeat-2"></i>
+          המסע האמיתי — מה לצפות
+        </div>
+        <div class="journey-loop">
+          <div class="journey-node">
+            <div class="journey-bubble dev"><i data-lucide="pen-tool" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">פיתוח<br>עם AI</span>
+          </div>
+          <span class="journey-arrow">›</span>
+          <div class="journey-node">
+            <div class="journey-bubble test"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">בדיקה<br>בוולידטור</span>
+          </div>
+          <span class="journey-arrow loop-back">↺</span>
+          <div class="journey-node">
+            <div class="journey-bubble fix"><i data-lucide="wrench" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">תיקון<br>עם AI</span>
+          </div>
+          <span class="journey-arrow loop-back">↺</span>
+          <div class="journey-node">
+            <div class="journey-bubble test"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">בדיקה<br>שוב</span>
+          </div>
+          <span class="journey-arrow">›</span>
+          <div class="journey-node">
+            <div class="journey-bubble done"><i data-lucide="send" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">עובר!<br>שליחה</span>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <span class="journey-tagline">⏱ לרוב לוקח 2–4 סיבובים — זה נורמלי לגמרי</span>
+        </div>
+        <ul class="journey-tips">
+          <li>אם המשחק לא מרשים — תגיד ל-AI <strong>בדיוק</strong> מה חסר: "הוסף פיצוץ בתשובה נכונה", "שפר את ה-UI"</li>
+          <li>אם הוולידטור נכשל — <strong>אל תפתח שיחה חדשה</strong>. המשך באותה שיחה, ה-AI כבר מכיר את הקוד</li>
+          <li>אחרי כל תיקון — הורד קובץ מחדש וגרור שוב לוולידטור</li>
+        </ul>
       </div>
 
       <div class="card">
@@ -1363,6 +1549,16 @@ Before finishing, verify every item:
             <li><strong>Claude.ai</strong> — פתח שיחה חדשה, הדבק את הפרומפט. ה-AI ישאל אותך 2–3 שאלות — ענה עליהן, ואז הוא יבנה את המשחק</li>
             <li><strong>Cursor</strong> — פתח agent חדש, הדבק את הפרומפט, ענה על שאלות ההבהרה</li>
             <li><strong>Bolt.new</strong> — הדבק בצ'אט, ענה על שאלות ה-AI ואז הוא יתחיל לבנות</li>
+          </ul>
+        </div>
+
+        <div class="tip-box" style="margin-top:var(--spacing-sm);">
+          <h3><i data-lucide="message-circle"></i> איך לעבוד עם ה-AI לאורך הדרך</h3>
+          <ul>
+            <li><strong>שיחה אחת לאורך כל הדרך</strong> — אל תפתח שיחה חדשה לכל תיקון. ה-AI זוכר את הקוד</li>
+            <li><strong>אם המשחק לא טוב</strong> — כתוב בדיוק מה לא עבד: "הסמן זזה לאט", "הפיצוץ קטן מדי", "לא ברור מה לעשות"</li>
+            <li><strong>פלואו טיפוסי:</strong> פרומפט ← AI שואל שאלות ← ענה ← AI בונה ← הורד ← בדוק ← תקן</li>
+            <li><strong>AI מחזיר קוד?</strong> — העתק את כל הטקסט, הדבק בקובץ .html חדש, שמור, גרור לוולידטור</li>
           </ul>
         </div>
       </div>
@@ -1787,6 +1983,34 @@ Before finishing, verify every item:
               <i data-lucide="copy"></i>
               <span>העתק לAI</span>
             </button>
+          </div>
+          <div class="fix-guide">
+            <div class="fix-guide-title">
+              <i data-lucide="list-ordered" style="width:15px;height:15px;"></i>
+              מה עושים עכשיו — 4 צעדים
+            </div>
+            <ol class="fix-steps">
+              <li class="fix-step">
+                <span class="fix-step-num">1</span>
+                <span><strong>העתק פרומפט תיקון</strong> — לחץ "העתק לAI" למעלה</span>
+              </li>
+              <li class="fix-step">
+                <span class="fix-step-num">2</span>
+                <span><strong>הדבק באותה שיחה</strong> עם ה-AI שבנה את המשחק — לא שיחה חדשה</span>
+              </li>
+              <li class="fix-step">
+                <span class="fix-step-num">3</span>
+                <span><strong>הורד את הקובץ המתוקן</strong> שה-AI מחזיר</span>
+              </li>
+              <li class="fix-step">
+                <span class="fix-step-num">4</span>
+                <span><strong>גרור שוב לוולידטור</strong> ובדוק מחדש</span>
+              </li>
+            </ol>
+            <div class="fix-round-note">
+              <i data-lucide="info" style="width:13px;height:13px;color:var(--color-teal-light);"></i>
+              בדרך כלל 1–2 סיבובי תיקון מספיקים
+            </div>
           </div>
         `;
       }
