@@ -234,7 +234,7 @@
     .hero-badge i { width: 13px; height: 13px; }
 
     .hero h1 {
-      font-size: clamp(30px, 5.5vw, 52px);
+      font-size: clamp(24px, 4vw, 42px);
       font-weight: 800;
       color: var(--color-navy);
       margin-bottom: var(--spacing-sm);
@@ -271,10 +271,25 @@
       color: var(--color-text);
     }
 
-    .hero-stat i { width: 18px; height: 18px; }
-    .hero-stat:nth-child(1) i { color: var(--step-1); }
-    .hero-stat:nth-child(3) i { color: var(--step-2); }
-    .hero-stat:nth-child(5) i { color: var(--step-3); }
+    .hero-step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      color: white; font-size: 12px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-step-num.s1 { background: var(--step-1); }
+    .hero-step-num.s2 { background: var(--step-2); }
+    .hero-step-num.s3 { background: var(--step-3); }
+
+    .hero-tagline {
+      font-size: 14px !important;
+      color: var(--color-text-muted) !important;
+      font-weight: 500;
+      max-width: 460px;
+      margin: var(--spacing-sm) auto 0 !important;
+      letter-spacing: 0.1px;
+    }
 
     .hero-stat-sep {
       width: 1px;
@@ -976,27 +991,27 @@
     <section id="section-instructions">
       <div class="hero">
         <div class="hero-badge">
-          <i data-lucide="zap"></i>
+          <i data-lucide="target"></i>
           <span>פיתוח משחקי לימוד עם AI</span>
         </div>
-        <h1><span class="hero-highlight">בנה משחק,</span><br>לא בפקודה</h1>
-        <p>תאר רעיון יצירתי, קבל פרומפט מותאם, ה-AI בונה לך משחק HTML5 שחיילים ישחקו ברצון בקמפוס הדיגיטלי.</p>
+        <h1>המשימה: <span class="hero-highlight">להפוך רעיון למשחק עובד</span></h1>
         <div class="hero-stats">
           <div class="hero-stat">
-            <i data-lucide="lightbulb"></i>
-            <span>תאר רעיון</span>
+            <span class="hero-step-num s1">1</span>
+            <span>מתארים רעיון</span>
           </div>
           <div class="hero-stat-sep"></div>
           <div class="hero-stat">
-            <i data-lucide="bot"></i>
-            <span>AI בונה</span>
+            <span class="hero-step-num s2">2</span>
+            <span>נותנים ל־AI לבנות</span>
           </div>
           <div class="hero-stat-sep"></div>
           <div class="hero-stat">
-            <i data-lucide="rocket"></i>
-            <span>בדוק ושלח</span>
+            <span class="hero-step-num s3">3</span>
+            <span>בודקים, משפרים ושולחים</span>
           </div>
         </div>
+        <p class="hero-tagline">משחק HTML5 אחד. קובץ אחד. בדיקה אחת לפני עלייה לקמפוס הדיגיטלי.</p>
       </div>
 
       <div class="card">
