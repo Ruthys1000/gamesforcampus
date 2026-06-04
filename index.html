@@ -533,6 +533,54 @@
       height: 20px;
     }
 
+    .fix-prompt-bar {
+      background: rgba(0, 196, 212, 0.07);
+      border: 1px solid rgba(0, 196, 212, 0.28);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: var(--spacing-sm);
+    }
+
+    .fix-prompt-bar-text strong {
+      font-size: 14px;
+      color: var(--color-navy);
+      display: block;
+    }
+
+    .fix-prompt-bar-text span {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-fix {
+      background: var(--color-teal-light);
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .btn-fix:hover {
+      background: var(--color-teal-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-fix i { width: 15px; height: 15px; }
+
     .checks-list {
       list-style: none;
     }
@@ -1244,6 +1292,7 @@ Think about: What does the player control? What are the enemies/obstacles? What'
         <div class="panel" id="auto-checks-panel">
           <h3><i data-lucide="check-circle-2"></i> בדיקות אוטומטיות</h3>
           <div id="auto-summary" class="summary-banner"></div>
+          <div id="fix-prompt-container"></div>
           <ul id="checks-list" class="checks-list"></ul>
         </div>
         <div class="panel" id="manual-checks-panel">
@@ -1469,6 +1518,60 @@ Think about: What does the player control? What are the enemies/obstacles? What'
       }
     }
 
+    function fallbackCopyText(text, onSuccess) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;top:0;right:0;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); onSuccess(); }
+      catch(e) { alert('לא הצלחנו להעתיק. נסה ידנית.'); }
+      document.body.removeChild(ta);
+    }
+
+    /* ============ COPY FIX PROMPT ============ */
+    function copyFixPrompt() {
+      const failed = STATE.autoCheckResults.filter(r => !r.passed);
+      if (!failed.length) return;
+
+      const failList = failed.map(r => '❌ ' + r.label).join('\n');
+      const code = STATE.fileContent || '';
+
+      const prompt = [
+        'המשחק שלי לא עבר את הבדיקות הטכניות הנדרשות לשילוב ב-Moodle LMS. אנא תקן את הבעיות הבאות:',
+        '',
+        'בדיקות שנכשלו:',
+        failList,
+        '',
+        'הוראות לתיקון:',
+        '- החזר את הקוד המלא של הקובץ עם כל התיקונים',
+        '- אל תשנה את לוגיקת המשחק ועיצוב — רק תקן את הבעיות הטכניות',
+        '- הקוד רץ כ-iframe בתוך Moodle ומתקשר איתו דרך postMessage ו-window.parent.moodleGameConfig',
+        '',
+        '--- קוד המשחק הנוכחי ---',
+        code
+      ].join('\n');
+
+      const btn = document.querySelector('#fix-prompt-container .btn-fix');
+      const setSuccess = () => {
+        if (btn) {
+          btn.innerHTML = '<i data-lucide="check"></i><span>הועתק!</span>';
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = '<i data-lucide="copy"></i><span>העתק לAI</span>';
+            lucide.createIcons();
+          }, 2500);
+        }
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(setSuccess).catch(() => fallbackCopyText(prompt, setSuccess));
+      } else {
+        fallbackCopyText(prompt, setSuccess);
+      }
+    }
+
     /* ============ DROP ZONE ============ */
     function initDropZone() {
       const zone = document.getElementById('drop-zone');
@@ -1546,13 +1649,27 @@ Think about: What does the player control? What are the enemies/obstacles? What'
       `).join('');
 
       const summaryEl = document.getElementById('auto-summary');
+      const fixContainer = document.getElementById('fix-prompt-container');
       if (STATE.autoAllPassed) {
         summaryEl.className = 'summary-banner pass';
         summaryEl.innerHTML = '<i data-lucide="check-circle-2"></i> עבר בדיקה טכנית — כל הבדיקות עברו!';
+        fixContainer.innerHTML = '';
       } else {
         const failCount = STATE.autoCheckResults.filter(r => !r.passed).length;
         summaryEl.className = 'summary-banner fail';
         summaryEl.innerHTML = `<i data-lucide="x-circle"></i> נכשל בבדיקה — ${failCount} בדיקות נכשלו`;
+        fixContainer.innerHTML = `
+          <div class="fix-prompt-bar">
+            <div class="fix-prompt-bar-text">
+              <strong>שלח לAI לתיקון</strong>
+              <span>פרומפט עם הקוד + ${failCount} הבעיות — הדבק ב-Claude או Cursor</span>
+            </div>
+            <button class="btn-fix" onclick="copyFixPrompt()">
+              <i data-lucide="copy"></i>
+              <span>העתק לAI</span>
+            </button>
+          </div>
+        `;
       }
 
       lucide.createIcons();
