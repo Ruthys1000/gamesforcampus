@@ -927,8 +927,15 @@
     @media (max-width: 640px) {
       .hero-stats {
         flex-direction: column;
+        align-items: center;
         gap: var(--spacing-sm);
         padding: 14px 20px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .hero-stat {
+        justify-content: center;
+        width: 100%;
       }
       .hero-stat-sep {
         width: 40px;
@@ -945,6 +952,10 @@
     @media (max-width: 520px) {
       .nav-logo span {
         font-size: 14px;
+        white-space: nowrap;
+      }
+      .nav-logo-sub {
+        display: none;
       }
       .nav-links {
         gap: 6px;
@@ -975,7 +986,7 @@
     <div class="nav-inner">
       <div class="nav-logo">
         <div class="nav-logo-icon"><i data-lucide="gamepad-2"></i></div>
-        <span>מרכז פיתוח משחקי AI לקמפוס הדיגיטלי</span>
+        <span>מרכז פיתוח משחקי AI<span class="nav-logo-sub"> לקמפוס הדיגיטלי</span></span>
       </div>
       <ul class="nav-links">
         <li><a href="#section-instructions"><i data-lucide="book-open"></i><span>הוראות</span></a></li>
