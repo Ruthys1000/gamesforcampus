@@ -10,31 +10,50 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      --color-teal-light: #00B4C6;
-      --color-teal-mid: #009BAE;
-      --color-teal-dark: #007A8A;
-      --color-teal-hover: #006070;
-      --color-bg: #F5F7F8;
+      /* Teal — kept for tip-box, form focus, validator */
+      --color-teal-light: #00C4D4;
+      --color-teal-dark: #007E8C;
+
+      /* Orange — primary CTA & energy color */
+      --color-orange: #FF6535;
+      --color-orange-dark: #E5521D;
+      --color-orange-light: rgba(255, 101, 53, 0.08);
+
+      /* Navy — nav, headings, code */
+      --color-navy: #0F1A2B;
+      --color-navy-mid: #1C2D44;
+
+      /* UI base */
+      --color-bg: #F1F5FB;
       --color-card-bg: #FFFFFF;
-      --color-text: #1A2B35;
-      --color-text-muted: #5A7080;
-      --color-border: #D0E4E8;
-      --color-border-light: #E6EFF1;
+      --color-text: #0F1A2B;
+      --color-text-muted: #64748B;
+      --color-border: #DDE5EF;
+      --color-border-light: #EEF2F8;
+
+      /* Status */
       --color-success: #22C55E;
       --color-success-bg: #DCFCE7;
       --color-fail: #EF4444;
       --color-fail-bg: #FEE2E2;
       --color-warn: #F59E0B;
-      --color-code-bg: #1A2B35;
-      --color-code-text: #E2F4F7;
+
+      /* Code block */
+      --color-code-bg: #0F1A2B;
+      --color-code-text: #93E6F0;
+
+      /* Step accent colors */
+      --step-1: #FF6535;
+      --step-2: #00C4D4;
+      --step-3: #22C55E;
 
       --radius-card: 16px;
       --radius-btn: 10px;
       --radius-sm: 8px;
 
-      --shadow-card: 0 4px 20px rgba(0, 122, 138, 0.10);
-      --shadow-hover: 0 8px 30px rgba(0, 122, 138, 0.18);
-      --shadow-nav: 0 2px 12px rgba(0, 0, 0, 0.12);
+      --shadow-card: 0 2px 12px rgba(15, 26, 43, 0.07);
+      --shadow-hover: 0 8px 28px rgba(15, 26, 43, 0.14);
+      --shadow-nav: 0 2px 16px rgba(0, 0, 0, 0.22);
 
       --font-main: 'Heebo', Arial, sans-serif;
       --font-mono: 'Courier New', Monaco, monospace;
@@ -77,7 +96,7 @@
 
     /* ============ NAV ============ */
     #main-nav {
-      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      background: var(--color-navy);
       height: var(--nav-height);
       position: sticky;
       top: 0;
@@ -102,30 +121,44 @@
       font-size: 18px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
+
+    .nav-logo-icon {
+      background: var(--color-orange);
+      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-logo-icon i { width: 18px; height: 18px; color: white; }
 
     .nav-links {
       display: flex;
-      gap: var(--spacing-md);
+      gap: 4px;
       list-style: none;
     }
 
     .nav-links a {
-      color: white;
+      color: rgba(255, 255, 255, 0.78);
       text-decoration: none;
       font-weight: 500;
-      font-size: 15px;
+      font-size: 14px;
       padding: 6px 12px;
       border-radius: var(--radius-sm);
-      transition: background 0.2s;
+      transition: background 0.15s, color 0.15s;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
     .nav-links a:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
     }
 
     /* ============ SECTIONS ============ */
@@ -141,12 +174,15 @@
     .section-title {
       font-size: 32px;
       font-weight: 800;
-      color: var(--color-text);
+      color: var(--color-navy);
       margin-bottom: var(--spacing-xs);
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
+    #section-validator .section-title i { color: var(--color-teal-light); }
+    #section-submit .section-title i { color: var(--color-success); }
 
     .section-subtitle {
       font-size: 17px;
@@ -170,7 +206,10 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--color-navy);
     }
+
+    .card-title i { color: var(--color-orange); }
 
     /* ============ HERO ============ */
     .hero {
@@ -178,21 +217,69 @@
       padding: var(--spacing-lg) 0 var(--spacing-md);
     }
 
-    .hero h1 {
-      font-size: clamp(28px, 5vw, 44px);
-      font-weight: 800;
-      color: var(--color-teal-dark);
-      margin-bottom: var(--spacing-sm);
+    .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
+      background: var(--color-orange-light);
+      color: var(--color-orange);
+      border: 1px solid rgba(255, 101, 53, 0.3);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 20px;
     }
+
+    .hero-badge i { width: 13px; height: 13px; }
+
+    .hero h1 {
+      font-size: clamp(30px, 5.5vw, 52px);
+      font-weight: 800;
+      color: var(--color-navy);
+      margin-bottom: var(--spacing-sm);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-highlight { color: var(--color-orange); }
 
     .hero p {
       font-size: 18px;
       color: var(--color-text-muted);
-      max-width: 600px;
-      margin: 0 auto;
+      max-width: 580px;
+      margin: 0 auto var(--spacing-md);
+    }
+
+    .hero-stats {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 14px 28px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .hero-stat {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .hero-stat i { width: 18px; height: 18px; }
+    .hero-stat:nth-child(1) i { color: var(--step-1); }
+    .hero-stat:nth-child(3) i { color: var(--step-2); }
+    .hero-stat:nth-child(5) i { color: var(--step-3); }
+
+    .hero-stat-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--color-border);
     }
 
     /* ============ STEPS GRID ============ */
@@ -203,34 +290,42 @@
     }
 
     .step {
-      background: linear-gradient(135deg, rgba(0, 180, 198, 0.05), rgba(0, 122, 138, 0.08));
+      background: var(--color-card-bg);
       border: 1px solid var(--color-border-light);
+      border-top: 4px solid transparent;
       border-radius: var(--radius-card);
       padding: var(--spacing-md);
       text-align: center;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
+    .step:nth-child(1) { border-top-color: var(--step-1); }
+    .step:nth-child(2) { border-top-color: var(--step-2); }
+    .step:nth-child(3) { border-top-color: var(--step-3); }
+
     .step:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
       box-shadow: var(--shadow-hover);
     }
 
     .step-icon {
       width: 56px;
       height: 56px;
-      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      border-radius: 14px;
       color: white;
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto var(--spacing-sm);
     }
 
+    .step:nth-child(1) .step-icon { background: var(--step-1); }
+    .step:nth-child(2) .step-icon { background: var(--step-2); }
+    .step:nth-child(3) .step-icon { background: var(--step-3); }
+
     .step-icon i {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
     }
 
     .step h3 {
@@ -272,23 +367,24 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
+      background: var(--color-orange);
       color: white;
       border: none;
       padding: 14px 28px;
       border-radius: var(--radius-btn);
       font-family: var(--font-main);
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
 
     .btn-primary:hover:not(:disabled) {
-      box-shadow: var(--shadow-hover);
+      background: var(--color-orange-dark);
+      box-shadow: 0 4px 18px rgba(255, 101, 53, 0.4);
       transform: translateY(-1px);
     }
 
@@ -307,7 +403,7 @@
     }
 
     .tip-box {
-      background: rgba(0, 180, 198, 0.06);
+      background: rgba(0, 196, 212, 0.06);
       border-right: 4px solid var(--color-teal-light);
       border-radius: var(--radius-sm);
       padding: var(--spacing-md);
@@ -323,6 +419,8 @@
       gap: 8px;
       color: var(--color-teal-dark);
     }
+
+    .tip-box h3 i { color: var(--color-teal-light); }
 
     .tip-box ul {
       list-style: none;
@@ -341,7 +439,7 @@
 
     /* ============ DROP ZONE ============ */
     #drop-zone {
-      border: 2.5px dashed var(--color-teal-light);
+      border: 2.5px dashed var(--color-orange);
       border-radius: var(--radius-card);
       padding: var(--spacing-xl) var(--spacing-md);
       text-align: center;
@@ -351,15 +449,15 @@
     }
 
     #drop-zone:hover, #drop-zone.dragover {
-      background: rgba(0, 180, 198, 0.07);
-      border-color: var(--color-teal-dark);
+      background: var(--color-orange-light);
+      border-color: var(--color-orange-dark);
     }
 
     .drop-icon {
       width: 72px;
       height: 72px;
       margin: 0 auto var(--spacing-sm);
-      color: var(--color-teal-light);
+      color: var(--color-orange);
     }
 
     .drop-icon i {
@@ -374,8 +472,8 @@
     }
 
     #drop-zone .browse-link {
-      color: var(--color-teal-dark);
-      font-weight: 600;
+      color: var(--color-orange);
+      font-weight: 700;
       text-decoration: underline;
       cursor: pointer;
     }
@@ -503,7 +601,7 @@
     .manual-item input[type="checkbox"] {
       width: 20px;
       height: 20px;
-      accent-color: var(--color-teal-dark);
+      accent-color: var(--color-teal-light);
       cursor: pointer;
       flex-shrink: 0;
       margin-top: 2px;
@@ -533,7 +631,7 @@
     }
 
     #preview-frame {
-      border: 8px solid var(--color-code-bg);
+      border: 8px solid var(--color-navy);
       border-radius: 32px;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
       background: white;
@@ -554,7 +652,7 @@
       width: 56px;
       height: 56px;
       margin: 0 auto var(--spacing-sm);
-      color: var(--color-text-muted);
+      color: var(--color-border);
     }
 
     #submit-locked .lock-icon i {
@@ -599,7 +697,7 @@
     .form-field textarea:focus {
       outline: none;
       border-color: var(--color-teal-light);
-      box-shadow: 0 0 0 3px rgba(0, 180, 198, 0.15);
+      box-shadow: 0 0 0 3px rgba(0, 196, 212, 0.15);
     }
 
     .form-field textarea {
@@ -644,8 +742,8 @@
 
     /* ============ PROMPT BUILDER ============ */
     .prompt-builder {
-      background: linear-gradient(135deg, rgba(0,180,198,0.05), rgba(0,122,138,0.07));
-      border: 1px solid var(--color-border-light);
+      background: var(--color-orange-light);
+      border: 1px solid rgba(255, 101, 53, 0.2);
       border-radius: var(--radius-sm);
       padding: var(--spacing-md);
       margin-bottom: var(--spacing-md);
@@ -654,7 +752,7 @@
     .prompt-builder-title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--color-teal-dark);
+      color: var(--color-orange);
       margin-bottom: var(--spacing-sm);
       display: flex;
       align-items: center;
@@ -702,8 +800,8 @@
     .builder-field select:focus,
     .builder-field textarea:focus {
       outline: none;
-      border-color: var(--color-teal-light);
-      box-shadow: 0 0 0 2px rgba(0,180,198,0.12);
+      border-color: var(--color-orange);
+      box-shadow: 0 0 0 2px rgba(255, 101, 53, 0.12);
     }
 
     .builder-field textarea {
@@ -728,7 +826,7 @@
     }
 
     .radio-option input[type="radio"] {
-      accent-color: var(--color-teal-dark);
+      accent-color: var(--color-orange);
       width: 16px;
       height: 16px;
       cursor: pointer;
@@ -763,6 +861,18 @@
       }
     }
 
+    @media (max-width: 640px) {
+      .hero-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: 14px 20px;
+      }
+      .hero-stat-sep {
+        width: 40px;
+        height: 1px;
+      }
+    }
+
     @media (max-width: 580px) {
       .builder-grid {
         grid-template-columns: 1fr;
@@ -770,8 +880,8 @@
     }
 
     @media (max-width: 520px) {
-      .nav-logo {
-        font-size: 15px;
+      .nav-logo span {
+        font-size: 14px;
       }
       .nav-links {
         gap: 6px;
@@ -801,7 +911,7 @@
   <nav id="main-nav">
     <div class="nav-inner">
       <div class="nav-logo">
-        <i data-lucide="gamepad-2"></i>
+        <div class="nav-logo-icon"><i data-lucide="gamepad-2"></i></div>
         <span>מרכז פיתוח משחקי AI</span>
       </div>
       <ul class="nav-links">
@@ -817,8 +927,28 @@
     <!-- ============ SECTION 1 — INSTRUCTIONS ============ -->
     <section id="section-instructions">
       <div class="hero">
-        <h1><i data-lucide="gamepad-2" style="width:40px;height:40px;color:var(--color-teal-dark)"></i> מרכז פיתוח משחקי AI</h1>
-        <p>פיתחת רעיון למשחק? תיצור, תבדוק, ותשלח — הכל כאן</p>
+        <div class="hero-badge">
+          <i data-lucide="zap"></i>
+          <span>פיתוח משחקי לימוד עם AI</span>
+        </div>
+        <h1>אל תכתוב דריל —<br><span class="hero-highlight">תבנה משחק</span></h1>
+        <p>תאר את הרעיון שלך, קבל פרומפט מותאם אישית, ה-AI בונה את המשחק. חיילים ישחקו אותו ב-Moodle.</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <i data-lucide="lightbulb"></i>
+            <span>תאר רעיון</span>
+          </div>
+          <div class="hero-stat-sep"></div>
+          <div class="hero-stat">
+            <i data-lucide="bot"></i>
+            <span>AI בונה</span>
+          </div>
+          <div class="hero-stat-sep"></div>
+          <div class="hero-stat">
+            <i data-lucide="rocket"></i>
+            <span>בדוק ושלח</span>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -1097,7 +1227,7 @@ Think about: What does the player control? What are the enemies/obstacles? What'
     <!-- ============ SECTION 2 — VALIDATOR ============ -->
     <section id="section-validator">
       <h2 class="section-title">
-        <i data-lucide="flask-conical" style="color:var(--color-teal-dark)"></i>
+        <i data-lucide="flask-conical"></i>
         וולידטור — בדוק את המשחק שלך
       </h2>
       <p class="section-subtitle">גרור את קובץ ה-HTML שיצרת וקבל בדיקה מיידית</p>
@@ -1137,7 +1267,7 @@ Think about: What does the player control? What are the enemies/obstacles? What'
     <!-- ============ SECTION 3 — SUBMISSION ============ -->
     <section id="section-submit">
       <h2 class="section-title">
-        <i data-lucide="send" style="color:var(--color-teal-dark)"></i>
+        <i data-lucide="send"></i>
         שלח למנהלת המוצר
       </h2>
       <p class="section-subtitle">סיימת את הבדיקה? זה הזמן לשלוח את המשחק</p>
