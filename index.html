@@ -924,6 +924,19 @@
       }
     }
 
+    @media (max-width: 639px) {
+      .steps-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .step { padding: 12px 8px; }
+      .step-icon { width: 40px; height: 40px; margin-bottom: 8px; }
+      .step-icon i { width: 20px; height: 20px; }
+      .step h3 { font-size: 13px; margin-bottom: 2px; }
+      .step p { font-size: 11px; line-height: 1.4; }
+      .step:hover { transform: none; box-shadow: none; }
+    }
+
     @media (max-width: 640px) {
       .hero-stats {
         flex-direction: column;
