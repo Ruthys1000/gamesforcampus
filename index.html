@@ -982,7 +982,6 @@
     .journey-loop {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
       justify-content: center;
       gap: 0;
       margin: var(--spacing-sm) 0;
@@ -1048,18 +1047,22 @@
     .journey-tips li {
       font-size: 14px;
       color: var(--color-text);
-      padding: 5px 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
+      padding: 6px 0;
+      padding-right: 22px;
+      position: relative;
+      border-bottom: 1px solid var(--color-border-light);
+      line-height: 1.6;
     }
+
+    .journey-tips li:last-child { border-bottom: none; }
 
     .journey-tips li::before {
       content: '→';
+      position: absolute;
+      right: 0;
+      top: 8px;
       color: var(--color-teal-light);
       font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
     }
 
     /* ============ FIX GUIDE ============ */
@@ -1150,23 +1153,7 @@
           <span>פיתוח משחקי לימוד עם AI</span>
         </div>
         <h1>המשימה: <span class="hero-highlight">להפוך רעיון למשחק עובד</span></h1>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hero-step-num s1">1</span>
-            <span>מתארים רעיון</span>
-          </div>
-          <div class="hero-stat-sep"></div>
-          <div class="hero-stat">
-            <span class="hero-step-num s2">2</span>
-            <span>נותנים ל־AI לבנות</span>
-          </div>
-          <div class="hero-stat-sep"></div>
-          <div class="hero-stat">
-            <span class="hero-step-num s3">3</span>
-            <span>בודקים, משפרים ושולחים</span>
-          </div>
-        </div>
-        <p class="hero-tagline">משחק HTML5 אחד. קובץ אחד. בדיקה אחת לפני עלייה לקמפוס הדיגיטלי.</p>
+        <p class="hero-tagline">כמה סיבובי פיתוח קצרים. תוצאה אחת: משחק עובד.</p>
       </div>
 
       <div class="card">
@@ -1183,7 +1170,7 @@
           <div class="step">
             <div class="step-icon"><i data-lucide="flask-conical"></i></div>
             <h3>2. בדוק</h3>
-            <p>גרור את קובץ ה-HTML שקיבלת לוולידטור למטה</p>
+            <p>גרור קובץ ה-HTML לוולידטור. אם נכשל — תקן עם AI ובדוק שוב</p>
           </div>
           <div class="step">
             <div class="step-icon"><i data-lucide="send"></i></div>
@@ -1196,7 +1183,7 @@
       <div class="card">
         <div class="card-title">
           <i data-lucide="repeat-2"></i>
-          המסע האמיתי — מה לצפות
+          מה לצפות — הפעם הראשונה
         </div>
         <div class="journey-loop">
           <div class="journey-node">
@@ -1205,23 +1192,13 @@
           </div>
           <span class="journey-arrow">›</span>
           <div class="journey-node">
-            <div class="journey-bubble test"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">בדיקה<br>בוולידטור</span>
-          </div>
-          <span class="journey-arrow loop-back">↺</span>
-          <div class="journey-node">
-            <div class="journey-bubble fix"><i data-lucide="wrench" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">תיקון<br>עם AI</span>
-          </div>
-          <span class="journey-arrow loop-back">↺</span>
-          <div class="journey-node">
-            <div class="journey-bubble test"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">בדיקה<br>שוב</span>
+            <div class="journey-bubble fix"><i data-lucide="flask-conical" style="width:20px;height:20px;"></i></div>
+            <span class="journey-label">בדיקה + תיקון<br><span style="font-size:10px;color:var(--color-warn);">↺ כמה סיבובים</span></span>
           </div>
           <span class="journey-arrow">›</span>
           <div class="journey-node">
             <div class="journey-bubble done"><i data-lucide="send" style="width:20px;height:20px;"></i></div>
-            <span class="journey-label">עובר!<br>שליחה</span>
+            <span class="journey-label">עובר!<br>שליחה ✓</span>
           </div>
         </div>
         <div style="text-align:center;">
