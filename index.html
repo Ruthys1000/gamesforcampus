@@ -1474,7 +1474,7 @@ Before finishing, verify every item:
 
       // ── 1. משתני config ──
       {
-        label: '1. כל 7 משתני config מוגדרים: questionsSource, MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
+        label: '1. כל 7 משתני config מוגדרים לפני applyMoodleConfig: questionsSource (עם שאלות fallback בעברית), MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
         test: c => ['questionsSource','MAX_LIVES','GAME_TIMER','SHOW_FEEDBACK',
                     'FEEDBACK_DURATION','CORRECT_FEEDBACK','INCORRECT_FEEDBACK'].every(v => c.includes(v))
       },
@@ -1485,7 +1485,7 @@ Before finishing, verify every item:
         test: c => /function\s+applyMoodleConfig\s*\(\s*cfg\s*\)/.test(c) && /if\s*\(\s*!cfg\s*\)\s*return/.test(c)
       },
       {
-        label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct!==undefined/q.c',
+        label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct??q.c (או !== undefined)',
         test: c => /q\.options\s*\|\|\s*q\.a/.test(c) && /q\.correct\s*!==\s*undefined|q\.correct\s*\?\?/.test(c)
       },
       {
@@ -1504,13 +1504,13 @@ Before finishing, verify every item:
 
       // ── 3. סדר אתחול ──
       {
-        label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים',
+        label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים אחרי משתני config ולפני משתני game state',
         test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
       },
 
       // ── 4. postMessage ──
       {
-        label: '4a. GAME_START נשלח עטוף ב-try/catch',
+        label: '4a. GAME_START נשלח בכל התחלה/ריסטארט — עטוף ב-try/catch',
         test: c => {
           const idx = c.indexOf('GAME_START');
           if (idx < 0) return false;
@@ -1519,14 +1519,32 @@ Before finishing, verify every item:
         }
       },
       {
-        label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה',
-        test: c => c.includes('isfinished: false') || c.includes('isfinished:false') ||
-                   c.includes('"isfinished": false') || c.includes('"isfinished":false')
+        label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה — עטוף ב-try/catch',
+        test: c => {
+          const markers = ['isfinished: false', 'isfinished:false', '"isfinished": false', '"isfinished":false'];
+          for (const m of markers) {
+            const idx = c.indexOf(m);
+            if (idx >= 0) {
+              const nearby = c.substring(Math.max(0, idx - 500), idx + 50);
+              if (/try\s*\{/.test(nearby)) return true;
+            }
+          }
+          return false;
+        }
       },
       {
-        label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק',
-        test: c => c.includes('isfinished: true') || c.includes('isfinished:true') ||
-                   c.includes('"isfinished": true') || c.includes('"isfinished":true')
+        label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק — עטוף ב-try/catch',
+        test: c => {
+          const markers = ['isfinished: true', 'isfinished:true', '"isfinished": true', '"isfinished":true'];
+          for (const m of markers) {
+            const idx = c.indexOf(m);
+            if (idx >= 0) {
+              const nearby = c.substring(Math.max(0, idx - 500), idx + 50);
+              if (/try\s*\{/.test(nearby)) return true;
+            }
+          }
+          return false;
+        }
       },
       {
         label: '4d. ערך timer בהודעות postMessage הוא משתנה (לא 0 קשיח)',
@@ -1535,26 +1553,27 @@ Before finishing, verify every item:
 
       // ── 5. לוגיקת משחק ──
       {
-        label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת',
+        label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת ומסיים ב-0',
         test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
       },
       {
-        label: '5b. חיים מתחילים ב-MAX_LIVES (לא מספר קשיח)',
+        label: '5b. חיים מתחילים ב-MAX_LIVES (משתנה, לא קשיח); תשובה שגויה = חיים−1; 0 חיים = game over',
         test: c => /[=:]\s*MAX_LIVES\b/.test(c)
       },
       {
-        label: '5c. שאלות ללא חזרה: questionsSource עם מנגנון אי-חזרה (splice/shift/filter/shuffle)',
+        label: '5c. שאלות ללא חזרה מ-questionsSource; pool מאופס אחרי שכולן הוצגו; שימוש ב-.c לאינדקס הנכון',
         test: c => c.includes('questionsSource') &&
-                   /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c)
+                   /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c) &&
+                   /\.c\b/.test(c)
       },
       {
-        label: '5d. SHOW_FEEDBACK בתנאי if עם FEEDBACK_DURATION',
+        label: '5d. SHOW_FEEDBACK=true → מציג פידבק + explanation, ממתין FEEDBACK_DURATION שניות; false → ממשיך ≤200ms',
         test: c => /if\s*\(.*SHOW_FEEDBACK/.test(c) && c.includes('FEEDBACK_DURATION')
       },
       {
-        label: '5e. Restart מאפס סטייט ללא location.reload()',
+        label: '5e. Restart מאפס כל הסטייט (score, lives, timer, questions) ללא location.reload()',
         test: c => !c.includes('location.reload') &&
-                   /\bfunction\s+init\s*[\s(]|\b(?:const|let|var)\s+init\s*=|\binit\s*[:=]\s*function/.test(c)
+                   /\bfunction\s+(?:init|startGame)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame)\s*=|\b(?:init|startGame)\s*[:=]\s*function/.test(c)
       },
 
       // ── 6. תאימות iframe ומובייל ──
