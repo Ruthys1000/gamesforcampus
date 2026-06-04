@@ -181,10 +181,7 @@
     .hero h1 {
       font-size: clamp(28px, 5vw, 44px);
       font-weight: 800;
-      background: linear-gradient(135deg, var(--color-teal-light), var(--color-teal-dark));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--color-teal-dark);
       margin-bottom: var(--spacing-sm);
       display: inline-flex;
       align-items: center;
@@ -1129,32 +1126,25 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 
       <div id="submit-form-container" class="hidden">
         <div class="card">
-          <form id="submit-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-            <div class="form-field">
-              <label for="soldier-name">שם החייל/ת *</label>
-              <input type="text" id="soldier-name" name="soldier-name" required>
-            </div>
-            <div class="form-field">
-              <label for="game-name">שם המשחק *</label>
-              <input type="text" id="game-name" name="game-name" required>
-            </div>
-            <div class="form-field">
-              <label for="description">תיאור קצר — במה הוא שונה / מה רעיון המשחק *</label>
-              <textarea id="description" name="description" required></textarea>
-            </div>
-            <input type="hidden" name="validation-results" id="hidden-validation">
-            <input type="hidden" name="filename" id="hidden-filename">
-            <input type="hidden" name="game-html" id="hidden-game-html">
-            <button type="submit" class="btn-primary" id="submit-btn">
-              <span>שלח למנהלת המוצר</span>
-              <i data-lucide="send"></i>
-            </button>
-          </form>
-        </div>
-        <div id="success-msg" class="hidden">
-          <div class="success-icon"><i data-lucide="check"></i></div>
-          <div>נשלח בהצלחה!</div>
-          <div style="font-size:15px;font-weight:400">רותי סלומון תקבל את המשחק ותחזור אליך בהקדם.</div>
+          <div class="form-field">
+            <label for="soldier-name">שם החייל/ת *</label>
+            <input type="text" id="soldier-name" placeholder="שם מלא">
+          </div>
+          <div class="form-field">
+            <label for="game-name">שם המשחק *</label>
+            <input type="text" id="game-name" placeholder="שם המשחק שיצרת">
+          </div>
+          <div class="form-field">
+            <label for="description">תיאור קצר *</label>
+            <textarea id="description" placeholder="במה המשחק שלך שונה? מה רעיון המשחק?"></textarea>
+          </div>
+          <button class="btn-primary" id="submit-btn" onclick="sendEmail()">
+            <i data-lucide="mail"></i>
+            <span>פתח מייל לשליחה</span>
+          </button>
+          <p style="margin-top:10px;font-size:13px;color:var(--color-text-muted);">
+            יפתח חלון מייל מוכן לשליחה — כל מה שנשאר הוא ללחוץ שלח
+          </p>
         </div>
       </div>
     </section>
@@ -1404,10 +1394,6 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
       document.getElementById('submit-form-container').classList.toggle('hidden', !unlocked);
 
       if (unlocked) {
-        document.getElementById('hidden-validation').value = JSON.stringify(STATE.autoCheckResults);
-        document.getElementById('hidden-filename').value = STATE.fileName || '';
-        const html = STATE.fileContent || '';
-        document.getElementById('hidden-game-html').value = html.length > 100000 ? '[קובץ גדול מדי לכלול במייל - ' + STATE.fileName + ']' : html;
         if (!wasUnlocked) {
           setTimeout(() => {
             document.getElementById('section-submit').scrollIntoView({ behavior: 'smooth' });
@@ -1416,42 +1402,41 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
       }
     }
 
-    /* ============ FORM ============ */
-    function initForm() {
-      const form = document.getElementById('submit-form');
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submit-btn');
-        const originalHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span>שולח...</span>';
+    /* ============ SEND EMAIL ============ */
+    function sendEmail() {
+      const soldierName = (document.getElementById('soldier-name').value || '').trim();
+      const gameName    = (document.getElementById('game-name').value || '').trim();
+      const desc        = (document.getElementById('description').value || '').trim();
 
-        try {
-          const response = await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: { 'Accept': 'application/json' }
-          });
-          if (response.ok) {
-            form.parentElement.classList.add('hidden');
-            document.getElementById('success-msg').classList.remove('hidden');
-            lucide.createIcons();
-            document.getElementById('success-msg').scrollIntoView({ behavior: 'smooth' });
-          } else {
-            const data = await response.json().catch(() => ({}));
-            const msg = data.errors ? data.errors.map(x => x.message).join(', ') : 'שגיאה בשליחה';
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            lucide.createIcons();
-            alert('שגיאה: ' + msg + '\n\nאם הטופס לא מוגדר עדיין, רותי תקבל ID חדש מ-formspree.io.');
-          }
-        } catch (err) {
-          btn.disabled = false;
-          btn.innerHTML = originalHTML;
-          lucide.createIcons();
-          alert('שגיאת רשת. אנא נסה שנית.');
-        }
-      });
+      if (!soldierName || !gameName) {
+        alert('אנא מלא שם חייל/ת ושם משחק לפני השליחה');
+        return;
+      }
+
+      const passed = STATE.autoCheckResults.filter(r => r.passed).map(r => '✅ ' + r.label);
+      const failed = STATE.autoCheckResults.filter(r => !r.passed).map(r => '❌ ' + r.label);
+      const validationSummary = [...passed, ...failed].join('\n');
+
+      const subject = 'משחק חדש: ' + gameName + ' — ' + soldierName;
+      const body = [
+        'שלום רותי,',
+        '',
+        'שם החייל/ת: ' + soldierName,
+        'שם המשחק: ' + gameName,
+        'קובץ: ' + (STATE.fileName || '—'),
+        '',
+        'תיאור:',
+        desc || '(לא הוזן)',
+        '',
+        'תוצאות וולידציה:',
+        validationSummary,
+        '',
+        '— נשלח ממרכז פיתוח משחקי AI'
+      ].join('\n');
+
+      window.location.href = 'mailto:ruthy.salomon@gmail.com'
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body='    + encodeURIComponent(body);
     }
 
     /* ============ PROMPT BUILDER ============ */
@@ -1517,7 +1502,6 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
     /* ============ INIT ============ */
     document.addEventListener('DOMContentLoaded', () => {
       initDropZone();
-      initForm();
       initPromptBuilder();
       if (window.lucide) lucide.createIcons();
     });
