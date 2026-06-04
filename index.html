@@ -1436,16 +1436,22 @@ Before finishing, verify every item:
             <label for="description">תיאור קצר *</label>
             <textarea id="description" placeholder="במה המשחק שלך שונה? מה רעיון המשחק?"></textarea>
           </div>
-          <button class="btn-primary" id="submit-btn" onclick="sendEmail()">
-            <i data-lucide="mail"></i>
-            <span>פתח מייל לשליחה</span>
-          </button>
-          <p style="font-size:13px;color:var(--color-text-muted);">
-            יפתח חלון מייל מוכן לשליחה — <strong>אל תשכח לצרף את קובץ ה-HTML</strong> ולאחר מכן לחץ שלח
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-primary" id="download-btn" onclick="downloadGameFile()" style="background:var(--color-teal-light);">
+              <i data-lucide="download"></i>
+              <span id="download-btn-text">שלב 1: הורד קובץ משחק</span>
+            </button>
+            <button class="btn-primary" id="submit-btn" onclick="sendEmail()">
+              <i data-lucide="mail"></i>
+              <span>שלב 2: פתח מייל לשליחה</span>
+            </button>
+          </div>
+          <p style="font-size:13px;color:var(--color-text-muted);margin-top:8px;">
+            הורד את קובץ המשחק ← פתח מייל ← <strong>צרף את הקובץ שהורדת</strong> ← שלח
           </p>
           <div id="success-msg" class="hidden">
             <div class="success-icon"><i data-lucide="check"></i></div>
-            <p>מצוין! המייל נפתח — זכור לצרף את קובץ ה-HTML ולאחר מכן לחץ שלח בתוכנת המייל.</p>
+            <p>המייל נפתח! צרף את קובץ המשחק שהורדת ולאחר מכן לחץ שלח בתוכנת המייל.</p>
             <button onclick="resetSubmitForm()" style="background:none;border:1.5px solid #166534;color:#166534;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:13px;font-weight:600;margin-top:4px;">שלח שוב</button>
           </div>
         </div>
@@ -1866,9 +1872,8 @@ Before finishing, verify every item:
         return;
       }
 
-      const passed = STATE.autoCheckResults.filter(r => r.passed).map(r => '✅ ' + r.label);
-      const failed = STATE.autoCheckResults.filter(r => !r.passed).map(r => '❌ ' + r.label);
-      const validationSummary = [...passed, ...failed].join('\n');
+      const passCount  = STATE.autoCheckResults.filter(r => r.passed).length;
+      const totalCount = STATE.autoCheckResults.length;
 
       const subject = 'משחק חדש: ' + gameName + ' — ' + soldierName;
       const body = [
@@ -1881,8 +1886,7 @@ Before finishing, verify every item:
         'תיאור:',
         desc || '(לא הוזן)',
         '',
-        'תוצאות וולידציה:',
-        validationSummary,
+        'וולידציה: עבר ' + passCount + '/' + totalCount + ' בדיקות ✅',
         '',
         '— נשלח ממרכז פיתוח משחקי AI לקמפוס הדיגיטלי'
       ].join('\n');
@@ -1897,6 +1901,24 @@ Before finishing, verify every item:
         document.getElementById('submit-btn').classList.add('hidden');
         lucide.createIcons();
         successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function downloadGameFile() {
+      if (!STATE.fileContent || !STATE.fileName) return;
+      const blob = new Blob([STATE.fileContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = STATE.fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      const span = document.getElementById('download-btn-text');
+      if (span) {
+        span.textContent = 'הורד! ✓';
+        setTimeout(() => { span.textContent = 'שלב 1: הורד קובץ משחק'; }, 3000);
       }
     }
 
