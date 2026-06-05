@@ -1853,11 +1853,13 @@ Before finishing, verify every item:
       {
         label: '2c. cfg.timer מוחל עם בדיקת !== undefined (כדי שטיימר=0 יעבוד)',
         shortLabel: 'הטיימר מוגדר נכון (כולל ערך 0)',
+        fixHint: 'if (cfg.timer !== undefined) { GAME_TIMER = cfg.timer; }  // לא if(cfg.timer) — כי 0 הוא ערך תקין',
         test: c => /cfg\.timer\s*!==\s*undefined/.test(c)
       },
       {
         label: "2d. cfg.showFeedback מוחל עם 'showFeedback' in cfg (לא בדיקת truthy)",
         shortLabel: 'הגדרת הפידבק מיושמת נכון',
+        fixHint: "if ('showFeedback' in cfg) { SHOW_FEEDBACK = !!cfg.showFeedback; }  // לא if(cfg.showFeedback)",
         test: c => /['"]showFeedback['"]\s+in\s+cfg/.test(c)
       },
       {
@@ -1871,6 +1873,7 @@ Before finishing, verify every item:
       {
         label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים אחרי משתני config ולפני משתני game state',
         shortLabel: 'טעינת ההגדרות מ-Moodle מוגנת ב-try/catch',
+        fixHint: 'try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}',
         test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
       },
 
@@ -1948,7 +1951,7 @@ Before finishing, verify every item:
         label: '5e. Restart מאפס כל הסטייט (score, lives, timer, questions) ללא location.reload()',
         shortLabel: 'ריסטארט מאפס את כל הסטייט ללא location.reload()',
         test: c => !c.includes('location.reload') &&
-                   /\bfunction\s+(?:init|startGame)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame)\s*=|\b(?:init|startGame)\s*[:=]\s*function/.test(c)
+                   /\bfunction\s+(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*=|\b(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*[:=]\s*function/.test(c)
       },
 
       // ── 6. תאימות iframe ומובייל ──
@@ -2034,7 +2037,9 @@ Before finishing, verify every item:
       const failed = STATE.autoCheckResults.filter(r => !r.passed);
       if (!failed.length) return;
 
-      const failList = failed.map(r => '❌ ' + r.label).join('\n');
+      const failList = failed.map(r =>
+        '❌ ' + r.label + (r.fixHint ? '\n   → קוד נכון: ' + r.fixHint : '')
+      ).join('\n');
 
       const prompt = [
         'יש כמה בעיות טכניות בקוד שצריך לתקן.',
@@ -2150,7 +2155,7 @@ Before finishing, verify every item:
       } else {
         const failCount = STATE.autoCheckResults.filter(r => !r.passed).length;
         summaryEl.className = 'summary-banner fail';
-        summaryEl.innerHTML = `<i data-lucide="x-circle"></i> נכשל בבדיקה — ${failCount} בדיקות נכשלו`;
+        summaryEl.innerHTML = `<i data-lucide="x-circle"></i> לא עמד בכל הכללים — ${failCount} בדיקות לא עברו`;
         fixContainer.innerHTML = `
           <div class="fix-prompt-bar">
             <div class="fix-prompt-bar-text">
@@ -2366,7 +2371,7 @@ Before finishing, verify every item:
         '## 🤖 BEFORE YOU BUILD — CREATIVE DISCOVERY',
         '',
         'Do NOT start building immediately.',
-        'Ask the user 2–3 short questions IN HEBREW to clarify the creative vision:',
+        'Ask the user 2–3 short questions IN HEBREW to clarify the creative vision (choose the most relevant ones — do NOT ask all four):',
         '',
         '* מי/מה השחקן שולט? (טנק? צלף? חללית? מטוס? דמות?)',
         '* מי/מה האויב או המכשול? (רחפן? מטוס? אבנים? מחסומים?)',
