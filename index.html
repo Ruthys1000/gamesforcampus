@@ -56,9 +56,9 @@
       --color-code-text: #93E6F0;
 
       /* Step accent colors */
-      --step-1: #FF6535;
-      --step-2: #00C4D4;
-      --step-3: #22C55E;
+      --step-1: var(--color-teal-light);
+      --step-2: var(--color-teal-light);
+      --step-3: var(--color-teal-light);
 
       --radius-card: 14px;
       --radius-btn: 10px;
@@ -268,7 +268,7 @@
       letter-spacing: -1.5px;
     }
 
-    .hero-highlight { color: var(--color-orange); }
+    .hero-highlight { color: var(--color-teal-dark); }
 
     .hero p {
       font-size: 18px;
@@ -304,9 +304,7 @@
       display: inline-flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .hero-step-num.s1 { background: var(--step-1); }
-    .hero-step-num.s2 { background: var(--step-2); }
-    .hero-step-num.s3 { background: var(--step-3); }
+    .hero-step-num.s1, .hero-step-num.s2, .hero-step-num.s3 { background: var(--color-teal-light); }
 
     .hero-tagline {
       font-size: 14px !important;
@@ -341,10 +339,6 @@
       box-shadow: var(--shadow-card);
     }
 
-    .step:nth-child(1) { border-top-color: var(--step-1); }
-    .step:nth-child(2) { border-top-color: var(--step-2); }
-    .step:nth-child(3) { border-top-color: var(--step-3); }
-
     .step:hover {
       transform: translateY(-6px);
       box-shadow: var(--shadow-hover);
@@ -354,17 +348,13 @@
       width: 60px;
       height: 60px;
       border-radius: 16px;
-      color: white;
+      background: var(--color-teal-xlight);
+      color: var(--color-teal-dark);
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto var(--spacing-sm);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-
-    .step:nth-child(1) .step-icon { background: var(--step-1); }
-    .step:nth-child(2) .step-icon { background: var(--step-2); }
-    .step:nth-child(3) .step-icon { background: var(--step-3); }
 
     .step-icon i {
       width: 26px;
@@ -1511,8 +1501,9 @@
       text-align: center; line-height: 1.4;
     }
     .wow-icon {
-      width: 44px; height: 44px; border-radius: 50%;
+      width: 32px; height: 32px;
       display: flex; align-items: center; justify-content: center;
+      color: var(--color-navy);
     }
     .wow-arrow {
       color: var(--color-border); font-size: 20px; font-weight: 300; flex-shrink: 0;
@@ -1533,7 +1524,7 @@
     .wow-cta-text {
       text-align: center; font-size: 15px; color: var(--color-navy);
       font-weight: 600; padding: 10px;
-      background: rgba(245,158,11,0.08); border-radius: var(--radius-sm);
+      background: var(--color-bg); border: 1px solid var(--color-teal-border); border-radius: var(--radius-sm);
     }
     @media (max-width: 639px) {
       #section-instructions { padding-top: var(--spacing-md); }
@@ -1541,7 +1532,6 @@
       .wow-cards { grid-template-columns: 1fr; }
       .wow-headline h2 { font-size: 17px; }
       .wow-flow { gap: 6px; padding: 12px 8px; }
-      .wow-icon { width: 36px; height: 36px; }
       .wow-step { font-size: 11px; }
       .wow-arrow { font-size: 16px; }
     }
@@ -1579,8 +1569,8 @@
       <!-- WOW CONTEXT SECTION -->
       <section class="wow-context-section">
         <div class="wow-headline">
-          <i data-lucide="rocket" style="width:28px;height:28px;color:var(--color-warn);flex-shrink:0;"></i>
-          <h2>פעילות חדשה בקמפוס הדיגיטלי — <span style="color:var(--color-warn);">משחק AI</span></h2>
+          <i data-lucide="rocket" style="width:28px;height:28px;color:var(--color-navy);flex-shrink:0;"></i>
+          <h2>פעילות חדשה בקמפוס הדיגיטלי — משחק AI</h2>
         </div>
 
         <p class="wow-intro">
@@ -1594,36 +1584,36 @@
 
         <div class="wow-flow">
           <div class="wow-step">
-            <div class="wow-icon" style="background:var(--color-navy);">
-              <i data-lucide="pen-tool" style="width:20px;height:20px;color:#fff;"></i>
+            <div class="wow-icon">
+              <i data-lucide="pen-tool" style="width:24px;height:24px;"></i>
             </div>
             <span>אתה בונה<br>משחק עם AI</span>
           </div>
           <span class="wow-arrow">←</span>
           <div class="wow-step">
-            <div class="wow-icon" style="background:var(--color-teal-light);">
-              <i data-lucide="check-circle-2" style="width:20px;height:20px;color:#fff;"></i>
+            <div class="wow-icon">
+              <i data-lucide="check-circle-2" style="width:24px;height:24px;"></i>
             </div>
             <span>הצוות בודק<br>ומאשר</span>
           </div>
           <span class="wow-arrow">←</span>
           <div class="wow-step">
-            <div class="wow-icon" style="background:#7c3aed;">
-              <i data-lucide="book-open" style="width:20px;height:20px;color:#fff;"></i>
+            <div class="wow-icon">
+              <i data-lucide="book-open" style="width:24px;height:24px;"></i>
             </div>
             <span>המשחק נכנס<br>לקמפוס</span>
           </div>
           <span class="wow-arrow">←</span>
           <div class="wow-step">
-            <div class="wow-icon" style="background:var(--color-warn);">
-              <i data-lucide="wand-2" style="width:20px;height:20px;color:#fff;"></i>
+            <div class="wow-icon">
+              <i data-lucide="wand-2" style="width:24px;height:24px;"></i>
             </div>
             <span>AI מזריק<br>שאלות אמיתיות</span>
           </div>
           <span class="wow-arrow">←</span>
           <div class="wow-step">
-            <div class="wow-icon" style="background:#16a34a;">
-              <i data-lucide="gamepad-2" style="width:20px;height:20px;color:#fff;"></i>
+            <div class="wow-icon">
+              <i data-lucide="gamepad-2" style="width:24px;height:24px;"></i>
             </div>
             <span>חניכים<br>משחקים ✓</span>
           </div>
