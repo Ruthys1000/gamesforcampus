@@ -946,6 +946,30 @@
       margin-bottom: var(--spacing-lg);
     }
 
+    .req-details { margin-top: 4px; }
+
+    .req-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-teal-dark);
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 0;
+      user-select: none;
+    }
+    .req-summary::-webkit-details-marker { display: none; }
+    .req-summary::before {
+      content: '';
+      width: 16px; height: 16px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300a3b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .req-details[open] .req-summary::before { transform: rotate(180deg); }
+
     .req-list {
       list-style: none;
       margin: 0; padding: 0;
@@ -1600,28 +1624,31 @@
           למידע בלבד — <strong style="color:var(--color-teal-dark)">הפרומפט שתעתיק כבר כולל את כל 20 הדרישות האלה</strong>, ה-AI יבנה לפיהן אוטומטית.
           הוולידטור יבדוק אותן בסוף.
         </p>
-        <ol class="req-list">
-          <li>שליחת אירוע "התחלת משחק" לפלטפורמה בכל התחלה/ריסטרט</li>
-          <li>שליחת ניקוד בזמן אמת על כל תשובה נכונה</li>
-          <li>שליחת "משחק נגמר" עם ניקוד סופי בסוף</li>
-          <li>קבלת שאלות, חיים, טיימר ופידבק מהפלטפורמה</li>
-          <li>מבנה הפעלה נכון: הגדרות → קבלת config → משתני משחק</li>
-          <li>כל 7 משתני ההגדרה מוגדרים לפני קבלת ה-config</li>
-          <li>מיפוי שאלות תומך בשתי פורמטים של נתוני Moodle</li>
-          <li>הגדרת טיימר עם !== undefined (כדי שטיימר=0 יעבוד)</li>
-          <li>showFeedback מוחל עם <code>in cfg</code> — לא בדיקת truthy</li>
-          <li>משך פידבק ומלל תגובות (correctFeedback / incorrectFeedback) מוחלים מה-config</li>
-          <li>טיימר: ספירה מעלה כשמוגדר 0, ספירה מטה עם גיים אובר כשמוגדר זמן</li>
-          <li>שדה הטיימר בדיווח — ערך אמיתי, לא 0 קשיח</li>
-          <li>חיים מתחילים מההגדרה (לא מספר קשיח)</li>
-          <li>תשובה שגויה = חיים פחות 1; הגעת ל-0 = גיים אובר</li>
-          <li>שאלות ללא חזרות; מתחיל מחדש אחרי שנגמרו</li>
-          <li>פידבק מוצג/מוסתר לפי ההגדרה, עם משך זמן מהגדרות</li>
-          <li>ריסטרט מאפס הכל ללא location.reload()</li>
-          <li>עברית מימין לשמאל + viewport למובייל</li>
-          <li>ללא alert/confirm/prompt (לא עובדים ב-iframe) ו-ללא localStorage/sessionStorage</li>
-          <li>תמיכת מגע (touch events) ו/או עיצוב responsive</li>
-        </ol>
+        <details class="req-details">
+          <summary class="req-summary">הצג את כל 20 הדרישות</summary>
+          <ol class="req-list">
+            <li>שליחת אירוע "התחלת משחק" לפלטפורמה בכל התחלה/ריסטרט</li>
+            <li>שליחת ניקוד בזמן אמת על כל תשובה נכונה</li>
+            <li>שליחת "משחק נגמר" עם ניקוד סופי בסוף</li>
+            <li>קבלת שאלות, חיים, טיימר ופידבק מהפלטפורמה</li>
+            <li>מבנה הפעלה נכון: הגדרות → קבלת config → משתני משחק</li>
+            <li>כל 7 משתני ההגדרה מוגדרים לפני קבלת ה-config</li>
+            <li>מיפוי שאלות תומך בשתי פורמטים של נתוני Moodle</li>
+            <li>הגדרת טיימר עם !== undefined (כדי שטיימר=0 יעבוד)</li>
+            <li>showFeedback מוחל עם <code>in cfg</code> — לא בדיקת truthy</li>
+            <li>משך פידבק ומלל תגובות (correctFeedback / incorrectFeedback) מוחלים מה-config</li>
+            <li>טיימר: ספירה מעלה כשמוגדר 0, ספירה מטה עם גיים אובר כשמוגדר זמן</li>
+            <li>שדה הטיימר בדיווח — ערך אמיתי, לא 0 קשיח</li>
+            <li>חיים מתחילים מההגדרה (לא מספר קשיח)</li>
+            <li>תשובה שגויה = חיים פחות 1; הגעת ל-0 = גיים אובר</li>
+            <li>שאלות ללא חזרות; מתחיל מחדש אחרי שנגמרו</li>
+            <li>פידבק מוצג/מוסתר לפי ההגדרה, עם משך זמן מהגדרות</li>
+            <li>ריסטרט מאפס הכל ללא location.reload()</li>
+            <li>עברית מימין לשמאל + viewport למובייל</li>
+            <li>ללא alert/confirm/prompt (לא עובדים ב-iframe) ו-ללא localStorage/sessionStorage</li>
+            <li>תמיכת מגע (touch events) ו/או עיצוב responsive</li>
+          </ol>
+        </details>
       </div>
 
       <div class="card" id="prompt-card">
