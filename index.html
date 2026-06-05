@@ -1768,7 +1768,7 @@ Before finishing, verify every item:
         <i data-lucide="send"></i>
         שלח את המשחק לקמפוס הדיגיטלי
       </h2>
-      <p class="section-subtitle">עבר את הבדיקה? שלח לצוות — ואם המשחק תקין, הוא ייכנס לספריית משחקי ה-AI</p>
+      <p class="section-subtitle">עבר את הבדיקה? שלח לצוות. נתקעת עם 1–3 שגיאות שלא מצליח לפתור? שלח בכל זאת — נשמח לסייע.</p>
 
       <div id="submit-locked">
         <div class="lock-icon"><i data-lucide="lock"></i></div>
@@ -1776,6 +1776,10 @@ Before finishing, verify every item:
       </div>
 
       <div id="submit-form-container" class="hidden">
+        <div id="submit-help-banner" class="hidden" style="background:#FEF9C3;border:1px solid #EAB308;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:14px;color:#713F12;line-height:1.6;">
+          <strong>🟡 נתקעת עם כמה שגיאות שלא מצליח לפתור?</strong><br>
+          שלח בכל זאת עם פירוט השגיאות — אם המשחק מהמם, נשמח לסייע לסגור את הפרטים הטכניים.
+        </div>
         <div class="card" id="submit-form">
           <div class="form-field">
             <label for="soldier-name">שם החייל/ת *</label>
@@ -1789,22 +1793,20 @@ Before finishing, verify every item:
             <label for="description">תיאור קצר *</label>
             <textarea id="description" placeholder="במה המשחק שלך שונה? מה רעיון המשחק?"></textarea>
           </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-            <button class="btn-primary" id="download-btn" onclick="downloadGameFile()" style="background:var(--color-teal-light);">
-              <i data-lucide="download"></i>
-              <span id="download-btn-text">שלב 1: הורד קובץ משחק</span>
-            </button>
-            <button class="btn-primary" id="submit-btn" onclick="sendEmail()">
-              <i data-lucide="mail"></i>
-              <span>שלב 2: פתח מייל לשליחה</span>
-            </button>
+          <div id="submit-error" class="hidden" style="color:var(--color-fail);font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+            <i data-lucide="alert-circle" style="width:13px;height:13px;flex-shrink:0;"></i>
+            אנא מלא שם חייל/ת ושם משחק לפני השליחה
           </div>
+          <button class="btn-primary" id="submit-btn" onclick="sendEmail()">
+            <i data-lucide="mail"></i>
+            <span>פתח מייל לשליחה</span>
+          </button>
           <p style="font-size:13px;color:var(--color-text-muted);margin-top:8px;">
-            הורד את קובץ המשחק ← פתח מייל ← <strong>צרף את הקובץ שהורדת</strong> ← שלח
+            פתח מייל ← <strong>צרף את קובץ ה-HTML מהמחשב שלך</strong> ← שלח
           </p>
           <div id="success-msg" class="hidden">
             <div class="success-icon"><i data-lucide="check"></i></div>
-            <p>המייל נפתח! צרף את קובץ המשחק שהורדת ולאחר מכן לחץ שלח בתוכנת המייל.</p>
+            <p>המייל נפתח! צרף את קובץ ה-HTML מהמחשב שלך ולאחר מכן לחץ שלח בתוכנת המייל.</p>
             <button onclick="resetSubmitForm()" style="background:none;border:1.5px solid #166534;color:#166534;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:13px;font-weight:600;margin-top:4px;">שלח שוב</button>
           </div>
         </div>
@@ -2252,23 +2254,29 @@ Before finishing, verify every item:
 
     /* ============ SUBMIT STATE ============ */
     function updateSubmitState() {
-      const unlocked = STATE.autoAllPassed && STATE.manualAllChecked;
-      const wasUnlocked = STATE.submissionUnlocked;
+      const failCount       = STATE.autoCheckResults.filter(r => !r.passed).length;
+      const canSubmitClean  = STATE.autoAllPassed && STATE.manualAllChecked;
+      const canSubmitHelp   = failCount > 0 && failCount <= 3 && STATE.manualAllChecked;
+      const unlocked        = canSubmitClean || canSubmitHelp;
+      const wasUnlocked     = STATE.submissionUnlocked;
       STATE.submissionUnlocked = unlocked;
 
       document.getElementById('submit-locked').classList.toggle('hidden', unlocked);
       document.getElementById('submit-form-container').classList.toggle('hidden', !unlocked);
 
-      if (unlocked) {
-        if (!wasUnlocked) {
-          const banner = document.createElement('div');
-          banner.className = 'validation-success-banner';
-          banner.innerHTML = '✅ עברת את כל הבדיקות! <a href="#section-submit">לחץ לשליחה ↓</a>';
-          document.getElementById('section-validator').prepend(banner);
-          setTimeout(() => {
-            document.getElementById('section-submit').scrollIntoView({ behavior: 'smooth' });
-          }, 200);
-        }
+      const helpBanner = document.getElementById('submit-help-banner');
+      if (helpBanner) helpBanner.classList.toggle('hidden', !canSubmitHelp);
+
+      if (unlocked && !wasUnlocked) {
+        const banner = document.createElement('div');
+        banner.className = 'validation-success-banner';
+        banner.innerHTML = canSubmitClean
+          ? '✅ עברת את כל הבדיקות! <a href="#section-submit">לחץ לשליחה ↓</a>'
+          : '🟡 עברת את הבדיקה הידנית — <a href="#section-submit">שלח עם פירוט השגיאות ↓</a>';
+        document.getElementById('section-validator').prepend(banner);
+        setTimeout(() => {
+          document.getElementById('section-submit').scrollIntoView({ behavior: 'smooth' });
+        }, 200);
       }
     }
 
@@ -2279,32 +2287,43 @@ Before finishing, verify every item:
       const desc        = (document.getElementById('description').value || '').trim();
 
       if (!soldierName || !gameName) {
-        alert('אנא מלא שם חייל/ת ושם משחק לפני השליחה');
+        document.getElementById('submit-error').classList.remove('hidden');
         return;
       }
+      document.getElementById('submit-error').classList.add('hidden');
 
       const passCount  = STATE.autoCheckResults.filter(r => r.passed).length;
       const totalCount = STATE.autoCheckResults.length;
+      const failed     = STATE.autoCheckResults.filter(r => !r.passed);
+      const hasErrors  = failed.length > 0;
 
-      const subject = 'משחק חדש: ' + gameName + ' — ' + soldierName;
-      const body = [
+      const subject = hasErrors
+        ? 'משחק חדש (לסיוע): ' + gameName + ' — ' + soldierName
+        : 'משחק חדש: '          + gameName + ' — ' + soldierName;
+
+      const bodyLines = [
         'שלום רותי,',
         '',
         'שם החייל/ת: ' + soldierName,
         'שם המשחק: ' + gameName,
-        'קובץ: ' + (STATE.fileName || '—'),
         '',
         'תיאור:',
         desc || '(לא הוזן)',
         '',
-        'וולידציה: עבר ' + passCount + '/' + totalCount + ' בדיקות ✅',
-        '',
-        '— נשלח ממרכז פיתוח משחקי AI לקמפוס הדיגיטלי'
-      ].join('\n');
+        'וולידציה: עבר ' + passCount + '/' + totalCount + ' בדיקות' + (hasErrors ? '' : ' ✅'),
+      ];
+
+      if (hasErrors) {
+        bodyLines.push('');
+        bodyLines.push('שגיאות פתוחות (לבדיקה):');
+        failed.forEach(r => bodyLines.push('❌ ' + r.label));
+      }
+
+      bodyLines.push('', '— נשלח ממרכז פיתוח משחקי AI לקמפוס הדיגיטלי');
 
       window.location.href = 'mailto:ruthy.salomon@gmail.com'
         + '?subject=' + encodeURIComponent(subject)
-        + '&body='    + encodeURIComponent(body);
+        + '&body='    + encodeURIComponent(bodyLines.join('\n'));
 
       const successEl = document.getElementById('success-msg');
       if (successEl) {
@@ -2312,24 +2331,6 @@ Before finishing, verify every item:
         document.getElementById('submit-btn').classList.add('hidden');
         lucide.createIcons();
         successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-
-    function downloadGameFile() {
-      if (!STATE.fileContent || !STATE.fileName) return;
-      const blob = new Blob([STATE.fileContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = STATE.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      const span = document.getElementById('download-btn-text');
-      if (span) {
-        span.textContent = 'הורד! ✓';
-        setTimeout(() => { span.textContent = 'שלב 1: הורד קובץ משחק'; }, 3000);
       }
     }
 
