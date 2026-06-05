@@ -1380,12 +1380,12 @@
           <div class="step">
             <div class="step-icon"><i data-lucide="flask-conical"></i></div>
             <h3>2. בדיקה ← תיקון ↺</h3>
-            <p>גרור קובץ HTML לוולידטור — הוא בודק שהמשחק עומד בכללי הכלי. לא עבר? העתק את מה שהוולידטור ציין וספר ל-AI — תקן, גרור שוב.<br><strong>2–4 סיבובים זה נורמלי לגמרי</strong></p>
+            <p>גרור קובץ HTML לוולידטור — הוא בודק שהמשחק ירוץ בקמפוס. לא עבר? העתק את מה שהוולידטור ציין וספר ל-AI — תקן, גרור שוב.<br><strong>2–4 סיבובים זה נורמלי לגמרי</strong></p>
           </div>
           <div class="step">
             <div class="step-icon"><i data-lucide="send"></i></div>
             <h3>3. שליחה</h3>
-            <p>עברת את כל הבדיקות? מלא פרטים ושלח לצוות הפיתוח</p>
+            <p>עברת את הבדיקות? מלא פרטים ושלח לצוות הפיתוח</p>
           </div>
         </div>
       </div>
@@ -1581,7 +1581,7 @@ function showGameOver(won) {
 ## 💡 Game Design Philosophy
 
 The creative challenge is designing a fun game — not writing questions.
-The `questionsSource` array is a placeholder. Moodle injects real questions at runtime. Focus on:
+The `questionsSource` array is a placeholder. Real questions are generated from the course content and injected at runtime. Focus on:
 
 * What does the player control?
 * What are the enemies/obstacles?
@@ -1682,7 +1682,7 @@ Before finishing, verify every item:
             <div class="builder-field">
               <label for="pb-demo-topic" style="font-size:12px;color:var(--color-text-muted);">נושא שאלות דמו (placeholder בלבד)</label>
               <input type="text" id="pb-demo-topic" placeholder="צבא, גאוגרפיה, היסטוריה..." style="font-size:13px;">
-              <span style="font-size:11px;color:var(--color-text-muted);margin-top:3px;display:block;">השאלות האמיתיות מגיעות מ-Moodle</span>
+              <span style="font-size:11px;color:var(--color-text-muted);margin-top:3px;display:block;">השאלות האמיתיות יגיעו מתוכן הקורס</span>
             </div>
           </div>
         </div>
@@ -2359,7 +2359,7 @@ Before finishing, verify every item:
       if (genre)       lines.push('Game genre / ז\'אנר: ' + genre);
       if (atmosphere)  lines.push('Visual atmosphere / אווירה: ' + atmosphere);
       if (intensity)   lines.push('Action intensity / עוצמה: ' + intensity);
-      if (demoTopic)   lines.push('Demo questions topic: ' + demoTopic + ' (placeholder only — real questions come from Moodle)');
+      if (demoTopic)   lines.push('Demo questions topic: ' + demoTopic + ' (placeholder only — real questions are generated from the course content)');
       if (description) lines.push('\nCreative concept / רעיון:\n' + description);
 
       const gameBlock = lines.length
