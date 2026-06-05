@@ -186,31 +186,6 @@
       scroll-margin-top: calc(var(--nav-height) + 16px);
     }
 
-    .section-title {
-      font-size: clamp(22px, 5.5vw, 34px);
-      font-weight: 800;
-      color: var(--color-navy);
-      margin-bottom: var(--spacing-xs);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      letter-spacing: -1px;
-      text-align: center;
-    }
-
-    #section-validator .section-title i { color: var(--color-teal-light); }
-    #section-submit .section-title i { color: var(--color-success); }
-
-    .section-subtitle {
-      font-size: 17px;
-      color: var(--color-text-muted);
-      margin: 0 auto var(--spacing-lg);
-      line-height: 1.65;
-      max-width: 620px;
-      text-align: center;
-    }
-
     .card {
       background: var(--color-card-bg);
       border-radius: var(--radius-card);
@@ -1953,11 +1928,12 @@ Before finishing, verify every item:
 
     <!-- ============ SECTION 2 — VALIDATOR ============ -->
     <section id="section-validator">
-      <h2 class="section-title">
-        <i data-lucide="flask-conical"></i>
-        וולידטור — בדוק שהמשחק ירוץ בקמפוס
-      </h2>
-      <p class="section-subtitle">הוולידטור בודק שהמשחק עומד בדרישות הטכניות של הקמפוס הדיגיטלי. גרור את קובץ ה-HTML וקבל תוצאה מיידית.</p>
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="flask-conical"></i>
+          וולידטור — בדוק שהמשחק ירוץ בקמפוס
+        </div>
+        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--spacing-md);line-height:1.6;">הוולידטור בודק שהמשחק עומד בדרישות הטכניות של הקמפוס הדיגיטלי. גרור את קובץ ה-HTML וקבל תוצאה מיידית.</p>
 
       <div id="drop-zone">
         <div class="drop-icon"><i data-lucide="folder-up"></i></div>
@@ -1966,6 +1942,7 @@ Before finishing, verify every item:
         <p class="file-meta" id="file-meta"></p>
         <input type="file" id="file-input" accept=".html,.htm" hidden>
       </div>
+      </div><!-- end card -->
 
       <div id="results-panel" class="hidden">
         <div class="panel" id="auto-checks-panel">
@@ -1994,11 +1971,12 @@ Before finishing, verify every item:
 
     <!-- ============ SECTION 3 — SUBMISSION ============ -->
     <section id="section-submit">
-      <h2 class="section-title">
-        <i data-lucide="send"></i>
-        שלח את המשחק לקמפוס הדיגיטלי
-      </h2>
-      <p class="section-subtitle">עבר את הבדיקה? שלח לצוות. נתקעת עם 1–3 שגיאות שלא מצליח לפתור? שלח בכל זאת — נשמח לסייע.</p>
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="send"></i>
+          שלח את המשחק לקמפוס הדיגיטלי
+        </div>
+        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--spacing-md);line-height:1.6;">עבר את הבדיקה? שלח לצוות. נתקעת עם 1–3 שגיאות שלא מצליח לפתור? שלח בכל זאת — נשמח לסייע.</p>
 
       <div id="submit-locked">
         <div class="lock-icon"><i data-lucide="lock"></i></div>
@@ -2010,7 +1988,7 @@ Before finishing, verify every item:
           <strong>🟡 נתקעת עם כמה שגיאות שלא מצליח לפתור?</strong><br>
           שלח בכל זאת עם פירוט השגיאות — אם המשחק מהמם, נשמח לסייע לסגור את הפרטים הטכניים.
         </div>
-        <div class="card" id="submit-form">
+        <div id="submit-form">
           <div class="form-field">
             <label for="soldier-name">שם החייל/ת *</label>
             <input type="text" id="soldier-name" placeholder="שם מלא">
@@ -2041,6 +2019,7 @@ Before finishing, verify every item:
           </div>
         </div>
       </div>
+      </div><!-- end card -->
     </section>
 
   </main>
