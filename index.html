@@ -931,6 +931,236 @@
       gap: 4px;
     }
 
+    /* ============ REQUIREMENTS SECTION ============ */
+    .requirements-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .req-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .req-group {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1.5px solid;
+    }
+
+    .req-group.critical { border-color: rgba(239,68,68,0.3); }
+    .req-group.important { border-color: rgba(245,158,11,0.3); }
+    .req-group.polish { border-color: rgba(34,197,94,0.3); }
+
+    .req-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .req-group.critical .req-group-header { background: rgba(239,68,68,0.06); color: #b91c1c; }
+    .req-group.important .req-group-header { background: rgba(245,158,11,0.06); color: #92400e; }
+    .req-group.polish .req-group-header { background: rgba(34,197,94,0.06); color: #166534; }
+
+    .req-group-header .req-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-right: auto;
+    }
+
+    .req-group.critical .req-badge { background: rgba(239,68,68,0.15); color: #b91c1c; }
+    .req-group.important .req-badge { background: rgba(245,158,11,0.15); color: #92400e; }
+    .req-group.polish .req-badge { background: rgba(34,197,94,0.15); color: #166534; }
+
+    .req-group-arrow {
+      width: 16px; height: 16px;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .req-group.open .req-group-arrow {
+      transform: rotate(180deg);
+    }
+
+    .req-items {
+      display: none;
+      padding: 8px 16px 12px;
+      background: white;
+      gap: 6px;
+      flex-direction: column;
+    }
+
+    .req-group.open .req-items { display: flex; }
+
+    .req-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-text);
+      padding: 4px 0;
+    }
+
+    .req-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .req-group.critical .req-dot { background: #ef4444; }
+    .req-group.important .req-dot { background: #f59e0b; }
+    .req-group.polish .req-dot { background: #22c55e; }
+
+    /* ============ INSPIRATION GALLERY ============ */
+    .gallery-section {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .gallery-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .gallery-card {
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gallery-card:hover {
+      border-color: var(--color-orange);
+      background: var(--color-orange-light);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .gallery-card.selected {
+      border-color: var(--color-orange);
+      background: var(--color-orange-light);
+      box-shadow: 0 0 0 2px rgba(255,101,53,0.25);
+    }
+
+    .gallery-card-icon { font-size: 22px; line-height: 1; }
+    .gallery-card-name { font-size: 12px; font-weight: 700; color: var(--color-text); }
+    .gallery-card-desc { font-size: 10px; color: var(--color-text-muted); line-height: 1.3; }
+
+    /* ============ ATMOSPHERE SWATCH ============ */
+    .atmosphere-preview {
+      display: flex;
+      gap: 4px;
+      padding: 5px 0 2px;
+      min-height: 18px;
+    }
+
+    .atm-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0,0,0,0.1);
+    }
+
+    /* ============ VALIDATOR GROUPS ============ */
+    .progress-ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      background: white;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--color-border);
+      margin-bottom: 16px;
+    }
+
+    .progress-ring-svg { flex-shrink: 0; }
+
+    .progress-ring-track { fill: none; stroke: var(--color-border); stroke-width: 4; }
+    .progress-ring-fill {
+      fill: none; stroke-width: 4;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+    }
+
+    .progress-ring-text { font-size: 13px; }
+    .progress-ring-count { font-size: 22px; font-weight: 800; line-height: 1; }
+    .progress-ring-label { font-size: 12px; color: var(--color-text-muted); }
+
+    .checks-group {
+      margin-bottom: 14px;
+    }
+
+    .checks-group-header {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .checks-group-header.critical { background: rgba(239,68,68,0.08); color: #b91c1c; }
+    .checks-group-header.important { background: rgba(245,158,11,0.08); color: #92400e; }
+    .checks-group-header.polish { background: rgba(34,197,94,0.08); color: #166534; }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--color-border-light);
+      font-size: 13px;
+      cursor: default;
+    }
+
+    .check-item:last-child { border-bottom: none; }
+
+    .check-item-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .check-explanation {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+      padding-top: 2px;
+    }
+
     /* ============ FOOTER ============ */
     footer {
       text-align: center;
@@ -1419,6 +1649,69 @@
         </div>
       </div>
 
+      <!-- REQUIREMENTS SECTION -->
+      <div class="card requirements-section">
+        <div class="card-title">
+          <i data-lucide="shield-check"></i>
+          מה המשחק שלך חייב לכלול — 20 דרישות
+        </div>
+        <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:16px;">
+          הוולידטור יבדוק את כל הסעיפים האלה. הסבר ל-AI מה נדרש — הוא יבנה לפי זה.
+          לחץ על קבוצה להרחבה.
+        </p>
+        <div class="req-groups">
+          <div class="req-group critical open" onclick="toggleReqGroup(this)">
+            <div class="req-group-header">
+              <span>🔴</span>
+              <span>חיוני — בלי אלה המשחק לא יעבוד בקמפוס</span>
+              <span class="req-badge">5 סעיפים</span>
+              <i data-lucide="chevron-down" class="req-group-arrow"></i>
+            </div>
+            <div class="req-items">
+              <div class="req-item"><span class="req-dot"></span>שליחת אירוע "התחלת משחק" לפלטפורמה בכל התחלה/ריסטרט</div>
+              <div class="req-item"><span class="req-dot"></span>שליחת ניקוד בזמן אמת על כל תשובה נכונה</div>
+              <div class="req-item"><span class="req-dot"></span>שליחת "משחק נגמר" עם ניקוד סופי בסוף</div>
+              <div class="req-item"><span class="req-dot"></span>קבלת שאלות, חיים, טיימר ופידבק מהפלטפורמה</div>
+              <div class="req-item"><span class="req-dot"></span>מבנה הפעלה נכון: הגדרות → קבלת config → משתני משחק</div>
+            </div>
+          </div>
+          <div class="req-group important" onclick="toggleReqGroup(this)">
+            <div class="req-group-header">
+              <span>🟡</span>
+              <span>חשוב — המשחק יתנהג נכון</span>
+              <span class="req-badge">10 סעיפים</span>
+              <i data-lucide="chevron-down" class="req-group-arrow"></i>
+            </div>
+            <div class="req-items">
+              <div class="req-item"><span class="req-dot"></span>טיימר: ספירה מעלה כשמוגדר 0, ספירה מטה עם גיים אובר כשמוגדר זמן</div>
+              <div class="req-item"><span class="req-dot"></span>שדה הטיימר בדיווח — ערך אמיתי, לא 0 קשיח</div>
+              <div class="req-item"><span class="req-dot"></span>חיים מתחילים מההגדרה (לא מספר קשיח)</div>
+              <div class="req-item"><span class="req-dot"></span>תשובה שגויה = חיים פחות 1; הגעת ל-0 = גיים אובר</div>
+              <div class="req-item"><span class="req-dot"></span>שאלות ללא חזרות; מתחיל מחדש אחרי שנגמרו</div>
+              <div class="req-item"><span class="req-dot"></span>אינדקס תשובה נכונה — שימוש ב-<code>.c</code> מהמיפוי</div>
+              <div class="req-item"><span class="req-dot"></span>פידבק מוצג/מוסתר לפי ההגדרה, עם משך זמן מהגדרות</div>
+              <div class="req-item"><span class="req-dot"></span>מיפוי שאלות תומך בשתי פורמטים של נתוני Moodle</div>
+              <div class="req-item"><span class="req-dot"></span>הגדרת טיימר עם !== undefined (כדי ש-0 יעבוד)</div>
+              <div class="req-item"><span class="req-dot"></span>ריסטרט מאפס הכל ללא location.reload()</div>
+            </div>
+          </div>
+          <div class="req-group polish" onclick="toggleReqGroup(this)">
+            <div class="req-group-header">
+              <span>🟢</span>
+              <span>פולישינג — UX ונגישות</span>
+              <span class="req-badge">5 סעיפים</span>
+              <i data-lucide="chevron-down" class="req-group-arrow"></i>
+            </div>
+            <div class="req-items">
+              <div class="req-item"><span class="req-dot"></span>עברית מימין לשמאל + viewport למובייל</div>
+              <div class="req-item"><span class="req-dot"></span>ללא alert/confirm/prompt (לא עובדים ב-iframe)</div>
+              <div class="req-item"><span class="req-dot"></span>ללא localStorage / sessionStorage</div>
+              <div class="req-item"><span class="req-dot"></span>תמיכת מגע (touch events) ו/או עיצוב responsive</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="prompt-card">
         <div class="card-title">
           <i data-lucide="clipboard-copy"></i>
@@ -1662,6 +1955,56 @@ Before finishing, verify every item:
 ## 🎮 YOUR GAME REQUEST
 </textarea>
 
+        <!-- Inspiration Gallery -->
+        <div class="gallery-section">
+          <div class="gallery-label">
+            <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--color-orange);"></i>
+            קצת השראה — לחץ על רעיון כדי למלא את הטופס אוטומטית:
+          </div>
+          <div class="gallery-grid">
+            <div class="gallery-card" onclick="selectInspirationCard(this,'ירי (Shooter)','תת-ימי / חלל (רחוק, מסתורי)','אינטנסיבי','חללית נלחמת באסטרואידים. תשובה נכונה = יריה שמפוצצת אסטרואיד, שגויה = פגיעה בחללית')">
+              <div class="gallery-card-icon">🚀</div>
+              <div class="gallery-card-name">ירי אסטרואידים</div>
+              <div class="gallery-card-desc">תשובה נכונה = יריה, שגויה = פגיעה</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'מרדף / לכידה','עתידני / סייבר (ניאון, חשוך, היי-טק)','אינטנסיבי','דמות רצה קדימה. מכשולים עם תשובות שגויות חוסמים, תשובה נכונה מנקה את הדרך')">
+              <div class="gallery-card-icon">🏃</div>
+              <div class="gallery-card-name">ריצת מכשולים</div>
+              <div class="gallery-card-desc">תשובה נכונה = מנקה דרך</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'Tower Defense','צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)','בינוני','גלים של אויבים ניגשים לבסיס. תשובה נכונה = כסף לבניית צריח, שגויה = אויב עובר')">
+              <div class="gallery-card-icon">🛡️</div>
+              <div class="gallery-card-name">הגנת בסיס</div>
+              <div class="gallery-card-desc">תשובה נכונה = קונה צריח</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'ירי (Shooter)','צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)','אינטנסיבי','מסך מכ\"מ עגול. נקודות מתקרבות מהשוליים. תשובה נכונה = מזהה את האיום ומסיר אותו')">
+              <div class="gallery-card-icon">📡</div>
+              <div class="gallery-card-name">סריקת מכ"מ</div>
+              <div class="gallery-card-desc">זיהוי איומים על מסך עגול</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'ירי (Shooter)','תת-ימי / חלל (רחוק, מסתורי)','בינוני','שורות aliens יורדות. תשובה נכונה = ירי שמוריד שורה, שגויה = הם מתקרבים מהר יותר')">
+              <div class="gallery-card-icon">👾</div>
+              <div class="gallery-card-name">ספייס אינווידרס</div>
+              <div class="gallery-card-desc">גלים של שאלות כמו aliens</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'ניווט ומכשולים (Platformer)','עירוני (רחובות, גרפיטי, עיר)','בינוני','דמות קופצת בין פלטפורמות. כל פלטפורמה = שאלה, נפילה = חיים פחות')">
+              <div class="gallery-card-icon">🎮</div>
+              <div class="gallery-card-name">קפיצת פלטפורמות</div>
+              <div class="gallery-card-desc">כל פלטפורמה = שאלה</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'מרוץ (Racing)','עירוני (רחובות, גרפיטי, עיר)','אינטנסיבי','רכב נוסע בכביש. פסים עם תשובות, צריך לסטות לפס הנכון לפני שעוברים')">
+              <div class="gallery-card-icon">🚗</div>
+              <div class="gallery-card-name">נהיגה מסוכנת</div>
+              <div class="gallery-card-desc">סטייה לפס הנכון = ניקוד</div>
+            </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'פאזל / אסטרטגיה','צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)','רגוע','שדה מוקשים. כל מוקש = שאלה, מענה נכון = מוקש מפונה בבטחה, שגוי = פיצוץ')">
+              <div class="gallery-card-icon">💣</div>
+              <div class="gallery-card-name">ניקוי מוקשים</div>
+              <div class="gallery-card-desc">ענה נכון = פנה מוקש בבטחה</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Prompt Builder Form -->
         <div class="prompt-builder">
           <div class="prompt-builder-title">
@@ -1689,7 +2032,8 @@ Before finishing, verify every item:
             </div>
             <div class="builder-field">
               <label for="pb-atmosphere">אווירה ויזואלית</label>
-              <select id="pb-atmosphere">
+              <div class="atmosphere-preview" id="atm-swatch"></div>
+              <select id="pb-atmosphere" onchange="updateAtmSwatch()">
                 <option value="">— בחר —</option>
                 <option value="צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)">צבאי-ישראלי</option>
                 <option value="עתידני / סייבר (ניאון, חשוך, היי-טק)">עתידני / סייבר</option>
@@ -1771,7 +2115,7 @@ Before finishing, verify every item:
           <h3><i data-lucide="check-circle-2"></i> בדיקות אוטומטיות</h3>
           <div id="auto-summary" class="summary-banner"></div>
           <div id="fix-prompt-container"></div>
-          <ul id="checks-list" class="checks-list"></ul>
+          <div id="checks-list" class="checks-list"></div>
         </div>
         <div class="panel" id="manual-checks-panel">
           <h3><i data-lucide="list-checks"></i> בדיקה עצמית — חובה לסמן הכל</h3>
@@ -1866,6 +2210,8 @@ Before finishing, verify every item:
       {
         label: '1. כל 7 משתני config מוגדרים לפני applyMoodleConfig: questionsSource (עם שאלות fallback בעברית), MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
         shortLabel: 'כל 7 משתני ההגדרה מוגדרים',
+        group: 'critical',
+        explanation: 'הפלטפורמה שולחת הגדרות לפני שהמשחק מתחיל. בלי המשתנים האלה, אין לאן לשמור אותן והמשחק יקרס.',
         test: c => ['questionsSource','MAX_LIVES','GAME_TIMER','SHOW_FEEDBACK',
                     'FEEDBACK_DURATION','CORRECT_FEEDBACK','INCORRECT_FEEDBACK'].every(v => c.includes(v))
       },
@@ -1874,28 +2220,39 @@ Before finishing, verify every item:
       {
         label: '2a. applyMoodleConfig(cfg) מוגדרת עם if (!cfg) return',
         shortLabel: 'פונקציית טעינת ההגדרות קיימת ומוגנת',
+        group: 'critical',
+        explanation: 'הפלטפורמה קוראת לפונקציה הזו כשיש config. בלעדיה המשחק לא מקבל שאלות, חיים או טיימר מהקורס.',
         test: c => /function\s+applyMoodleConfig\s*\(\s*cfg\s*\)/.test(c) && /if\s*\(\s*!cfg\s*\)\s*return/.test(c)
       },
       {
         label: '2b. מיפוי שאלות תומך גם ב-q.options||q.a וגם ב-q.correct??q.c (או !== undefined)',
         shortLabel: 'מיפוי השאלות מ-Moodle תקין',
+        group: 'important',
+        explanation: 'Moodle שולח שאלות בפורמט מסוים. אם המיפוי לא נכון, השאלות לא יגיעו למשחק.',
+        fixHint: 'options: q.options || q.a,  correct: q.correct !== undefined ? q.correct : q.c',
         test: c => /q\.options\s*\|\|\s*q\.a/.test(c) && /q\.correct\s*!==\s*undefined|q\.correct\s*\?\?/.test(c)
       },
       {
         label: '2c. cfg.timer מוחל עם בדיקת !== undefined (כדי שטיימר=0 יעבוד)',
         shortLabel: 'הטיימר מוגדר נכון (כולל ערך 0)',
+        group: 'important',
+        explanation: 'טיימר=0 אומר "ספירה עולה". אם משתמשים ב-if(cfg.timer), הערך 0 נראה כ-false ונדחה.',
         fixHint: 'if (cfg.timer !== undefined) { GAME_TIMER = cfg.timer; }  // לא if(cfg.timer) — כי 0 הוא ערך תקין',
         test: c => /cfg\.timer\s*!==\s*undefined/.test(c)
       },
       {
         label: "2d. cfg.showFeedback מוחל עם 'showFeedback' in cfg (לא בדיקת truthy)",
         shortLabel: 'הגדרת הפידבק מיושמת נכון',
+        group: 'important',
+        explanation: 'showFeedback יכול להיות false בכוונה. בדיקת truthy תתעלם ממנו ותשאיר את ברירת המחדל.',
         fixHint: "if ('showFeedback' in cfg) { SHOW_FEEDBACK = !!cfg.showFeedback; }  // לא if(cfg.showFeedback)",
         test: c => /['"]showFeedback['"]\s+in\s+cfg/.test(c)
       },
       {
         label: '2e. feedbackDuration מוחל עם parseInt; correctFeedback ו-incorrectFeedback מוחלים',
         shortLabel: 'משך הפידבק ומלל התגובות מוגדרים',
+        group: 'important',
+        explanation: 'המשך של הפידבק ומלל "כל הכבוד!" / "טעות!" מגיעים מהקורס. בלעדיהם מוצגים ערכי ברירת מחדל.',
         test: c => c.includes('feedbackDuration') && c.includes('parseInt') &&
                    c.includes('correctFeedback') && c.includes('incorrectFeedback')
       },
@@ -1904,6 +2261,8 @@ Before finishing, verify every item:
       {
         label: '3. try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} קיים אחרי משתני config ולפני משתני game state',
         shortLabel: 'טעינת ההגדרות מ-Moodle מוגנת ב-try/catch',
+        group: 'critical',
+        explanation: 'ה-try/catch מונע שגיאה אם הקוד רץ מחוץ ל-Moodle (למשל בבדיקה מקומית). בלעדיו המשחק יקרס בכניסה.',
         fixHint: 'try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}',
         test: c => /try\s*\{\s*applyMoodleConfig\s*\(\s*window\.parent\.moodleGameConfig\s*\)/.test(c)
       },
@@ -1912,6 +2271,9 @@ Before finishing, verify every item:
       {
         label: '4a. GAME_START נשלח בכל התחלה/ריסטארט — עטוף ב-try/catch',
         shortLabel: 'אות התחלת משחק (GAME_START) נשלח ל-Moodle',
+        group: 'critical',
+        explanation: 'Moodle מחכה לאות הזה כדי להתחיל לעקוב אחרי המשחק. בלעדיו הניקוד לא ירשם.',
+        fixHint: 'try { window.parent.postMessage({ type: "GAME_START" }, "*"); } catch(e) {}',
         test: c => {
           const idx = c.indexOf('GAME_START');
           if (idx < 0) return false;
@@ -1922,6 +2284,9 @@ Before finishing, verify every item:
       {
         label: '4b. SCORE_UPDATE עם isfinished: false על כל תשובה נכונה — עטוף ב-try/catch',
         shortLabel: 'ניקוד על תשובה נכונה נשלח ל-Moodle',
+        group: 'critical',
+        explanation: 'כך Moodle יודע מה הניקוד הנוכחי של השחקן בזמן אמת.',
+        fixHint: 'try { window.parent.postMessage({ type: "SCORE_UPDATE", score: score, timer: elapsed, isfinished: false }, "*"); } catch(e) {}',
         test: c => {
           const markers = ['isfinished: false', 'isfinished:false', '"isfinished": false', '"isfinished":false'];
           for (const m of markers) {
@@ -1937,6 +2302,9 @@ Before finishing, verify every item:
       {
         label: '4c. SCORE_UPDATE עם isfinished: true בסוף המשחק — עטוף ב-try/catch',
         shortLabel: 'ניקוד סיום משחק נשלח ל-Moodle',
+        group: 'critical',
+        explanation: 'בלי isfinished:true, Moodle לא יודע שהמשחק נגמר ולא ישמור את הניקוד הסופי.',
+        fixHint: 'try { window.parent.postMessage({ type: "SCORE_UPDATE", score: score, timer: elapsed, isfinished: true }, "*"); } catch(e) {}',
         test: c => {
           const markers = ['isfinished: true', 'isfinished:true', '"isfinished": true', '"isfinished":true'];
           for (const m of markers) {
@@ -1952,6 +2320,9 @@ Before finishing, verify every item:
       {
         label: '4d. ערך timer בהודעות postMessage הוא משתנה (לא 0 קשיח)',
         shortLabel: 'שדה הטיימר בדיווח הוא משתנה (לא 0 קשיח)',
+        group: 'important',
+        explanation: 'Moodle מציג את הזמן שלקח לשחקן. אם שולחים 0 קשיח, הוא תמיד יראה "0 שניות".',
+        fixHint: 'timer: elapsed  // או: timer: GAME_TIMER - timeLeft  — לא timer: 0',
         test: c => /timer\s*:\s*[a-zA-Z_$][a-zA-Z0-9_$.]*/.test(c)
       },
 
@@ -1959,16 +2330,23 @@ Before finishing, verify every item:
       {
         label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת ומסיים ב-0',
         shortLabel: 'לוגיקת הטיימר (ספירה עולה/יורדת) מיושמת',
+        group: 'important',
+        explanation: 'כשהמורה מגדיר זמן=60, הטיימר צריך לספור מ-60 ל-0. כשזמן=0, ספירה עולה ללא הגבלה.',
         test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
       },
       {
         label: '5b. חיים מתחילים ב-MAX_LIVES (משתנה, לא קשיח); תשובה שגויה = חיים−1; 0 חיים = game over',
         shortLabel: 'מספר החיים נלקח מההגדרות (לא ספרה קשיחה)',
+        group: 'important',
+        explanation: 'המורה בוחר כמה חיים בקורס. אם קשיח ב-3, ההגדרה שלו לא תשפיע.',
+        fixHint: 'let lives = MAX_LIVES;  // לא: let lives = 3',
         test: c => /[=:]\s*MAX_LIVES\b/.test(c)
       },
       {
         label: '5c. שאלות ללא חזרה מ-questionsSource; pool מאופס אחרי שכולן הוצגו; שימוש ב-.c לאינדקס הנכון',
         shortLabel: 'שאלות ללא חזרה; אינדקס תשובה נכונה תקין',
+        group: 'important',
+        explanation: 'בלי מנגנון ללא-חזרה, אותה שאלה תופיע שוב ושוב. האינדקס .c חייב להיות מהמיפוי.',
         test: c => c.includes('questionsSource') &&
                    /splice|shift|usedQuestions|usedIndices|shuffle|\.filter|\.indexOf/.test(c) &&
                    /\.c\b/.test(c)
@@ -1976,11 +2354,15 @@ Before finishing, verify every item:
       {
         label: '5d. SHOW_FEEDBACK=true → מציג פידבק + explanation, ממתין FEEDBACK_DURATION שניות; false → ממשיך ≤200ms',
         shortLabel: 'לוגיקת הפידבק (הצגה/דילוג) מיושמת',
+        group: 'important',
+        explanation: 'חלק מהקורסים רוצים להסביר תשובות, חלק לא. המנגנון חייב לתמוך בשתי האפשרויות.',
         test: c => /if\s*\(.*SHOW_FEEDBACK/.test(c) && c.includes('FEEDBACK_DURATION')
       },
       {
         label: '5e. Restart מאפס כל הסטייט (score, lives, timer, questions) ללא location.reload()',
         shortLabel: 'ריסטארט מאפס את כל הסטייט ללא location.reload()',
+        group: 'important',
+        explanation: 'location.reload() מוחק את הגדרות Moodle שנטענו, כך המשחק יאבד את השאלות מהקורס.',
         test: c => !c.includes('location.reload') &&
                    /\bfunction\s+(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*[\s(]|\b(?:const|let|var)\s+(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*=|\b(?:init|startGame|resetGame|restartGame|newGame|reset|restart)\s*[:=]\s*function/.test(c)
       },
@@ -1989,6 +2371,8 @@ Before finishing, verify every item:
       {
         label: '6a. <html lang="he" dir="rtl"> ו-<meta name="viewport"...> קיימים',
         shortLabel: 'תגית HTML בעברית (RTL) + viewport למובייל',
+        group: 'polish',
+        explanation: 'בלי dir="rtl" הטקסט בעברית מיושר שמאל. בלי viewport הממשק נראה קטן בנייד.',
         test: c => (c.includes('lang="he"') || c.includes("lang='he'")) &&
                    (c.includes('dir="rtl"') || c.includes("dir='rtl'")) &&
                    /meta[^>]+viewport/i.test(c)
@@ -1996,16 +2380,22 @@ Before finishing, verify every item:
       {
         label: '6b. אין alert() / confirm() / prompt() — לא עובדים ב-iframe',
         shortLabel: 'ללא alert/confirm/prompt (לא עובדים ב-iframe)',
+        group: 'polish',
+        explanation: 'חלונות popup חסומים ב-iframe של Moodle. הם גורמים לקפיאה בלתי ניתנת לפתרון.',
         test: c => !/\balert\s*\(/.test(c) && !/\bconfirm\s*\(/.test(c) && !/\bprompt\s*\(/.test(c)
       },
       {
         label: '6c. אין localStorage / sessionStorage',
         shortLabel: 'ללא localStorage / sessionStorage',
+        group: 'polish',
+        explanation: 'localStorage חסום ב-iframe cross-origin. הגישה אליו תגרום לשגיאה שתשבור את המשחק.',
         test: c => !c.includes('localStorage') && !c.includes('sessionStorage')
       },
       {
         label: '6d. תמיכת מובייל: touch events ו/או @media responsive',
         shortLabel: 'תמיכת מגע (touch) ו/או עיצוב responsive',
+        group: 'polish',
+        explanation: 'רוב החניכים ישחקו על נייד. בלי touch events לחצות/תנועות לא יעבדו.',
         test: c => /touchstart|touchend|ontouchstart|touch-action/.test(c) || c.includes('@media')
       }
 
@@ -2068,9 +2458,12 @@ Before finishing, verify every item:
       const failed = STATE.autoCheckResults.filter(r => !r.passed);
       if (!failed.length) return;
 
-      const failList = failed.map(r =>
-        '❌ ' + r.label + (r.fixHint ? '\n   → קוד נכון: ' + r.fixHint : '')
-      ).join('\n');
+      const failList = failed.map(r => {
+        let line = '❌ ' + (r.shortLabel || r.label);
+        if (r.explanation) line += '\n   מדוע: ' + r.explanation;
+        if (r.fixHint) line += '\n   ✅ תיקון: ' + r.fixHint;
+        return line;
+      }).join('\n\n');
 
       const prompt = [
         'יש כמה בעיות טכניות בקוד שצריך לתקן.',
@@ -2155,9 +2548,12 @@ Before finishing, verify every item:
     /* ============ VALIDATION ============ */
     function runValidation() {
       const c = STATE.fileContent || '';
-      STATE.autoCheckResults = AUTO_CHECKS.map(({ label, shortLabel, test }) => ({
+      STATE.autoCheckResults = AUTO_CHECKS.map(({ label, shortLabel, group, explanation, fixHint, test }) => ({
         label,
         shortLabel,
+        group: group || 'important',
+        explanation: explanation || '',
+        fixHint: fixHint || '',
         passed: test(c)
       }));
       STATE.autoAllPassed = STATE.autoCheckResults.every(r => r.passed);
@@ -2168,14 +2564,59 @@ Before finishing, verify every item:
       document.getElementById('preview-container').classList.remove('hidden');
 
       const list = document.getElementById('checks-list');
-      list.innerHTML = STATE.autoCheckResults.map(r => `
-        <li class="check-item">
-          <span class="check-icon ${r.passed ? 'pass' : 'fail'}">
-            <i data-lucide="${r.passed ? 'check' : 'x'}"></i>
-          </span>
-          <span>${r.shortLabel || r.label}</span>
-        </li>
-      `).join('');
+      const total = STATE.autoCheckResults.length;
+      const passCount = STATE.autoCheckResults.filter(r => r.passed).length;
+      const pct = Math.round((passCount / total) * 100);
+      const ringColor = passCount === total ? '#22c55e' : passCount >= Math.round(total * 0.85) ? '#f59e0b' : '#ef4444';
+      const circumference = 2 * Math.PI * 22;
+      const dashOffset = circumference * (1 - passCount / total);
+
+      const groups = [
+        { key: 'critical', label: '🔴 חיוני — בלי אלה המשחק לא יעבוד', cls: 'critical' },
+        { key: 'important', label: '🟡 חשוב — התנהגות נכונה של המשחק', cls: 'important' },
+        { key: 'polish', label: '🟢 פולישינג — UX ונגישות', cls: 'polish' },
+      ];
+
+      list.innerHTML = `
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring-svg" width="54" height="54" viewBox="0 0 54 54">
+            <circle class="progress-ring-track" cx="27" cy="27" r="22"/>
+            <circle class="progress-ring-fill" cx="27" cy="27" r="22"
+              stroke="${ringColor}"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${dashOffset}"/>
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-ring-count" style="color:${ringColor}">${passCount}/${total}</div>
+            <div class="progress-ring-label">בדיקות עברו</div>
+          </div>
+          <div style="font-size:13px;color:var(--color-text-muted);line-height:1.5;">
+            ${passCount === total
+              ? '<strong style="color:#166534">✅ הכל תקין!</strong>'
+              : `<strong>${total - passCount} בדיקות נכשלו</strong> — ראה למטה מה לתקן`}
+          </div>
+        </div>
+        ${groups.map(g => {
+          const items = STATE.autoCheckResults.filter(r => r.group === g.key);
+          if (!items.length) return '';
+          return `
+            <div class="checks-group">
+              <div class="checks-group-header ${g.cls}">${g.label}</div>
+              ${items.map(r => `
+                <div class="check-item">
+                  <span class="check-icon ${r.passed ? 'pass' : 'fail'}" style="flex-shrink:0;">
+                    <i data-lucide="${r.passed ? 'check' : 'x'}"></i>
+                  </span>
+                  <div class="check-item-main">
+                    <span>${r.shortLabel || r.label}</span>
+                    ${r.explanation ? `<span class="check-explanation">${r.explanation}</span>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }).join('')}
+      `;
 
       const summaryEl = document.getElementById('auto-summary');
       const fixContainer = document.getElementById('fix-prompt-container');
@@ -2411,8 +2852,42 @@ Before finishing, verify every item:
         'Only after receiving answers — build the complete game.'
       ].join('\n');
 
+      const validatorChecklist = [
+        '',
+        '---',
+        '',
+        '## ✅ VALIDATOR CHECKLIST — MUST PASS BEFORE RETURNING CODE',
+        '',
+        'Before returning the code, verify ALL of the following:',
+        '',
+        '🔴 CRITICAL (game will not work without these):',
+        '[ ] All 7 config vars declared: questionsSource, MAX_LIVES, GAME_TIMER, SHOW_FEEDBACK, FEEDBACK_DURATION, CORRECT_FEEDBACK, INCORRECT_FEEDBACK',
+        '[ ] applyMoodleConfig(cfg) function exists with if (!cfg) return guard',
+        '[ ] try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} called after config vars',
+        '[ ] GAME_START postMessage sent on start/restart, wrapped in try/catch',
+        '[ ] SCORE_UPDATE { isfinished: false } sent on every correct answer, in try/catch',
+        '[ ] SCORE_UPDATE { isfinished: true } sent at game over, in try/catch',
+        '',
+        '🟡 IMPORTANT (game will behave incorrectly without these):',
+        '[ ] timer field in postMessage is a variable (not hardcoded 0)',
+        '[ ] cfg.timer applied with !== undefined check (not truthy — 0 is valid)',
+        '[ ] cfg.showFeedback applied with "showFeedback" in cfg (not truthy)',
+        '[ ] Question mapping uses q.options||q.a and q.correct !== undefined',
+        '[ ] Timer logic: count up when GAME_TIMER===0, count down + game over when GAME_TIMER>0',
+        '[ ] lives initialized from MAX_LIVES (not hardcoded)',
+        '[ ] No-repeat questions; pool resets after exhausted; uses .c for correct index',
+        '[ ] SHOW_FEEDBACK logic with FEEDBACK_DURATION timing',
+        '[ ] Restart resets all state without location.reload()',
+        '',
+        '🟢 POLISH (UX and compatibility):',
+        '[ ] <html lang="he" dir="rtl"> and <meta name="viewport">',
+        '[ ] No alert/confirm/prompt',
+        '[ ] No localStorage/sessionStorage',
+        '[ ] Touch events or @media responsive rules',
+      ].join('\n');
+
       document.getElementById('prompt-textarea').value =
-        baseSpec + '\n\n## 🎮 YOUR GAME REQUEST\n\n' + gameBlock + '\n\n' + clarification;
+        baseSpec + '\n\n## 🎮 YOUR GAME REQUEST\n\n' + gameBlock + '\n\n' + clarification + validatorChecklist;
     }
 
     function initPromptBuilder() {
@@ -2430,10 +2905,51 @@ Before finishing, verify every item:
       buildPrompt();
     }
 
+    /* ============ INSPIRATION GALLERY ============ */
+    const ATM_PALETTES = {
+      'צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)': ['#8B7355','#4A5E3A','#D4821A'],
+      'עתידני / סייבר (ניאון, חשוך, היי-טק)':    ['#0D0D0D','#00FFFF','#A020F0'],
+      'עירוני (רחובות, גרפיטי, עיר)':              ['#2C2C2C','#4A90D9','#E8E8E8'],
+      'צבעוני ומשוגע (פסיכדלי, מלא אנימציה)':     ['#FF4DA6','#FFDE03','#7B2FBE'],
+      'רטרו אארקייד (8-bit, פיקסל-ארט)':          ['#000000','#FF0000','#00FF00'],
+      'תת-ימי / חלל (רחוק, מסתורי)':              ['#0A0A2E','#1A3A6B','#4FC3F7'],
+    };
+
+    function updateAtmSwatch() {
+      const sel = document.getElementById('pb-atmosphere');
+      const swatch = document.getElementById('atm-swatch');
+      if (!sel || !swatch) return;
+      const colors = ATM_PALETTES[sel.value] || [];
+      swatch.innerHTML = colors.map(c => `<span class="atm-dot" style="background:${c}"></span>`).join('');
+    }
+
+    function selectInspirationCard(card, genre, atmosphere, intensity, description) {
+      document.querySelectorAll('.gallery-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const genreEl = document.getElementById('pb-genre');
+      const atmEl   = document.getElementById('pb-atmosphere');
+      const descEl  = document.getElementById('pb-description');
+      if (genreEl) genreEl.value = genre;
+      if (atmEl)   atmEl.value   = atmosphere;
+      if (descEl)  descEl.value  = description;
+      document.querySelectorAll('input[name="pb-intensity"]').forEach(r => {
+        r.checked = (r.value === intensity);
+      });
+      updateAtmSwatch();
+      buildPrompt();
+      document.getElementById('prompt-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ============ REQUIREMENTS ACCORDION ============ */
+    function toggleReqGroup(el) {
+      el.classList.toggle('open');
+    }
+
     /* ============ INIT ============ */
     document.addEventListener('DOMContentLoaded', () => {
       initDropZone();
       initPromptBuilder();
+      updateAtmSwatch();
       if (window.lucide) lucide.createIcons();
     });
   </script>
