@@ -187,14 +187,16 @@
     }
 
     .section-title {
-      font-size: 34px;
+      font-size: clamp(22px, 5.5vw, 34px);
       font-weight: 800;
       color: var(--color-navy);
       margin-bottom: var(--spacing-xs);
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
       letter-spacing: -1px;
+      text-align: center;
     }
 
     #section-validator .section-title i { color: var(--color-teal-light); }
@@ -203,9 +205,10 @@
     .section-subtitle {
       font-size: 17px;
       color: var(--color-text-muted);
-      margin-bottom: var(--spacing-lg);
+      margin: 0 auto var(--spacing-lg);
       line-height: 1.65;
       max-width: 620px;
+      text-align: center;
     }
 
     .card {
@@ -453,40 +456,6 @@
       box-shadow: 0 1px 0 var(--color-orange-dark), 0 2px 8px rgba(255,101,53,0.2);
     }
 
-    .tip-box {
-      background: var(--color-teal-xlight);
-      border: 1px solid var(--color-teal-border);
-      border-radius: var(--radius-sm);
-      padding: var(--spacing-md);
-      margin-top: var(--spacing-md);
-    }
-
-    .tip-box h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: var(--spacing-xs);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--color-teal-dark);
-    }
-
-    .tip-box h3 i { color: var(--color-teal-light); }
-
-    .tip-box ul {
-      list-style: none;
-      padding-right: 0;
-    }
-
-    .tip-box li {
-      padding: 6px 0;
-      font-size: 14px;
-      color: var(--color-text);
-    }
-
-    .tip-box li strong {
-      color: var(--color-teal-dark);
-    }
 
     /* ============ DROP ZONE ============ */
     #drop-zone {
@@ -1379,39 +1348,6 @@
     }
 
     /* ============ HOW-TO FILE BOX ============ */
-    .how-to-file-box {
-      background: var(--color-teal-xlight);
-      border: 1px solid var(--color-teal-border);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      margin-bottom: var(--spacing-md);
-      font-size: 13px;
-      color: var(--color-text);
-    }
-
-    .how-to-file-box strong {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: var(--color-navy);
-    }
-
-    .how-to-file-box ol {
-      padding-right: 20px;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      line-height: 1.5;
-    }
-
-    .how-to-file-box code {
-      background: rgba(15,26,43,0.08);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-    }
 
     /* ============ VALIDATION SUCCESS BANNER ============ */
     .validation-success-banner {
@@ -2011,14 +1947,6 @@ Before finishing, verify every item:
           <span>העתק פרומפט</span>
         </button>
 
-        <div class="tip-box">
-          <h3><i data-lucide="lightbulb"></i> איפה להדביק?</h3>
-          <ul>
-            <li><strong>Claude.ai</strong> — פתח שיחה חדשה, הדבק את הפרומפט. ה-AI ישאל אותך 2–3 שאלות — ענה עליהן, ואז הוא יבנה את המשחק</li>
-            <li><strong>Cursor</strong> — פתח agent חדש, הדבק את הפרומפט, ענה על שאלות ההבהרה</li>
-            <li><strong>Bolt.new</strong> — הדבק בצ'אט, ענה על שאלות ה-AI ואז הוא יתחיל לבנות</li>
-          </ul>
-        </div>
 
       </div>
     </section>
@@ -2030,16 +1958,6 @@ Before finishing, verify every item:
         וולידטור — בדוק שהמשחק ירוץ בקמפוס
       </h2>
       <p class="section-subtitle">הוולידטור בודק שהמשחק עומד בדרישות הטכניות של הקמפוס הדיגיטלי. גרור את קובץ ה-HTML וקבל תוצאה מיידית.</p>
-
-      <div class="how-to-file-box">
-        <strong>📄 קיבלת קוד מ-AI? כך הופכים אותו לקובץ:</strong>
-        <ol>
-          <li>סמן את כל הקוד שה-AI נתן (לחץ בתוך הקוד ← Ctrl+A)</li>
-          <li>העתק (Ctrl+C)</li>
-          <li>פתח Notepad / TextEdit ← הדבק ← שמור בשם <code>game.html</code></li>
-          <li>גרור את הקובץ לתיבה למטה ↓</li>
-        </ol>
-      </div>
 
       <div id="drop-zone">
         <div class="drop-icon"><i data-lucide="folder-up"></i></div>
