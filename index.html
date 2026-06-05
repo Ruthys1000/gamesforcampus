@@ -10,14 +10,27 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      /* Teal — kept for tip-box, form focus, validator */
+      /* Teal — primary interactive color */
       --color-teal-light: #00C4D4;
       --color-teal-dark: #007E8C;
+      --color-teal-xlight: rgba(0, 196, 212, 0.08);
+      --color-teal-border: rgba(0, 196, 212, 0.28);
 
-      /* Orange — primary CTA & energy color */
+      /* Orange — single primary CTA only (#copy-btn) */
       --color-orange: #FF6535;
       --color-orange-dark: #E5521D;
       --color-orange-light: rgba(255, 101, 53, 0.08);
+
+      /* Status color tokens */
+      --color-critical-border: rgba(239, 68, 68, 0.25);
+      --color-critical-bg:     rgba(239, 68, 68, 0.05);
+      --color-critical-text:   #b91c1c;
+      --color-important-border: rgba(245, 158, 11, 0.25);
+      --color-important-bg:    rgba(245, 158, 11, 0.05);
+      --color-important-text:  #92400e;
+      --color-polish-border:   rgba(34, 197, 94, 0.25);
+      --color-polish-bg:       rgba(34, 197, 94, 0.05);
+      --color-polish-text:     #166534;
 
       /* Navy — nav, headings, code */
       --color-navy: #0F1A2B;
@@ -222,7 +235,7 @@
       letter-spacing: -0.3px;
     }
 
-    .card-title i { color: var(--color-orange); }
+    .card-title i { color: var(--color-teal-light); }
 
     /* ============ HERO ============ */
     .hero {
@@ -399,7 +412,7 @@
     }
 
     .btn-primary {
-      background: var(--color-orange);
+      background: var(--color-teal-light);
       color: white;
       border: none;
       padding: 14px 30px;
@@ -412,19 +425,19 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 2px 0 var(--color-orange-dark), 0 4px 14px rgba(255,101,53,0.22);
+      box-shadow: 0 2px 0 var(--color-teal-dark), 0 4px 14px rgba(0,196,212,0.22);
       letter-spacing: 0.1px;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--color-orange-dark);
-      box-shadow: 0 2px 0 #C44419, 0 6px 20px rgba(255, 101, 53, 0.35);
+      background: var(--color-teal-dark);
+      box-shadow: 0 2px 0 #005f6b, 0 6px 20px rgba(0,196,212,0.32);
       transform: translateY(-2px);
     }
 
     .btn-primary:active:not(:disabled) {
       transform: translateY(1px);
-      box-shadow: 0 1px 0 var(--color-orange-dark), 0 2px 8px rgba(255,101,53,0.2);
+      box-shadow: 0 1px 0 var(--color-teal-dark), 0 2px 8px rgba(0,196,212,0.18);
     }
 
     .btn-primary:disabled {
@@ -437,14 +450,25 @@
       height: 18px;
     }
 
+    /* "העתק פרומפט" — the single primary CTA stays orange */
+    #copy-btn {
+      background: var(--color-orange);
+      box-shadow: 0 2px 0 var(--color-orange-dark), 0 4px 14px rgba(255,101,53,0.22);
+    }
+    #copy-btn:hover:not(:disabled) {
+      background: var(--color-orange-dark);
+      box-shadow: 0 2px 0 #C44419, 0 6px 20px rgba(255,101,53,0.35);
+    }
+    #copy-btn:active:not(:disabled) {
+      box-shadow: 0 1px 0 var(--color-orange-dark), 0 2px 8px rgba(255,101,53,0.2);
+    }
+
     .tip-box {
-      background: rgba(0, 196, 212, 0.05);
-      border-right: 3px solid var(--color-teal-dark);
+      background: var(--color-teal-xlight);
+      border: 1px solid var(--color-teal-border);
       border-radius: var(--radius-sm);
       padding: var(--spacing-md);
       margin-top: var(--spacing-md);
-      border: 1px solid rgba(0,196,212,0.18);
-      border-right: 3px solid var(--color-teal-dark);
     }
 
     .tip-box h3 {
@@ -486,19 +510,15 @@
     }
 
     #drop-zone:hover, #drop-zone.dragover {
-      border-color: var(--color-orange);
-    }
-
-    #drop-zone:hover, #drop-zone.dragover {
-      background: var(--color-orange-light);
-      border-color: var(--color-orange-dark);
+      border-color: var(--color-teal-light);
+      background: var(--color-teal-xlight);
     }
 
     .drop-icon {
       width: 72px;
       height: 72px;
       margin: 0 auto var(--spacing-sm);
-      color: var(--color-orange);
+      color: var(--color-teal-light);
     }
 
     .drop-icon i {
@@ -513,7 +533,7 @@
     }
 
     #drop-zone .browse-link {
-      color: var(--color-orange);
+      color: var(--color-teal-dark);
       font-weight: 700;
       text-decoration: underline;
       cursor: pointer;
@@ -832,8 +852,8 @@
 
     /* ============ PROMPT BUILDER ============ */
     .prompt-builder {
-      background: var(--color-orange-light);
-      border: 1px solid rgba(255, 101, 53, 0.2);
+      background: var(--color-teal-xlight);
+      border: 1px solid var(--color-teal-border);
       border-radius: var(--radius-sm);
       padding: var(--spacing-md);
       margin-bottom: var(--spacing-md);
@@ -842,7 +862,7 @@
     .prompt-builder-title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--color-orange);
+      color: var(--color-teal-dark);
       margin-bottom: var(--spacing-sm);
       display: flex;
       align-items: center;
@@ -890,8 +910,8 @@
     .builder-field select:focus,
     .builder-field textarea:focus {
       outline: none;
-      border-color: var(--color-orange);
-      box-shadow: 0 0 0 2px rgba(255, 101, 53, 0.12);
+      border-color: var(--color-teal-light);
+      box-shadow: 0 0 0 2px rgba(0, 196, 212, 0.12);
     }
 
     .builder-field textarea {
@@ -916,7 +936,7 @@
     }
 
     .radio-option input[type="radio"] {
-      accent-color: var(--color-orange);
+      accent-color: var(--color-teal-light);
       width: 16px;
       height: 16px;
       cursor: pointer;
@@ -939,18 +959,19 @@
     .req-groups {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: var(--spacing-xs);
     }
 
     .req-group {
       border-radius: var(--radius-sm);
       overflow: hidden;
-      border: 1.5px solid;
+      border: 1px solid var(--color-border);
+      border-right-width: 3px;
     }
 
-    .req-group.critical { border-color: rgba(239,68,68,0.3); }
-    .req-group.important { border-color: rgba(245,158,11,0.3); }
-    .req-group.polish { border-color: rgba(34,197,94,0.3); }
+    .req-group.critical  { border-right-color: var(--color-fail); }
+    .req-group.important { border-right-color: var(--color-warn); }
+    .req-group.polish    { border-right-color: var(--color-success); }
 
     .req-group-header {
       display: flex;
@@ -961,11 +982,12 @@
       font-weight: 700;
       cursor: pointer;
       user-select: none;
+      background: var(--color-bg);
     }
 
-    .req-group.critical .req-group-header { background: rgba(239,68,68,0.06); color: #b91c1c; }
-    .req-group.important .req-group-header { background: rgba(245,158,11,0.06); color: #92400e; }
-    .req-group.polish .req-group-header { background: rgba(34,197,94,0.06); color: #166534; }
+    .req-group.critical  .req-group-header { color: var(--color-critical-text); }
+    .req-group.important .req-group-header { color: var(--color-important-text); }
+    .req-group.polish    .req-group-header { color: var(--color-polish-text); }
 
     .req-group-header .req-badge {
       font-size: 11px;
@@ -975,9 +997,9 @@
       margin-right: auto;
     }
 
-    .req-group.critical .req-badge { background: rgba(239,68,68,0.15); color: #b91c1c; }
-    .req-group.important .req-badge { background: rgba(245,158,11,0.15); color: #92400e; }
-    .req-group.polish .req-badge { background: rgba(34,197,94,0.15); color: #166534; }
+    .req-group.critical  .req-badge { background: var(--color-critical-bg);  color: var(--color-critical-text); }
+    .req-group.important .req-badge { background: var(--color-important-bg); color: var(--color-important-text); }
+    .req-group.polish    .req-badge { background: var(--color-polish-bg);    color: var(--color-polish-text); }
 
     .req-group-arrow {
       width: 16px; height: 16px;
@@ -1059,16 +1081,16 @@
     }
 
     .gallery-card:hover {
-      border-color: var(--color-orange);
-      background: var(--color-orange-light);
+      border-color: var(--color-teal-light);
+      background: var(--color-teal-xlight);
       transform: translateY(-1px);
       box-shadow: var(--shadow-hover);
     }
 
     .gallery-card.selected {
-      border-color: var(--color-orange);
-      background: var(--color-orange-light);
-      box-shadow: 0 0 0 2px rgba(255,101,53,0.25);
+      border-color: var(--color-teal-light);
+      background: var(--color-teal-xlight);
+      box-shadow: 0 0 0 2px var(--color-teal-border);
     }
 
     .gallery-card-icon { font-size: 22px; line-height: 1; }
@@ -1093,12 +1115,11 @@
     .progress-ring-wrap {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 14px 16px;
-      background: white;
-      border-radius: var(--radius-sm);
-      border: 1.5px solid var(--color-border);
-      margin-bottom: 16px;
+      gap: var(--spacing-sm);
+      padding: 0 0 var(--spacing-sm) 0;
+      background: transparent;
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: var(--spacing-sm);
     }
 
     .progress-ring-svg { flex-shrink: 0; }
@@ -1117,13 +1138,13 @@
     .progress-ring-label { font-size: 12px; color: var(--color-text-muted); }
 
     .checks-group {
-      margin-bottom: 14px;
+      margin-bottom: var(--spacing-sm);
     }
 
     .checks-group-header {
       font-size: 12px;
       font-weight: 700;
-      padding: 4px 8px;
+      padding: 4px var(--spacing-xs);
       border-radius: 4px;
       margin-bottom: 6px;
       display: flex;
@@ -1131,9 +1152,9 @@
       gap: 6px;
     }
 
-    .checks-group-header.critical { background: rgba(239,68,68,0.08); color: #b91c1c; }
-    .checks-group-header.important { background: rgba(245,158,11,0.08); color: #92400e; }
-    .checks-group-header.polish { background: rgba(34,197,94,0.08); color: #166534; }
+    .checks-group-header.critical  { background: var(--color-critical-bg);  color: var(--color-critical-text); }
+    .checks-group-header.important { background: var(--color-important-bg); color: var(--color-important-text); }
+    .checks-group-header.polish    { background: var(--color-polish-bg);    color: var(--color-polish-text); }
 
     .check-item {
       display: flex;
@@ -1277,7 +1298,7 @@
       flex-shrink: 0;
     }
 
-    .journey-bubble.dev  { background: rgba(255,101,53,0.12); border: 2px solid var(--color-orange); color: var(--color-orange); }
+    .journey-bubble.dev  { background: var(--color-teal-xlight); border: 2px solid var(--color-teal-light); color: var(--color-teal-dark); }
     .journey-bubble.test { background: rgba(0,196,212,0.12);  border: 2px solid var(--color-teal-light); color: var(--color-teal-dark); }
     .journey-bubble.fix  { background: rgba(245,158,11,0.12); border: 2px dashed var(--color-warn); color: var(--color-warn); }
     .journey-bubble.done { background: var(--color-success-bg); border: 2px solid var(--color-success); color: var(--color-success); }
@@ -1400,8 +1421,8 @@
 
     /* ============ HOW-TO FILE BOX ============ */
     .how-to-file-box {
-      background: rgba(245,158,11,0.07);
-      border-right: 4px solid var(--color-warn);
+      background: var(--color-teal-xlight);
+      border: 1px solid var(--color-teal-border);
       border-radius: var(--radius-sm);
       padding: 14px 16px;
       margin-bottom: var(--spacing-md);
@@ -1462,10 +1483,9 @@
 
     /* === WOW CONTEXT SECTION === */
     .wow-context-section {
-      background: linear-gradient(135deg, rgba(15,26,43,0.03) 0%, rgba(245,158,11,0.06) 100%);
+      background: linear-gradient(135deg, rgba(15,26,43,0.02) 0%, rgba(0,196,212,0.04) 100%);
       border: 1px solid var(--color-border-light);
-      border-right: 4px solid var(--color-warn);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-card);
       padding: var(--spacing-lg);
       margin-bottom: var(--spacing-lg);
     }
@@ -1958,7 +1978,7 @@ Before finishing, verify every item:
         <!-- Inspiration Gallery -->
         <div class="gallery-section">
           <div class="gallery-label">
-            <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--color-orange);"></i>
+            <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--color-teal-light);"></i>
             קצת השראה — לחץ על רעיון כדי למלא את הטופס אוטומטית:
           </div>
           <div class="gallery-grid">
