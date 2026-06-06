@@ -403,12 +403,33 @@ function drawBg() {
 }
 
 function drawSoldier() {
+  var x = soldier.x, y = soldier.y;
+  // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.beginPath();
-  ctx.ellipse(soldier.x, GROUND + 3, 19, 5, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, GROUND + 3, 19, 5, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.font = '40px serif';
-  ctx.fillText('🏃', soldier.x - 20, soldier.y + 40);
+  // Legs (animated, leaning forward-right)
+  var lx = soldier.jumping ? 2 : (soldier.frame ? 9 : -5);
+  ctx.strokeStyle = '#5d4e37'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x + 2, y + 30); ctx.lineTo(x + 6 + lx, y + 46); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,     y + 30); ctx.lineTo(x - 2 - lx, y + 46); ctx.stroke();
+  // Body (olive uniform)
+  ctx.fillStyle = '#5a6e2a';
+  ctx.fillRect(x - 7, y + 12, 15, 20);
+  // Skin — head, slightly right-facing
+  ctx.fillStyle = '#d4a574';
+  ctx.beginPath(); ctx.arc(x + 3, y + 7, 8, 0, Math.PI * 2); ctx.fill();
+  // Helmet
+  ctx.fillStyle = '#3d5010';
+  ctx.beginPath(); ctx.ellipse(x + 3, y + 5, 11, 8, 0, Math.PI, 0); ctx.fill();
+  ctx.fillRect(x - 8, y + 4, 24, 3);
+  // Forward arm (right side — direction of travel)
+  var fa = soldier.jumping ? -6 : (soldier.frame ? -10 : 2);
+  ctx.strokeStyle = '#5a6e2a'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x + 7, y + 16); ctx.lineTo(x + 17, y + 26 + fa); ctx.stroke();
+  // Back arm
+  ctx.beginPath(); ctx.moveTo(x - 5, y + 16); ctx.lineTo(x - 13, y + 26 - fa); ctx.stroke();
 }
 
 function drawObstacles() {
