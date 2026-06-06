@@ -421,38 +421,40 @@ function drawObstacles() {
 
 
 function drawBarber() {
+  var bx = W - 54; // right-aligned: building occupies bx..bx+50
   // Building walls
   ctx.fillStyle = '#f0ddb0';
-  ctx.fillRect(2, GROUND - 68, 46, 68);
+  ctx.fillRect(bx + 2, GROUND - 68, 46, 68);
   // Roof
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(0, GROUND - 74, 50, 8);
+  ctx.fillRect(bx, GROUND - 74, 50, 8);
   // Door
   ctx.fillStyle = '#6b3310';
-  ctx.fillRect(16, GROUND - 32, 18, 32);
+  ctx.fillRect(bx + 16, GROUND - 32, 18, 32);
   ctx.fillStyle = '#ffd700';
-  ctx.beginPath(); ctx.arc(30, GROUND - 16, 2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(bx + 30, GROUND - 16, 2, 0, Math.PI*2); ctx.fill();
   // Sign
   ctx.fillStyle = '#d63031';
-  ctx.fillRect(4, GROUND - 84, 42, 14);
+  ctx.fillRect(bx + 4, GROUND - 84, 42, 14);
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 9px Arial';
-  ctx.fillText('✂️  ס פ ר', 7, GROUND - 74);
-  // Barber pole — clipped to pole rect so stripes never bleed outside
+  ctx.fillText('✂️  ס פ ר', bx + 7, GROUND - 74);
+  // Barber pole — left of building, clipped so stripes stay inside
+  var px = bx - 6;
   ctx.save();
   ctx.beginPath();
-  ctx.rect(48, GROUND - 72, 6, 72);
+  ctx.rect(px, GROUND - 72, 6, 72);
   ctx.clip();
   ctx.fillStyle = '#fff';
-  ctx.fillRect(48, GROUND - 72, 6, 72);
+  ctx.fillRect(px, GROUND - 72, 6, 72);
   var stripeH = 10, stripeOff = Math.floor(bgScroll * 0.5) % (stripeH * 2);
   ctx.fillStyle = '#e74c3c';
   for (var si = -1; si < 8; si++) {
-    ctx.fillRect(48, GROUND - 72 + si * stripeH * 2 + stripeOff, 6, stripeH);
+    ctx.fillRect(px, GROUND - 72 + si * stripeH * 2 + stripeOff, 6, stripeH);
   }
   ctx.restore();
   ctx.fillStyle = '#bbb';
-  ctx.beginPath(); ctx.arc(51, GROUND - 72, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + 3, GROUND - 72, 5, 0, Math.PI*2); ctx.fill();
 }
 
 
