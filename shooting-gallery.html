@@ -100,14 +100,38 @@
 <div id="start-screen" class="overlay">
   <div class="overlay-box">
     <h1>🎯 מבחן הירי של הסמל 🪖</h1>
-    <div style="background:#2d1a06;border-radius:10px;padding:10px 12px;margin:8px 0;text-align:right;">
-      <p style="color:#fff;font-size:14px;font-weight:bold;margin-bottom:4px;">המשימה:</p>
-      <p>הסמל בודק אם אתה חייל מקצועי! מטרות עוברות על המסך — פגע בהן לפני שייברחו!</p>
-      <p>אחרי 3 אירועים — שאלה! ענה נכון = כבוד. ענה לא נכון = הפסד חיים.</p>
+    <p style="font-size:13px;color:#bbb;margin-bottom:10px;">הסמל בודק אם אתה חייל מקצועי — הגיע הזמן להוכיח!</p>
+
+    <!-- How to play — visual instruction -->
+    <div style="background:#2d1a06;border:1px solid #6b4010;border-radius:10px;padding:12px 14px;margin-bottom:12px;text-align:right;">
+      <p style="color:#f1c40f;font-size:13px;font-weight:bold;margin-bottom:10px;">👇 איך משחקים:</p>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:32px;line-height:1;flex-shrink:0;">🎯</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:bold;">הקש/לחץ על המטרה הנעה</div>
+          <div style="color:#aaa;font-size:12px;">מטרות עוברות על המסך משמאל לימין ובחזרה — הקש עליהן בזמן!</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:28px;line-height:1;flex-shrink:0;">❌</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:bold;">מטרה שברחה = פספוס</div>
+          <div style="color:#aaa;font-size:12px;">אם מטרה יצאה מהמסך לפני שהקשת — היא נספרת כאירוע</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:28px;line-height:1;flex-shrink:0;">❓</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:bold;">אחרי 3 אירועים — שאלה!</div>
+          <div style="color:#aaa;font-size:12px;">המשחק נעצר ← ענה נכון = כבוד | שגוי = הפסד חיים 🔫</div>
+        </div>
+      </div>
     </div>
-    <p>🎯 לחץ/הקש על מטרה = ירי&emsp;|&emsp;❌ מטרה שברחה = אירוע</p>
-    <p style="color:#aaa;font-size:12px;margin-top:6px;">לחץ על המטרות הנעות בזמן!</p>
-    <button class="btn-game" id="start-btn">התחל את מבחן הירי! 🎯</button>
+
+    <button class="btn-game" id="start-btn">יאללה, מתחילים! 🎯</button>
   </div>
 </div>
 
