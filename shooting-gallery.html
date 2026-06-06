@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>גלריית ירי - מבחן הסמל</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #2c1a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      overflow: hidden;
+      direction: rtl;
+      user-select: none;
+    }
+    #hud {
+      width: 390px;
+      max-width: 100vw;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #lives-display { font-size: 15px; letter-spacing: 2px; min-width: 60px; }
+    #score-display { flex: 1; text-align: center; font-size: 13px; color: #f1c40f; }
+    #timer-display { font-size: 13px; font-variant-numeric: tabular-nums; color: #aed6f1; min-width: 40px; text-align: center; }
+    #game-canvas { display: block; max-width: 100vw; touch-action: none; cursor: crosshair; }
+    .overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.72);
+      z-index: 20; direction: rtl;
+    }
+    .overlay.hidden { display: none; }
+    .overlay-box {
+      background: #1e1208;
+      border: 2px solid #8B6914;
+      border-radius: 18px;
+      padding: 22px 20px;
+      text-align: center;
+      color: #f0e6d0;
+      max-width: 340px; width: 92%;
+      direction: rtl;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .overlay-box h1 { font-size: 22px; margin-bottom: 10px; }
+    .overlay-box h2 { font-size: 20px; margin-bottom: 10px; }
+    .overlay-box p  { font-size: 14px; line-height: 1.55; margin-bottom: 7px; color: #ccc; }
+    .btn-game {
+      background: #7a4a10; color: #fff; border: none;
+      border-radius: 10px; padding: 13px 20px; font-size: 17px;
+      cursor: pointer; margin-top: 12px; width: 100%;
+      font-family: inherit; transition: background 0.15s, transform 0.1s;
+    }
+    .btn-game:active { transform: scale(0.97); }
+    .btn-game:hover  { background: #9a5e18; }
+    #question-text { font-size: 17px; font-weight: bold; margin-bottom: 14px; line-height: 1.45; color: #fff; }
+    #answer-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .ans-btn {
+      background: #2d1a06; color: #eee;
+      border: 2px solid #8B6914; border-radius: 9px;
+      padding: 11px 7px; font-size: 14px; cursor: pointer;
+      font-family: inherit; transition: background 0.12s;
+      direction: rtl; line-height: 1.3;
+    }
+    .ans-btn:hover:not(:disabled) { background: #3d2a0a; }
+    .ans-btn:disabled { cursor: default; }
+    .ans-btn.correct { background: #1e7e34; border-color: #28a745; }
+    .ans-btn.wrong   { background: #8b1a1a; border-color: #dc3545; }
+    #feedback-msg { font-size: 15px; font-weight: bold; min-height: 20px; margin-bottom: 5px; }
+    #feedback-msg.correct { color: #5dff88; }
+    #feedback-msg.wrong   { color: #ff6b6b; }
+    #explanation-text { font-size: 12px; color: #aaa; min-height: 14px; }
+    @media (max-width: 400px) {
+      #hud { font-size: 12px; padding: 6px 8px; }
+      .overlay-box { padding: 16px 14px; }
+      .ans-btn { font-size: 13px; padding: 9px 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="hud">
+  <div id="lives-display">🔫🔫🔫</div>
+  <div id="score-display">ניקוד: 0</div>
+  <div id="timer-display">00:00</div>
+</div>
+<canvas id="game-canvas" width="390" height="575"></canvas>
+
+<div id="start-screen" class="overlay">
+  <div class="overlay-box">
+    <h1>🎯 מבחן הירי של הסמל 🪖</h1>
+    <div style="background:#2d1a06;border-radius:10px;padding:10px 12px;margin:8px 0;text-align:right;">
+      <p style="color:#fff;font-size:14px;font-weight:bold;margin-bottom:4px;">המשימה:</p>
+      <p>הסמל בודק אם אתה חייל מקצועי! מטרות עוברות על המסך — פגע בהן לפני שייברחו!</p>
+      <p>אחרי 3 אירועים — שאלה! ענה נכון = כבוד. ענה לא נכון = הפסד חיים.</p>
+    </div>
+    <p>🎯 לחץ/הקש על מטרה = ירי&emsp;|&emsp;❌ מטרה שברחה = אירוע</p>
+    <p style="color:#aaa;font-size:12px;margin-top:6px;">לחץ על המטרות הנעות בזמן!</p>
+    <button class="btn-game" id="start-btn">התחל את מבחן הירי! 🎯</button>
+  </div>
+</div>
+
+<div id="question-overlay" class="overlay hidden">
+  <div class="overlay-box">
+    <p style="font-size:11px;color:#888;margin-bottom:8px;">⏸ הסמל שואל... ענה מהר חייל!</p>
+    <div id="question-text"></div>
+    <div id="answer-buttons"></div>
+    <div id="feedback-msg"></div>
+    <div id="explanation-text"></div>
+  </div>
+</div>
+
+<div id="gameover-screen" class="overlay hidden">
+  <div class="overlay-box">
+    <h2 id="gameover-title"></h2>
+    <p id="gameover-desc"></p>
+    <div id="final-score" style="font-size:19px;margin:12px 0;font-weight:bold;"></div>
+    <button class="btn-game" id="restart-btn">שחק שוב 🔄</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG VARIABLES
+============================================================ */
+var questionsSource = [
+  { q: 'מה ראשי התיבות של צה"ל?',          a: ['צבא הגנה לישראל','צבא עם ישראל','צוות הגנה לאומי','צבא חיל לישראל'], c: 0, explanation: 'צה"ל = צבא הגנה לישראל' },
+  { q: 'כמה שניות יש בדקה?',                a: ['30','45','60','90'],                              c: 2, explanation: '60 שניות בדקה' },
+  { q: 'מה עיר הבירה של ישראל?',            a: ['תל אביב','ירושלים','חיפה','באר שבע'],             c: 1, explanation: 'ירושלים היא עיר הבירה' },
+  { q: 'כמה חודשים יש בשנה?',               a: ['10','11','12','13'],                              c: 2, explanation: '12 חודשים בשנה' },
+  { q: 'כמה ימים יש בשבוע?',                a: ['5','6','7','8'],                                  c: 2, explanation: '7 ימים בשבוע' },
+  { q: 'מה צבע הדגל הישראלי?',              a: ['אדום ולבן','כחול ולבן','ירוק ולבן','שחור ולבן'], c: 1, explanation: 'הדגל הישראלי כחול ולבן' },
+  { q: 'כמה שעות יש ביממה?',               a: ['12','18','24','36'],                              c: 2, explanation: '24 שעות ביממה' },
+  { q: 'מה קורה לחייל שפוגע במטרה?',        a: ['מקבל עונש','מקבל כבוד מהסמל','מקבל חופשה','יוצא לשטח'], c: 1, explanation: 'פגיעה במטרה = כבוד מהסמל!' }
+];
+var MAX_LIVES         = 3;
+var GAME_TIMER        = 0;
+var SHOW_FEEDBACK     = true;
+var FEEDBACK_DURATION = 2;
+var CORRECT_FEEDBACK  = 'כל הכבוד חייל! 🎖️ הסמל מרוצה!';
+var INCORRECT_FEEDBACK = 'טעות! הסמל מאוכזב... 😤';
+
+/* ============================================================
+   MOODLE CONFIG
+============================================================ */
+function applyMoodleConfig(cfg) {
+  if (!cfg) return;
+  if (cfg.questions) {
+    questionsSource = cfg.questions.map(function(q) {
+      return { q: q.q, a: q.options || q.a, c: q.correct !== undefined ? q.correct : q.c, explanation: q.explanation || '' };
+    });
+  }
+  if (cfg.lives !== undefined)             MAX_LIVES         = cfg.lives;
+  if (cfg.timer !== undefined)             GAME_TIMER        = cfg.timer;
+  if ('showFeedback' in cfg)               SHOW_FEEDBACK     = cfg.showFeedback;
+  if (cfg.feedbackDuration !== undefined)  FEEDBACK_DURATION = parseInt(cfg.feedbackDuration) || FEEDBACK_DURATION;
+  if (cfg.correctFeedback !== undefined)   CORRECT_FEEDBACK  = cfg.correctFeedback;
+  if (cfg.incorrectFeedback !== undefined) INCORRECT_FEEDBACK = cfg.incorrectFeedback;
+}
+try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
+
+/* ============================================================
+   CANVAS & CONSTANTS
+============================================================ */
+var canvas = document.getElementById('game-canvas');
+var ctx    = canvas.getContext('2d');
+var W = canvas.width, H = canvas.height;
+var GROUND_Y         = 415;
+var EVENTS_PER_Q     = 3;
+var WIN_SCORE        = questionsSource.length;
+var LANES            = [130, 220, 310]; // y-center of each target lane
+var _targetIdSeq     = 0;
+
+/* ============================================================
+   GAME STATE
+============================================================ */
+var gs = {
+  lives: MAX_LIVES, score: 0,
+  timerMs: 0, prevTs: 0,
+  running: false, paused: false,
+  eventCount: 0,
+  pool: [], poolIdx: 0,
+  fbTimeout: null, rafId: null,
+  samalMood: 'neutral',
+  samalMoodTimer: 0,
+  flashAlpha: 0,
+  spawnTimer: 0,
+  nextLane: 0
+};
+var targets   = [];
+var particles = [];
+
+/* ============================================================
+   QUESTION POOL
+============================================================ */
+function shuffle(arr) {
+  var a = arr.slice(), i, j, t;
+  for (i = a.length - 1; i > 0; i--) {
+    j = Math.floor(Math.random() * (i + 1));
+    t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function initPool()     { gs.pool = shuffle(questionsSource); gs.poolIdx = 0; }
+function nextQuestion() {
+  if (gs.poolIdx >= gs.pool.length) { gs.pool = shuffle(questionsSource); gs.poolIdx = 0; }
+  return gs.pool[gs.poolIdx++];
+}
+
+/* ============================================================
+   SOUNDS
+============================================================ */
+var _ac = null;
+function getAC() { if (!_ac) try { _ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return _ac; }
+function tone(freq, dur, type, vol, delay) {
+  try {
+    var a = getAC(); if (!a) return;
+    var o = a.createOscillator(), g = a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, a.currentTime);
+    var t = a.currentTime + (delay || 0);
+    g.gain.setValueAtTime(vol || 0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur);
+  } catch(e) {}
+}
+function sndShoot()    { tone(900, 0.025, 'square', 0.28); tone(500, 0.05, 'sawtooth', 0.18, 0.02); }
+function sndHit()      { tone(950, 0.03, 'square', 0.32); tone(600, 0.07, 'sawtooth', 0.22, 0.03); tone(300, 0.08, 'sawtooth', 0.12, 0.07); }
+function sndMiss()     { tone(220, 0.12, 'sawtooth', 0.18); tone(160, 0.15, 'sawtooth', 0.12, 0.1); }
+function sndCorrect()  { tone(523, 0.09, 'sine', 0.25); tone(659, 0.09, 'sine', 0.25, 0.1); tone(784, 0.18, 'sine', 0.3, 0.2); }
+function sndWrong()    { tone(280, 0.12, 'sawtooth', 0.2); tone(180, 0.18, 'sawtooth', 0.15, 0.11); }
+function sndWin()      { [523,659,784,1047].forEach(function(n,i){ tone(n,0.22,'sine',0.28,i*0.14); }); }
+function sndGameOver() { [392,330,294,262].forEach(function(n,i){ tone(n,0.28,'sawtooth',0.18,i*0.22); }); }
+
+/* ============================================================
+   DRAWING — BACKGROUND
+============================================================ */
+function drawBg() {
+  // Sky
+  var sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  sky.addColorStop(0,   '#5e8db8');
+  sky.addColorStop(0.65,'#b8d4e8');
+  sky.addColorStop(1,   '#d8b870');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, GROUND_Y);
+
+  // Sun
+  ctx.fillStyle = '#ffe066';
+  ctx.beginPath(); ctx.arc(46, 46, 30, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,220,80,0.12)';
+  ctx.beginPath(); ctx.arc(46, 46, 50, 0, Math.PI * 2); ctx.fill();
+
+  // Distant sand hills
+  ctx.fillStyle = '#c8a85a';
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y);
+  ctx.bezierCurveTo(70, GROUND_Y - 95, 160, GROUND_Y - 130, 250, GROUND_Y - 75);
+  ctx.bezierCurveTo(310, GROUND_Y - 45, 360, GROUND_Y - 105, W, GROUND_Y - 55);
+  ctx.lineTo(W, GROUND_Y); ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle = '#aa8a48';
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y);
+  ctx.bezierCurveTo(55, GROUND_Y - 50, 145, GROUND_Y - 72, 210, GROUND_Y - 38);
+  ctx.bezierCurveTo(270, GROUND_Y - 18, 330, GROUND_Y - 60, W, GROUND_Y - 28);
+  ctx.lineTo(W, GROUND_Y); ctx.closePath(); ctx.fill();
+
+  // Distant watchtower
+  ctx.fillStyle = '#7a6040';
+  ctx.fillRect(330, GROUND_Y - 95, 22, 95);
+  ctx.fillRect(322, GROUND_Y - 105, 38, 15);
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1;
+  for (var r = 0; r < 5; r++) {
+    ctx.beginPath(); ctx.moveTo(333, GROUND_Y - 95 + r * 20); ctx.lineTo(351, GROUND_Y - 95 + r * 20); ctx.stroke();
+  }
+  ctx.fillStyle = '#5a4530'; ctx.fillRect(325, GROUND_Y - 14, 36, 14);
+
+  // Lane track lines (dashed)
+  ctx.setLineDash([10, 14]);
+  ctx.lineWidth = 1;
+  for (var li = 0; li < LANES.length; li++) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.beginPath(); ctx.moveTo(0, LANES[li] + 38); ctx.lineTo(W, LANES[li] + 38); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Ground
+  var grd = ctx.createLinearGradient(0, GROUND_Y, 0, H);
+  grd.addColorStop(0, '#c09048'); grd.addColorStop(1, '#856030');
+  ctx.fillStyle = grd; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+
+  // Ground texture
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.lineWidth = 1;
+  for (var gy = GROUND_Y + 25; gy < H; gy += 28) {
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  }
+}
+
+function drawSandbags() {
+  var sbY = GROUND_Y - 10;
+  var cols = ['#8B7355','#9B8365','#7B6345'];
+  // Back row
+  for (var sx = -5; sx < W + 10; sx += 40) {
+    ctx.fillStyle = cols[Math.floor(sx / 40) % 3];
+    ctx.beginPath(); ctx.ellipse(sx + 20, sbY - 12, 21, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+  // Front row
+  for (var sx2 = 14; sx2 < W + 14; sx2 += 40) {
+    ctx.fillStyle = '#7a6040';
+    ctx.beginPath(); ctx.ellipse(sx2 + 20, sbY, 20, 11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+}
+
+/* ============================================================
+   DRAWING — TARGET
+============================================================ */
+function drawTarget(t) {
+  var x = t.x, y = t.y, tw = t.w, th = t.h, hr = t.headR;
+  ctx.save();
+
+  if (t.hit) {
+    ctx.globalAlpha = t.hitAlpha;
+    ctx.fillStyle = '#ff4400';
+    ctx.fillRect(x, y, tw, th + hr * 2);
+    // X mark
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + 4, y + 4); ctx.lineTo(x + tw - 4, y + th + hr * 2 - 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + tw - 4, y + 4); ctx.lineTo(x + 4, y + th + hr * 2 - 4); ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.beginPath(); ctx.ellipse(x + tw / 2, y + th + hr * 2 + 5, tw * 0.55, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+  // Post
+  ctx.fillStyle = '#4a3820';
+  ctx.fillRect(x + tw / 2 - 3, y + th + hr * 2 - 2, 6, 16);
+  // Base
+  ctx.fillStyle = '#3a2810';
+  ctx.fillRect(x + tw / 2 - 14, y + th + hr * 2 + 10, 28, 6);
+
+  // Body silhouette
+  ctx.fillStyle = t.color;
+  ctx.fillRect(x, y + hr * 2, tw, th);
+  // Wide shoulders
+  ctx.fillRect(x - 3, y + hr * 2, tw + 6, th * 0.18);
+
+  // Head
+  ctx.beginPath(); ctx.arc(x + tw / 2, y + hr, hr, 0, Math.PI * 2); ctx.fill();
+
+  // Helmet
+  ctx.fillStyle = '#192e0a';
+  ctx.beginPath(); ctx.arc(x + tw / 2, y + hr - 2, hr + 3, Math.PI, 0); ctx.fill();
+  ctx.fillRect(x + tw / 2 - hr - 4, y + hr - 2, (hr + 4) * 2, 4);
+
+  // Bullseye on chest
+  var bx = x + tw / 2, by = y + hr * 2 + th * 0.32;
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.arc(bx, by, 10, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(bx, by, 5,  0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.arc(bx, by, 2, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
+/* ============================================================
+   DRAWING — PARTICLES
+============================================================ */
+function drawParticles() {
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* ============================================================
+   DRAWING — SAMAL CHARACTER
+============================================================ */
+function drawSamal() {
+  var sx = W - 72, sy = GROUND_Y + 8;
+  var mood = gs.samalMood;
+
+  // Body
+  ctx.fillStyle = '#3a5a1a'; ctx.fillRect(sx + 6, sy + 28, 38, 52);
+
+  // Head
+  ctx.fillStyle = '#c89060';
+  ctx.beginPath(); ctx.arc(sx + 25, sy + 18, 17, 0, Math.PI * 2); ctx.fill();
+
+  // Officer cap
+  ctx.fillStyle = '#1a3a08'; ctx.fillRect(sx + 8, sy + 4, 34, 9);
+  ctx.fillStyle = '#2a5010'; ctx.fillRect(sx + 6, sy + 12, 38, 4);
+  ctx.fillStyle = '#d4a017'; ctx.fillRect(sx + 9, sy + 6, 32, 4);
+
+  // Eyes & expression
+  ctx.fillStyle = '#222';
+  if (mood === 'happy') {
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(sx + 17, sy + 19, 4, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx + 33, sy + 19, 4, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx + 25, sy + 24, 9, 0.1, Math.PI - 0.1); ctx.stroke();
+    // Stars (happy)
+    ctx.fillStyle = '#f1c40f'; ctx.font = '10px serif';
+    ctx.fillText('★', sx - 14, sy + 10);
+    ctx.fillText('★', sx + 50, sy + 10);
+  } else if (mood === 'angry') {
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(sx + 13, sy + 13); ctx.lineTo(sx + 21, sy + 17); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx + 37, sy + 13); ctx.lineTo(sx + 29, sy + 17); ctx.stroke();
+    ctx.fillRect(sx + 15, sy + 19, 5, 5);
+    ctx.fillRect(sx + 29, sy + 19, 5, 5);
+    ctx.beginPath(); ctx.arc(sx + 25, sy + 30, 8, Math.PI * 0.1, Math.PI * 0.9, true); ctx.stroke();
+  } else {
+    ctx.fillRect(sx + 17, sy + 17, 5, 5);
+    ctx.fillRect(sx + 31, sy + 17, 5, 5);
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(sx + 19, sy + 27); ctx.lineTo(sx + 31, sy + 27); ctx.stroke();
+  }
+
+  // Arms
+  ctx.strokeStyle = '#3a5a1a'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  if (mood === 'angry') {
+    ctx.beginPath(); ctx.moveTo(sx + 8,  sy + 40); ctx.lineTo(sx,      sy + 56); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx + 42, sy + 40); ctx.lineTo(sx + 52, sy + 56); ctx.stroke();
+  } else if (mood === 'happy') {
+    ctx.beginPath(); ctx.moveTo(sx + 8,  sy + 38); ctx.lineTo(sx - 6,  sy + 22); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx + 42, sy + 38); ctx.lineTo(sx + 58, sy + 22); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(sx + 8,  sy + 40); ctx.lineTo(sx + 2,  sy + 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx + 42, sy + 40); ctx.lineTo(sx + 48, sy + 60); ctx.stroke();
+  }
+
+  // Label
+  ctx.fillStyle = '#d4a017'; ctx.font = 'bold 9px Arial';
+  ctx.textAlign = 'center'; ctx.fillText('סמל', sx + 25, sy + 86); ctx.textAlign = 'right';
+
+  // Speech bubble
+  if (mood !== 'neutral') {
+    var bubble = mood === 'happy' ? '👍 כל הכבוד!' : '😤 לא טוב!';
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(sx - 94, sy - 14, 90, 28);
+    ctx.fillStyle = mood === 'happy' ? '#5dff88' : '#ff6b6b';
+    ctx.font = 'bold 11px Arial'; ctx.textAlign = 'right';
+    ctx.fillText(bubble, sx - 6, sy + 6); ctx.textAlign = 'right';
+  }
+}
+
+/* ============================================================
+   DRAWING — EVENT METER & PROGRESS
+============================================================ */
+function drawEventMeter() {
+  var filled = gs.eventCount % EVENTS_PER_Q;
+  var dotR = 7, spacing = 22, startX = 18, meterY = H - 22;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.42)';
+  ctx.fillRect(6, H - 34, EVENTS_PER_Q * spacing + 16, 26);
+
+  for (var di = 0; di < EVENTS_PER_Q; di++) {
+    ctx.fillStyle = di < filled ? '#f1c40f' : 'rgba(255,255,255,0.18)';
+    ctx.beginPath(); ctx.arc(startX + di * spacing, meterY, dotR, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = di < filled ? '#d4a017' : 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.font = '9px Arial'; ctx.textAlign = 'right';
+  ctx.fillText('עוד ' + (EVENTS_PER_Q - filled) + ' → שאלה', W - 8, H - 16);
+  ctx.textAlign = 'right';
+}
+
+function drawProgressBar() {
+  var pct = Math.min(1, gs.score / WIN_SCORE);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(6, H - 55, W - 12, 11);
+  if (pct > 0) {
+    var grad = ctx.createLinearGradient(6, 0, W - 12, 0);
+    grad.addColorStop(0, '#f1c40f'); grad.addColorStop(1, '#27ae60');
+    ctx.fillStyle = grad;
+    ctx.fillRect(6, H - 55, (W - 12) * pct, 11);
+  }
+  var remaining = Math.max(0, WIN_SCORE - gs.score);
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '9px Arial'; ctx.textAlign = 'center';
+  ctx.fillText(remaining > 0 ? 'עוד ' + remaining + ' תשובות נכונות לסיום' : '! כמעט סיימת', W / 2, H - 45);
+  ctx.textAlign = 'right';
+}
+
+/* ============================================================
+   HUD UPDATE
+============================================================ */
+function updateHUD() {
+  var bulls = '';
+  for (var i = 0; i < MAX_LIVES; i++) bulls += (i < gs.lives ? '🔫' : '💔');
+  document.getElementById('lives-display').textContent = bulls || '💀';
+  document.getElementById('score-display').textContent = 'ניקוד: ' + gs.score + ' / ' + WIN_SCORE;
+
+  var secs = Math.floor(gs.timerMs / 1000), displaySecs;
+  if (GAME_TIMER > 0) {
+    displaySecs = Math.max(0, GAME_TIMER - secs);
+    if (displaySecs <= 0 && gs.running && !gs.paused) { endGame(false, 'נגמר הזמן!'); return; }
+  } else {
+    displaySecs = secs;
+  }
+  var m = Math.floor(displaySecs / 60), s = displaySecs % 60;
+  document.getElementById('timer-display').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+/* ============================================================
+   TARGET SPAWNING
+============================================================ */
+function spawnTarget() {
+  if (!gs.running) return;
+  var fromRight = Math.random() > 0.5;
+  var lane = gs.nextLane;
+  gs.nextLane = (gs.nextLane + 1) % LANES.length;
+  if (Math.random() < 0.35) lane = Math.floor(Math.random() * LANES.length);
+
+  var speed = Math.min(1.4 + gs.score * 0.18 + Math.random() * 1.3, 5.8);
+  var tw = 34, hr = 10, th = 52;
+  var colors = ['#2d4020','#3a5010','#1e3018'];
+
+  targets.push({
+    id: _targetIdSeq++,
+    x: fromRight ? W + 12 : -tw - 12,
+    y: LANES[lane] - hr * 2,
+    w: tw, h: th, headR: hr,
+    vx: fromRight ? -speed : speed,
+    hit: false, escaped: false,
+    hitAlpha: 1,
+    color: colors[lane]
+  });
+}
+
+/* ============================================================
+   HIT PARTICLES
+============================================================ */
+function spawnParticles(cx, cy) {
+  var pcolors = ['#ff6600','#ffaa00','#ff3300','#ffdd00'];
+  for (var pi = 0; pi < 9; pi++) {
+    var angle = (pi / 9) * Math.PI * 2;
+    var spd = 2.5 + Math.random() * 3;
+    particles.push({ x: cx, y: cy, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd - 1,
+      r: 3 + Math.random() * 3, alpha: 1, color: pcolors[pi % 4] });
+  }
+}
+
+/* ============================================================
+   REGISTER EVENT → every EVENTS_PER_Q triggers question
+   returns true if question was shown
+============================================================ */
+function registerEvent() {
+  gs.eventCount++;
+  if (gs.eventCount % EVENTS_PER_Q === 0) { showQuestion(); return true; }
+  return false;
+}
+
+/* ============================================================
+   GAME LOOP
+============================================================ */
+function loop(ts) {
+  if (!gs.running) return;
+
+  var dt = gs.prevTs ? Math.min(ts - gs.prevTs, 80) : 16;
+  gs.prevTs = ts;
+
+  if (!gs.paused) {
+    gs.timerMs += dt;
+
+    // Samal mood countdown
+    if (gs.samalMoodTimer > 0) { gs.samalMoodTimer -= dt; if (gs.samalMoodTimer <= 0) gs.samalMood = 'neutral'; }
+    // Flash fade
+    if (gs.flashAlpha > 0) gs.flashAlpha = Math.max(0, gs.flashAlpha - dt * 0.003);
+
+    // Spawn
+    gs.spawnTimer += dt;
+    var spawnInt = Math.max(550, 2100 - gs.score * 90);
+    if (gs.spawnTimer >= spawnInt) {
+      gs.spawnTimer = 0;
+      spawnTarget();
+      if (gs.score >= 4 && Math.random() < 0.28) setTimeout(spawnTarget, 450);
+    }
+
+    // Update targets
+    for (var i = targets.length - 1; i >= 0; i--) {
+      var t = targets[i];
+      if (t.hit) {
+        t.hitAlpha -= dt * 0.0028;
+        if (t.hitAlpha <= 0) targets.splice(i, 1);
+        continue;
+      }
+      t.x += t.vx * (dt / 16);
+      // Escaped?
+      if ((t.vx < 0 && t.x + t.w < -18) || (t.vx > 0 && t.x > W + 18)) {
+        t.escaped = true;
+        targets.splice(i, 1);
+        gs.samalMood = 'angry'; gs.samalMoodTimer = 1800;
+        sndMiss();
+        if (registerEvent()) return;
+      }
+    }
+
+    // Update particles
+    for (var pi = particles.length - 1; pi >= 0; pi--) {
+      var p = particles[pi];
+      p.x += p.vx * (dt / 16); p.y += p.vy * (dt / 16);
+      p.vy += 0.12 * (dt / 16);
+      p.alpha -= dt * 0.0022;
+      if (p.alpha <= 0) particles.splice(pi, 1);
+    }
+  }
+
+  // Render
+  ctx.clearRect(0, 0, W, H);
+  drawBg();
+
+  if (gs.flashAlpha > 0) {
+    ctx.fillStyle = 'rgba(255,80,0,' + gs.flashAlpha * 0.35 + ')';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  for (var ti = 0; ti < targets.length; ti++) drawTarget(targets[ti]);
+  drawParticles();
+  drawSandbags();
+  drawSamal();
+  drawProgressBar();
+  drawEventMeter();
+  updateHUD();
+
+  gs.rafId = requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   SHOOT
+============================================================ */
+function shoot(cx, cy) {
+  if (!gs.running || gs.paused) return;
+  sndShoot();
+
+  // Check targets back-to-front
+  for (var i = targets.length - 1; i >= 0; i--) {
+    var t = targets[i];
+    if (t.hit || t.escaped) continue;
+    if (cx >= t.x - 10 && cx <= t.x + t.w + 10 && cy >= t.y - 10 && cy <= t.y + t.h + t.headR * 2 + 10) {
+      t.hit = true; t.hitAlpha = 1;
+      sndHit();
+      spawnParticles(t.x + t.w / 2, t.y + t.h / 2);
+      gs.samalMood = 'happy'; gs.samalMoodTimer = 1800;
+      gs.flashAlpha = 1;
+      if (registerEvent()) return;
+      return;
+    }
+  }
+  // Miss on empty area — small flash particle
+  particles.push({ x: cx, y: cy, vx: 0, vy: -0.5, r: 5, alpha: 0.6, color: 'rgba(255,220,100,0.9)' });
+}
+
+/* ============================================================
+   QUESTIONS
+============================================================ */
+function showQuestion() {
+  gs.paused = true;
+  var q = nextQuestion();
+  document.getElementById('question-overlay').classList.remove('hidden');
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('feedback-msg').textContent = '';
+  document.getElementById('feedback-msg').className = '';
+  document.getElementById('explanation-text').textContent = '';
+
+  var btnsEl = document.getElementById('answer-buttons');
+  btnsEl.innerHTML = '';
+  q.a.forEach(function(ans, idx) {
+    var btn = document.createElement('button');
+    btn.className = 'ans-btn'; btn.textContent = ans;
+    btn.onclick = function() { answer(idx, q); };
+    btnsEl.appendChild(btn);
+  });
+  gs.rafId = requestAnimationFrame(loop);
+}
+
+function answer(chosen, q) {
+  document.querySelectorAll('.ans-btn').forEach(function(b, i) {
+    b.disabled = true;
+    if (i === q.c)         b.classList.add('correct');
+    else if (i === chosen) b.classList.add('wrong');
+  });
+
+  var correct = (chosen === q.c);
+  var fbEl = document.getElementById('feedback-msg');
+  var explEl = document.getElementById('explanation-text');
+
+  if (correct) {
+    gs.score++;
+    sndCorrect();
+    gs.samalMood = 'happy'; gs.samalMoodTimer = 2500;
+    if (SHOW_FEEDBACK) { fbEl.textContent = CORRECT_FEEDBACK; fbEl.className = 'correct'; }
+    var _sc = Math.floor(gs.timerMs / 1000);
+    try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sc, isfinished: false }, '*'); } catch(e) {}
+    if (gs.score >= WIN_SCORE) {
+      document.getElementById('question-overlay').classList.add('hidden');
+      endGame(true, '');
+      return;
+    }
+  } else {
+    gs.lives--;
+    sndWrong();
+    gs.samalMood = 'angry'; gs.samalMoodTimer = 2500;
+    if (SHOW_FEEDBACK) { fbEl.textContent = INCORRECT_FEEDBACK; fbEl.className = 'wrong'; }
+    var _sw = Math.floor(gs.timerMs / 1000);
+    try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sw, isfinished: false }, '*'); } catch(e) {}
+  }
+
+  if (SHOW_FEEDBACK && q.explanation) explEl.textContent = q.explanation;
+
+  var delay = SHOW_FEEDBACK ? FEEDBACK_DURATION * 1000 : 350;
+  if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
+  gs.fbTimeout = setTimeout(function() {
+    document.getElementById('question-overlay').classList.add('hidden');
+    if (gs.lives <= 0) { endGame(false, 'אין יותר חיים!'); return; }
+    gs.paused = false; gs.prevTs = 0;
+  }, delay);
+}
+
+/* ============================================================
+   END GAME
+============================================================ */
+function endGame(won, reason) {
+  gs.running = false; gs.paused = false;
+  var secs = Math.floor(gs.timerMs / 1000);
+  try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: secs, isfinished: true }, '*'); } catch(e) {}
+  if (won) sndWin(); else sndGameOver();
+  var m = Math.floor(secs / 60), s = secs % 60;
+  var t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById('gameover-title').textContent = won ? '🎖️ עברת את מבחן הסמל!' : ('😤 ' + reason);
+  document.getElementById('gameover-desc').textContent  = won ? 'הסמל מרוצה ממך! חייל מקצועי!' : 'הסמל מאוכזב... נסה שוב חייל!';
+  document.getElementById('final-score').textContent    = 'ניקוד: ' + gs.score + ' | זמן: ' + t;
+  document.getElementById('gameover-screen').classList.remove('hidden');
+}
+
+/* ============================================================
+   START / RESTART
+============================================================ */
+function startGame() {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('gameover-screen').classList.add('hidden');
+  document.getElementById('question-overlay').classList.add('hidden');
+
+  WIN_SCORE = questionsSource.length;
+  gs.lives       = MAX_LIVES; gs.score       = 0;
+  gs.timerMs     = 0;         gs.prevTs      = 0;
+  gs.running     = true;      gs.paused      = false;
+  gs.eventCount  = 0;         gs.poolIdx     = 0;
+  gs.samalMood   = 'neutral'; gs.samalMoodTimer = 0;
+  gs.flashAlpha  = 0;         gs.spawnTimer  = 0;
+  gs.nextLane    = 0;
+  if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
+  targets.length = 0; particles.length = 0;
+  _targetIdSeq   = 0;
+
+  initPool();
+  try { window.parent.postMessage({ type: 'GAME_START' }, '*'); } catch(e) {}
+  if (gs.rafId) cancelAnimationFrame(gs.rafId);
+  gs.rafId = requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   EVENTS
+============================================================ */
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('restart-btn').addEventListener('click', startGame);
+
+canvas.addEventListener('click', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  shoot((e.clientX - rect.left) * (W / rect.width), (e.clientY - rect.top) * (H / rect.height));
+});
+canvas.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  var rect = canvas.getBoundingClientRect(), touch = e.touches[0];
+  shoot((touch.clientX - rect.left) * (W / rect.width), (touch.clientY - rect.top) * (H / rect.height));
+}, { passive: false });
+
+/* ============================================================
+   INITIAL STATIC FRAME
+============================================================ */
+(function() {
+  var sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  sky.addColorStop(0, '#5e8db8'); sky.addColorStop(1, '#d8b870');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#c09048'; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+  ctx.font = '52px serif'; ctx.textAlign = 'center';
+  ctx.fillText('🎯', W / 2, H / 2);
+  ctx.textAlign = 'right';
+}());
+</script>
+</body>
+</html>

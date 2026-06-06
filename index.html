@@ -1799,7 +1799,7 @@ function showGameOver(won) {
 4. Visually rich: particles, explosions, screen shake, smooth animations — make it feel alive
 5. Sound effects via Web Audio API (hits, wins, fails)
 6. Keyboard + touch support for mobile
-7. The game IS the experience — questions are a mechanic integrated into real gameplay
+7. The game IS the experience — questions appear as natural pause moments between gameplay bursts
 8. Correct answer → visual reward (explosion, color burst, power-up); wrong answer → penalty (flash, shake, life lost animation)
 
 ## 💡 Game Design Philosophy
@@ -1812,12 +1812,32 @@ The `questionsSource` array is a placeholder. Real questions are generated from 
 * What is the most exciting moment?
 * What happens visually on correct/wrong answers?
 
-Examples:
+### ⚠️ Question Integration Pattern — CRITICAL
 
-* Shooter: enemy crosses screen → question appears → correct = fire → enemy explodes
-* Runner: obstacle ahead → answer correctly to boost, wrong = slowdown
-* Tower defense: wave of enemies → each triggers a question → correct = defeated with animation
-* Radar: blip appears → answer to lock on → correct = intercept with explosion
+Questions appear as a **PAUSE overlay** every 2–3 gameplay events. They are **NOT** embedded inside game objects.
+
+**The correct loop:**
+1. Game runs normally (player shoots, jumps, taps targets...)
+2. After 2–3 events (hits, misses, obstacles cleared, enemies defeated) → game FREEZES
+3. Question overlay appears on top of the frozen canvas
+4. Player clicks an answer button → feedback shown → overlay closes → game RESUMES
+5. Repeat until all questions answered or lives run out
+
+**DO NOT do this (wrong approach):**
+* Enemies or bubbles labeled with answer text that the player shoots/pops to answer
+* Answer options floating as game objects inside the play area
+* Any mechanic where choosing the answer IS the game action
+
+**DO this instead (correct approach):**
+* Keep game actions simple (jump, tap, shoot) — completely separate from answering
+* Count gameplay events with a counter (e.g. `eventCount`)
+* Every N events: `paused = true` → show question modal → wait for answer → `paused = false`
+
+Examples:
+* Shooter: after 3 shots (hit or miss) → game pauses → question overlay → answer → resume
+* Runner: after 3 obstacles (cleared or hit) → game pauses → question overlay → answer → resume
+* Tower defense: after each wave ends → question overlay → answer → next wave starts
+* Tap targets: after 3 target events (hit + escaped) → game pauses → question overlay → answer → resume
 
 ## 🚫 Hard Constraints (iframe + mobile compatibility)
 
@@ -1863,6 +1883,10 @@ Before finishing, verify every item:
             <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--color-teal-light);"></i>
             קצת השראה — לחץ על רעיון כדי למלא את הטופס אוטומטית:
           </div>
+          <div style="display:flex;align-items:flex-start;gap:7px;background:rgba(0,196,212,0.07);border:1px solid rgba(0,196,212,0.22);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px;color:var(--color-text-body);line-height:1.5;">
+            <i data-lucide="info" style="width:13px;height:13px;color:var(--color-teal-light);flex-shrink:0;margin-top:2px;"></i>
+            <span><strong>מנגנון שאלות בכל המשחקים:</strong> שאלה = הפסקה (overlay) שעוצרת את המשחק כל 2–3 אירועים (פגיעות, פספוסים, מכשולים) — <strong>לא מוטמעת בתוך אובייקטי המשחק עצמו</strong>. המשחק רץ רגיל ← N אירועים ← שאלה עוצרת ← תשובה ← ממשיכים.</span>
+          </div>
           <div class="gallery-grid">
             <div class="gallery-card" onclick="selectInspirationCard(this,'ירי (Shooter)','תת-ימי / חלל (רחוק, מסתורי)','אינטנסיבי','חללית ישראלית שטה בחלל אינסופי. אסטרואידים ניאון ניגשים מכל כיוון — יריה מדויקת מפוצצת אותם עם אפקטי אש מרשימים. המשחק הוא ארקייד רציף: יורים, מתחמקים, מצברים קומבו. שאלה קופצת רק אחרי ניקוי גל שלם של אסטרואידים, או אחרי התנגשות שמורידה חיים — בממוצע 20-30 שניות משחק טהור בין שאלה לשאלה.')">
               <div class="gallery-card-icon">🚀</div>
@@ -1904,6 +1928,11 @@ Before finishing, verify every item:
               <div class="gallery-card-name">ניקוי מוקשים</div>
               <div class="gallery-card-desc">מתח שקט, שאלה לפני כל פינוי</div>
             </div>
+            <div class="gallery-card" onclick="selectInspirationCard(this,'גלריית ירי / לחיצה','צבאי-ישראלי (כלי נשק, מדים, רקע מדברי)','אינטנסיבי','טווח ירי צבאי מדברי: סילואטי מטרות עפות לכיוונים שונים לאורך 3 מסלולים. השחקן לוחץ/מקיש על מטרה לפגיעה — פספוס = מטרה בורחת. אחרי כל 3 אירועים (פגיעות + פספוסים) — המשחק נעצר ושאלה קופצת. ענה נכון = הסמל מרוצה, שגוי = אבדן חיים. מהירות המטרות עולה עם הציון — מתח גובר.')">
+              <div class="gallery-card-icon">🎯</div>
+              <div class="gallery-card-name">גלריית ירי</div>
+              <div class="gallery-card-desc">לחץ מטרות נעות, שאלה כל 3 אירועים</div>
+            </div>
           </div>
         </div>
 
@@ -1929,6 +1958,7 @@ Before finishing, verify every item:
                 <option value="מרוץ (Racing)">מרוץ (Racing)</option>
                 <option value="פאזל / אסטרטגיה">פאזל / אסטרטגיה</option>
                 <option value="Tower Defense">Tower Defense</option>
+                <option value="גלריית ירי / לחיצה">גלריית ירי / לחיצה</option>
                 <option value="חפשי — AI יחליט">חפשי — AI יחליט</option>
               </select>
             </div>
