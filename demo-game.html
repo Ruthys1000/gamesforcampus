@@ -180,7 +180,7 @@
 <div id="hud">
   <div id="lives-display">❤️❤️❤️</div>
   <div id="sgt-bar-wrap">
-    <span title="הרס&quot;ר">😤</span>
+    <span style="font-size:11px;color:#aaa;">רס"ר</span>
     <div id="sgt-bar"><div id="sgt-fill"></div></div>
     <span title="ספר">✂️</span>
   </div>
@@ -300,7 +300,7 @@ var gs = {
   rafId: null
 };
 
-var soldier = { x: 78, y: GROUND - 46, vy: 0, jumping: false, frame: 0, frameMs: 0 };
+var soldier = { x: 115, y: GROUND - 46, vy: 0, jumping: false, frame: 0, frameMs: 0 };
 var obstacles = [];
 var obsTimer = 0;
 var bgScroll = 0;
@@ -419,15 +419,6 @@ function drawObstacles() {
   }
 }
 
-function drawSergeant() {
-  var p  = gs.sgtProximity / 100;
-  var sx = W - 18 - p * 90;
-  var sz = 22 + p * 22;
-  ctx.globalAlpha = 0.28 + p * 0.72;
-  ctx.font = sz + 'px serif';
-  ctx.fillText('😤', sx, GROUND + 2);
-  ctx.globalAlpha = 1;
-}
 
 function drawBarber() {
   // Building walls
@@ -447,45 +438,23 @@ function drawBarber() {
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 9px Arial';
   ctx.fillText('✂️  ס פ ר', 7, GROUND - 74);
-  // Barber pole
+  // Barber pole — clipped to pole rect so stripes never bleed outside
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(48, GROUND - 72, 6, 72);
+  ctx.clip();
   ctx.fillStyle = '#fff';
   ctx.fillRect(48, GROUND - 72, 6, 72);
   var stripeH = 10, stripeOff = Math.floor(bgScroll * 0.5) % (stripeH * 2);
   ctx.fillStyle = '#e74c3c';
   for (var si = -1; si < 8; si++) {
-    var sy = GROUND - 72 + si * stripeH * 2 + stripeOff;
-    ctx.fillRect(48, Math.max(GROUND - 72, sy), 6, Math.min(stripeH, GROUND - Math.max(GROUND - 72, sy)));
+    ctx.fillRect(48, GROUND - 72 + si * stripeH * 2 + stripeOff, 6, stripeH);
   }
+  ctx.restore();
   ctx.fillStyle = '#bbb';
   ctx.beginPath(); ctx.arc(51, GROUND - 72, 5, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(51, GROUND, 5, 0, Math.PI*2); ctx.fill();
 }
 
-/* sergeant speech bubble state */
-var sgtBubble = { msg: '', timer: 0 };
-var SGT_PHRASES = ['עמוד!', 'תסתפר!', 'חייל!', 'לאן?!', 'אסור!', 'תחזור!'];
-
-function drawSgtBubble() {
-  if (!sgtBubble.msg) return;
-  var p  = gs.sgtProximity / 100;
-  var sx = W - 18 - p * 90 + 10;
-  var by = GROUND - 62, bx = sx - 54, bw = 50, bh = 20;
-  ctx.fillStyle = '#fff';
-  ctx.strokeStyle = '#c0392b';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  if (ctx.roundRect) { ctx.roundRect(bx, by, bw, bh, 5); } else { ctx.rect(bx, by, bw, bh); }
-  ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.moveTo(sx - 4, GROUND - 30);
-  ctx.lineTo(sx - 12, GROUND - 42);
-  ctx.lineTo(sx - 22, GROUND - 42);
-  ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#c0392b';
-  ctx.font = 'bold 11px Arial';
-  ctx.fillText(sgtBubble.msg, bx + 5, by + 13);
-}
 
 function drawProgressBar() {
   var pct       = Math.min(1, gs.score / WIN_SCORE);
@@ -542,16 +511,6 @@ function loop(ts) {
     // Sergeant creeps closer
     gs.sgtProximity = Math.min(100, gs.sgtProximity + dt * 0.005);
     if (gs.sgtProximity >= 100) { endGame(false, 'הרס"ר תפס אותך!'); return; }
-
-    // Sergeant speech bubble
-    if (gs.sgtProximity > 45) {
-      sgtBubble.timer += dt;
-      if (sgtBubble.timer > 2800) {
-        sgtBubble.timer = 0;
-        sgtBubble.msg = SGT_PHRASES[Math.floor(Math.random() * SGT_PHRASES.length)];
-        setTimeout(function() { sgtBubble.msg = ''; }, 1400);
-      }
-    }
 
     // Footstep rhythm
     gs._stepTimer = (gs._stepTimer || 0) + dt;
@@ -611,8 +570,6 @@ function loop(ts) {
   drawBarber();
   drawObstacles();
   drawSoldier();
-  drawSergeant();
-  drawSgtBubble();
   drawProgressBar();
   updateHUD();
 
@@ -768,8 +725,6 @@ function startGame() {
   obsTimer  = 0;
   bgScroll  = 0;
   cloudX    = W;
-  sgtBubble.msg   = '';
-  sgtBubble.timer = 0;
   gs._stepTimer   = 0;
 
   initPool();
