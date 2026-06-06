@@ -192,10 +192,14 @@
 <!-- Start Screen -->
 <div id="start-screen" class="overlay">
   <div class="overlay-box">
-    <h1>🏃 חייל בורח מהרס"ר ✂️</h1>
-    <p>הרס"ר שם עינו עליך — עשיר שנה שלא הסתפרת!</p>
-    <p>קפוץ מעל מכשולים, ענה נכון על שאלות, והגע לספר לפני שייתפס!</p>
-    <p style="color:#888;font-size:12px;">Space / נגיעה על המסך = קפיצה</p>
+    <h1>✂️ חייל בורח מהרס"ר 😤</h1>
+    <div style="background:#2a4d10;border-radius:10px;padding:10px 12px;margin:8px 0;text-align:right;">
+      <p style="color:#fff;font-size:14px;font-weight:bold;margin-bottom:4px;">המשימה:</p>
+      <p>הרס"ר גילה שלא הסתפרת — הוא רודף אחריך! 🏃‍♂️💨😤</p>
+      <p>הגע לספר <strong>✂️</strong> (בצד שמאל) לפני שהוא תופס אותך!</p>
+    </div>
+    <p>📦 קפוץ מעל מכשולים&emsp;|&emsp;✅ ענה נכון = הרס"ר מתרחק</p>
+    <p style="color:#aaa;font-size:12px;margin-top:6px;">Space / נגיעה = קפיצה</p>
     <button class="btn-game" id="start-btn">התחל לרוץ! 🏃</button>
   </div>
 </div>
@@ -325,6 +329,34 @@ function nextQuestion() {
 }
 
 /* ============================================================
+   SOUNDS  (Web Audio API — no external files)
+============================================================ */
+var _ac = null;
+function getAC() {
+  if (!_ac) try { _ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  return _ac;
+}
+function tone(freq, dur, type, vol, delay) {
+  try {
+    var a = getAC(); if (!a) return;
+    var o = a.createOscillator(), g = a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, a.currentTime);
+    var t = a.currentTime + (delay || 0);
+    g.gain.setValueAtTime(vol || 0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur);
+  } catch(e) {}
+}
+function sndJump()     { tone(380, 0.07, 'square', 0.15); tone(560, 0.06, 'square', 0.1, 0.06); }
+function sndCorrect()  { tone(523, 0.09, 'sine', 0.25); tone(659, 0.09, 'sine', 0.25, 0.1); tone(784, 0.18, 'sine', 0.3, 0.2); }
+function sndWrong()    { tone(280, 0.12, 'sawtooth', 0.2); tone(180, 0.18, 'sawtooth', 0.15, 0.11); }
+function sndHit()      { tone(160, 0.18, 'sawtooth', 0.28); tone(110, 0.1, 'sawtooth', 0.18, 0.1); }
+function sndWin()      { [523,659,784,1047].forEach(function(n,i){ tone(n,0.22,'sine',0.28,i*0.14); }); }
+function sndGameOver() { [392,330,294,262].forEach(function(n,i){ tone(n,0.28,'sawtooth',0.18,i*0.22); }); }
+
+/* ============================================================
    DRAWING
 ============================================================ */
 function drawBg() {
@@ -398,23 +430,74 @@ function drawSergeant() {
 }
 
 function drawBarber() {
-  ctx.font = '26px serif';
-  ctx.fillText('✂️', 8, GROUND - 8);
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font = 'bold 10px Arial';
-  ctx.fillText('ספר', 8, GROUND + 14);
+  // Building walls
+  ctx.fillStyle = '#f0ddb0';
+  ctx.fillRect(2, GROUND - 68, 46, 68);
+  // Roof
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(0, GROUND - 74, 50, 8);
+  // Door
+  ctx.fillStyle = '#6b3310';
+  ctx.fillRect(16, GROUND - 32, 18, 32);
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath(); ctx.arc(30, GROUND - 16, 2, 0, Math.PI*2); ctx.fill();
+  // Sign
+  ctx.fillStyle = '#d63031';
+  ctx.fillRect(4, GROUND - 84, 42, 14);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 9px Arial';
+  ctx.fillText('✂️  ס פ ר', 7, GROUND - 74);
+  // Barber pole
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(48, GROUND - 72, 6, 72);
+  var stripeH = 10, stripeOff = Math.floor(bgScroll * 0.5) % (stripeH * 2);
+  ctx.fillStyle = '#e74c3c';
+  for (var si = -1; si < 8; si++) {
+    var sy = GROUND - 72 + si * stripeH * 2 + stripeOff;
+    ctx.fillRect(48, Math.max(GROUND - 72, sy), 6, Math.min(stripeH, GROUND - Math.max(GROUND - 72, sy)));
+  }
+  ctx.fillStyle = '#bbb';
+  ctx.beginPath(); ctx.arc(51, GROUND - 72, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(51, GROUND, 5, 0, Math.PI*2); ctx.fill();
+}
+
+/* sergeant speech bubble state */
+var sgtBubble = { msg: '', timer: 0 };
+var SGT_PHRASES = ['עמוד!', 'תסתפר!', 'חייל!', 'לאן?!', 'אסור!', 'תחזור!'];
+
+function drawSgtBubble() {
+  if (!sgtBubble.msg) return;
+  var p  = gs.sgtProximity / 100;
+  var sx = W - 18 - p * 90 + 10;
+  var by = GROUND - 62, bx = sx - 54, bw = 50, bh = 20;
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#c0392b';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  if (ctx.roundRect) { ctx.roundRect(bx, by, bw, bh, 5); } else { ctx.rect(bx, by, bw, bh); }
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(sx - 4, GROUND - 30);
+  ctx.lineTo(sx - 12, GROUND - 42);
+  ctx.lineTo(sx - 22, GROUND - 42);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c0392b';
+  ctx.font = 'bold 11px Arial';
+  ctx.fillText(sgtBubble.msg, bx + 5, by + 13);
 }
 
 function drawProgressBar() {
-  // small "reach barber" bar at bottom
-  var pct = Math.min(1, gs.score / WIN_SCORE);
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(8, H - 14, W - 16, 8);
-  ctx.fillStyle = '#5dff88';
-  ctx.fillRect(8, H - 14, (W - 16) * pct, 8);
+  var pct       = Math.min(1, gs.score / WIN_SCORE);
+  var remaining = Math.max(0, WIN_SCORE - gs.score);
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(56, H - 16, W - 64, 9);
+  ctx.fillStyle = pct > 0.7 ? '#5dff88' : '#f1c40f';
+  ctx.fillRect(56, H - 16, (W - 64) * pct, 9);
   ctx.fillStyle = '#fff';
-  ctx.font = '9px Arial';
-  ctx.fillText('התקדמות אל הספר', W / 2 - 38, H - 6);
+  ctx.font = 'bold 9px Arial';
+  var label = remaining > 0 ? 'עוד ' + remaining + ' שאלות נכונות לספר ✂️' : '!הגע לספר';
+  ctx.fillText(label, 58, H - 8);
 }
 
 /* ============================================================
@@ -459,6 +542,23 @@ function loop(ts) {
     // Sergeant creeps closer
     gs.sgtProximity = Math.min(100, gs.sgtProximity + dt * 0.005);
     if (gs.sgtProximity >= 100) { endGame(false, 'הרס"ר תפס אותך!'); return; }
+
+    // Sergeant speech bubble
+    if (gs.sgtProximity > 45) {
+      sgtBubble.timer += dt;
+      if (sgtBubble.timer > 2800) {
+        sgtBubble.timer = 0;
+        sgtBubble.msg = SGT_PHRASES[Math.floor(Math.random() * SGT_PHRASES.length)];
+        setTimeout(function() { sgtBubble.msg = ''; }, 1400);
+      }
+    }
+
+    // Footstep rhythm
+    gs._stepTimer = (gs._stepTimer || 0) + dt;
+    if (gs._stepTimer > 320 && !soldier.jumping) {
+      gs._stepTimer = 0;
+      tone(90, 0.04, 'sawtooth', 0.07);
+    }
 
     // Obstacle spawning (speeds up with score)
     obsTimer += dt;
@@ -512,6 +612,7 @@ function loop(ts) {
   drawObstacles();
   drawSoldier();
   drawSergeant();
+  drawSgtBubble();
   drawProgressBar();
   updateHUD();
 
@@ -526,6 +627,7 @@ function jump() {
   if (!soldier.jumping && soldier.y >= GROUND - 52) {
     soldier.vy = -22;
     soldier.jumping = true;
+    sndJump();
   }
 }
 
@@ -539,6 +641,7 @@ function hitObstacle() {
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _secs, isfinished: false }, '*'); } catch(e) {}
   // count toward question trigger even on hits
   gs.obstaclesCleared++;
+  sndHit();
   canvas.style.filter = 'brightness(0.25)';
   setTimeout(function() { canvas.style.filter = ''; }, 280);
   if (gs.lives <= 0) { endGame(false, 'כל החיים נגמרו!'); return; }
@@ -585,6 +688,7 @@ function answer(chosen, q) {
   if (correct) {
     gs.score++;
     gs.sgtProximity = Math.max(0, gs.sgtProximity - 28);
+    sndCorrect();
     if (SHOW_FEEDBACK) { fbEl.textContent = CORRECT_FEEDBACK; fbEl.className = 'correct'; }
     var _sc = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sc, isfinished: false }, '*'); } catch(e) {}
@@ -596,6 +700,7 @@ function answer(chosen, q) {
   } else {
     gs.lives--;
     gs.sgtProximity = Math.min(100, gs.sgtProximity + 22);
+    sndWrong();
     if (SHOW_FEEDBACK) { fbEl.textContent = INCORRECT_FEEDBACK; fbEl.className = 'wrong'; }
     var _sw = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sw, isfinished: false }, '*'); } catch(e) {}
@@ -622,6 +727,7 @@ function endGame(won, reason) {
   gs.paused  = false;
   var secs = Math.floor(gs.timerMs / 1000);
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: secs, isfinished: true }, '*'); } catch(e) {}
+  if (won) { sndWin(); } else { sndGameOver(); }
 
   var m = Math.floor(secs / 60), s = secs % 60;
   var t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
@@ -662,6 +768,9 @@ function startGame() {
   obsTimer  = 0;
   bgScroll  = 0;
   cloudX    = W;
+  sgtBubble.msg   = '';
+  sgtBubble.timer = 0;
+  gs._stepTimer   = 0;
 
   initPool();
 
