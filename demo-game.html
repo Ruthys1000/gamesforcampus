@@ -371,17 +371,12 @@ function drawBg() {
 }
 
 function drawSoldier() {
-  // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.beginPath();
   ctx.ellipse(soldier.x, GROUND + 3, 19, 5, 0, 0, Math.PI * 2);
   ctx.fill();
-
-  ctx.font = '42px serif';
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.fillText('🏃', -(soldier.x + 21), soldier.y + 42);
-  ctx.restore();
+  ctx.font = '40px serif';
+  ctx.fillText('🏃', soldier.x - 20, soldier.y + 40);
 }
 
 function drawObstacles() {
@@ -473,10 +468,11 @@ function loop(ts) {
       obstacles.push({ x: W + 10, y: GROUND - 36, type: Math.floor(Math.random() * 3) });
     }
 
-    // Soldier physics
+    // Soldier physics — dt-normalised to 60fps
     if (soldier.jumping || soldier.y < GROUND - 46) {
-      soldier.vy += 0.95;
-      soldier.y  += soldier.vy;
+      var dtF = dt / 16.67;
+      soldier.vy += 0.7 * dtF;
+      soldier.y  += soldier.vy * dtF;
       if (soldier.y >= GROUND - 46) {
         soldier.y      = GROUND - 46;
         soldier.vy     = 0;
@@ -527,8 +523,8 @@ function loop(ts) {
 ============================================================ */
 function jump() {
   if (!gs.running || gs.paused) return;
-  if (!soldier.jumping && soldier.y >= GROUND - 50) {
-    soldier.vy = -17;
+  if (!soldier.jumping && soldier.y >= GROUND - 52) {
+    soldier.vy = -22;
     soldier.jumping = true;
   }
 }
@@ -541,9 +537,12 @@ function hitObstacle() {
   gs.sgtProximity = Math.min(100, gs.sgtProximity + 18);
   var _secs = Math.floor(gs.timerMs / 1000);
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _secs, isfinished: false }, '*'); } catch(e) {}
-  if (gs.lives <= 0) { endGame(false, 'כל החיים נגמרו!'); return; }
+  // count toward question trigger even on hits
+  gs.obstaclesCleared++;
   canvas.style.filter = 'brightness(0.25)';
   setTimeout(function() { canvas.style.filter = ''; }, 280);
+  if (gs.lives <= 0) { endGame(false, 'כל החיים נגמרו!'); return; }
+  if (gs.obstaclesCleared % OBS_PER_QUESTION === 0) { showQuestion(); return; }
   gs.rafId = requestAnimationFrame(loop);
 }
 
@@ -701,10 +700,8 @@ canvas.addEventListener('touchstart', function(e) { e.preventDefault(); jump(); 
   ctx.fillRect(0, GROUND, W, H - GROUND);
   ctx.fillStyle = '#4A5E3A';
   ctx.fillRect(0, GROUND, W, 5);
-  ctx.font = '42px serif';
-  ctx.save(); ctx.scale(-1, 1);
-  ctx.fillText('🏃', -(soldier.x + 21), GROUND - 4);
-  ctx.restore();
+  ctx.font = '40px serif';
+  ctx.fillText('🏃', soldier.x - 20, GROUND - 6);
 }());
 </script>
 </body>
