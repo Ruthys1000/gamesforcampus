@@ -1584,11 +1584,11 @@
           מה המשחק שלך חייב לכלול
         </div>
         <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:8px;">
-          למידע בלבד — <strong style="color:var(--color-teal-dark)">הפרומפט שתעתיק כבר כולל את כל 20 הדרישות האלה</strong>, ה-AI יבנה לפיהן אוטומטית.
+          למידע בלבד — <strong style="color:var(--color-teal-dark)">הפרומפט שתעתיק כבר כולל את כל 21 הדרישות האלה</strong>, ה-AI יבנה לפיהן אוטומטית.
           הוולידטור יבדוק אותן בסוף.
         </p>
         <details class="req-details">
-          <summary class="req-summary">הצג את כל 20 הדרישות</summary>
+          <summary class="req-summary">הצג את כל 21 הדרישות</summary>
           <ol class="req-list">
             <li>שליחת אירוע "התחלת משחק" לפלטפורמה בכל התחלה/ריסטרט</li>
             <li>שליחת ניקוד בזמן אמת על כל תשובה נכונה</li>
@@ -1604,12 +1604,13 @@
             <li>שדה הטיימר בדיווח — ערך אמיתי, לא 0 קשיח</li>
             <li>חיים מתחילים מההגדרה (לא מספר קשיח)</li>
             <li>תשובה שגויה = חיים פחות 1; הגעת ל-0 = גיים אובר</li>
-            <li>שאלות ללא חזרות; מתחיל מחדש אחרי שנגמרו</li>
+            <li>מצב חופשי: כל שאלה מוצגת פעם אחת בלבד; אחרי שכל השאלות הוצגו — אין יותר overlay/דיווח לפי שאלות, מוצג טוסט/באדג' חד-פעמי, והמשחק ממשיך כארקייד טהור עד הסוף</li>
             <li>פידבק מוצג/מוסתר לפי ההגדרה, עם משך זמן מהגדרות</li>
             <li>ריסטרט מאפס הכל ללא location.reload()</li>
             <li>עברית מימין לשמאל + viewport למובייל</li>
             <li>ללא alert/confirm/prompt (לא עובדים ב-iframe) ו-ללא localStorage/sessionStorage</li>
             <li>תמיכת מגע (touch events) ו/או עיצוב responsive</li>
+            <li>תקני קוד מאובטחים ונקיים מ-CI/CD: עטיפה ב-IIFE עם 'use strict', רק const/let ו-===/!==, ללא var/console/eval/new Function/cookies, addEventListener במקום on*, textContent במקום innerHTML דינמי, HTML/CSS תקינים ועיצוב אחיד</li>
           </ol>
         </details>
       </div>
@@ -1690,9 +1691,30 @@ window.parent.postMessage({
 
 Critical rules for SCORE_UPDATE:
 
-* `isfinished: false` — sent on every correct answer, UNLESS that answer simultaneously triggers game over (in which case only `isfinished: true` is sent)
+* `isfinished: false` — sent on every correct answer, UNLESS that answer simultaneously triggers game over (in which case only `isfinished: true` is sent — never both for the same event)
 * `isfinished: true` — sent exactly once, at game over (win or lose). Use a guard (`if (gameState === 'gameover') return`) to prevent double-fire.
 * All `postMessage` calls must be wrapped in `try/catch`.
+
+These three rules apply **regardless** of whether you call `postMessage` inline or through helper functions (see below).
+
+### Optional: wrap reporting in helper functions
+
+You may centralize reporting in two small helpers instead of inlining `postMessage`:
+
+```js
+let currentSeconds = 0;   // ⚠️ MUST be declared in game state AND updated every frame/tick — see warning below
+
+function reportGameStart() {
+    try { window.parent.postMessage({ type: 'GAME_START' }, '*'); } catch (e) { /* ignore */ }
+}
+function reportScore(score, isfinished) {
+    try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: score, timer: currentSeconds, isfinished: !!isfinished }, '*'); } catch (e) { /* ignore */ }
+}
+```
+
+⚠️ **`currentSeconds` (or whatever variable name you choose for it) MUST be declared in game state and reassigned every frame/tick — count up or down depending on `GAME_TIMER` — *before* `reportScore` is ever called.** If it is left undeclared or never updated, `reportScore` throws a `ReferenceError` that its own `try/catch` silently swallows — `SCORE_UPDATE` will simply never fire, and you will not see any error. This is the single most common silent bug in helper-based reporting; double-check it explicitly before submitting.
+
+If you use these helpers, the three "Critical rules for SCORE_UPDATE" above still apply exactly as written — `reportScore(score, false)` must NOT also be called for the same event that triggers `reportScore(score, true)`.
 
 ## 🔧 Required Script Structure (exact order)
 
@@ -1738,6 +1760,9 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 // 3. Game state variables — AFTER applyMoodleConfig so they pick up the final config values
 let lives = MAX_LIVES;   // ← MUST use MAX_LIVES, never hardcoded
 let score = 0;
+let currentSeconds = 0;             // updated every frame/tick — used in SCORE_UPDATE / reportScore
+let questionsExhausted = false;     // → free mode flag, see "Questions — Free Mode" below
+let usedQuestionIndices = [];       // tracks which questions were already shown this session
 // ... rest of game state
 ```
 
@@ -1757,10 +1782,16 @@ let score = 0;
 * Wrong answer → lose 1 life → update display immediately.
 * 0 lives → game over (call `showGameOver`).
 
-### Questions
+### Questions — Free Mode (no repeat rounds)
 
-* No repetition within a cycle. Track used indices. Reset pool only after all questions shown.
+* Each question in `questionsSource` is shown **at most once per session** — shuffle the pool once at game start and track an index/used-list, never repeat.
 * Correct answer index is always `.c` (already mapped by `applyMoodleConfig`).
+* **Once every question has been shown one time, STOP** — do not reshuffle/restart the pool, do not show any more question overlays, and do not call `reportScore`/`postMessage SCORE_UPDATE` for question-answer events anymore. The game now enters **"free mode"**: gameplay continues normally (arcade scoring such as collecting items, surviving, dodging — whatever the game already does — keeps working), but the question mechanic is permanently off for the rest of that session.
+* On the exact frame the last unique question is answered (transition into free mode), show **once**:
+  - A toast that auto-hides after ~4 seconds, e.g. `🎉 כל הכבוד! ענית על כל השאלות. המשחק ממשיך במצב חופשי 🚀`
+  - Optionally, a small persistent badge that stays on screen for the rest of the session, e.g. `🎓 סיימת את כל השאלות · מצב חופשי`
+* `startGame()` / restart **MUST** reset all of this: re-shuffle the pool, clear the used-indices tracker, hide the badge, and reset the "free mode entered" / "toast shown" flags — so a fresh session shows every question again from scratch and can re-trigger the toast.
+* ⚠️ Do **NOT** implement "reset the pool and start a new round once exhausted" — that is the OLD behavior and is now incorrect. Free mode replaces it entirely.
 
 ### Feedback (SHOW_FEEDBACK)
 
@@ -1846,6 +1877,39 @@ Examples:
 * No `location.reload()`
 * All external resources via CDN (no local file paths)
 
+## 🔒 Code Standards (secure + CI/CD-clean)
+
+The submitted file passes through automated lint/security checks. To pass them on the first try:
+
+**Structure**
+* Wrap **all** JavaScript in a single IIFE that starts with `'use strict'`:
+  ```js
+  (function () {
+      'use strict';
+      // ... all game code goes here ...
+  })();
+  ```
+* Only `const` / `let` — **never** `var`
+* Only `===` / `!==` — never `==` / `!=`
+* Every statement ends with a semicolon; no unused variables or functions
+
+**Forbidden** (will fail CI/CD lint and security scans):
+* `var`
+* `console.*` (`log`/`warn`/`error`/`info`/`debug`)
+* `debugger`
+* `eval(...)` / `new Function(...)`
+* `alert` / `confirm` / `prompt`
+* `localStorage` / `sessionStorage` / `document.cookie`
+* Deprecated HTML tags (`&lt;font&gt;`, `&lt;center&gt;`, `&lt;marquee&gt;`, etc.)
+
+**Preferred patterns**
+* `addEventListener(...)` over inline `on*` attributes/properties — `&lt;button onclick="..."&gt;` and `element.onclick = ...` are both anti-patterns; use `element.addEventListener('click', ...)`
+* `textContent` over `innerHTML` — `innerHTML` is XSS-prone if it ever carries dynamic/untrusted text (e.g. question text from Moodle). The only acceptable `innerHTML` use is clearing a container with an empty string (`el.innerHTML = ''`) — and even that is better written as `el.textContent = ''`. Any dynamic text goes through `textContent`.
+
+**Formatting & validity**
+* Valid HTML5 (single `&lt;!DOCTYPE html&gt;`, `&lt;meta charset="UTF-8"&gt;` first in `&lt;head&gt;`, `&lt;title&gt;`, unique `id`s, all tags closed, no deprecated tags/attributes) and valid CSS (no orphan declarations, no empty/duplicate rule blocks) — would pass HTMLHint / Stylelint
+* UTF-8 encoding, LF line endings, 2-space indentation, single trailing newline at EOF — would pass ESLint / Prettier
+
 ## ✅ Pre-Submit Checklist
 
 Before finishing, verify every item:
@@ -1858,21 +1922,29 @@ Before finishing, verify every item:
 
 **Reporting**
 * [ ] `GAME_START` sent on every new/restarted session, in try/catch
-* [ ] `SCORE_UPDATE isfinished:false` sent on every correct answer (unless that answer also triggers game over)
+* [ ] `SCORE_UPDATE isfinished:false` sent on every correct answer (unless that answer also triggers game over — then ONLY `isfinished:true` fires for that event)
 * [ ] `SCORE_UPDATE isfinished:true` sent exactly once at game over, with guard against double-fire
 * [ ] `timer` field = actual elapsed/remaining seconds
+* [ ] If using `reportScore`/`reportGameStart` helpers: the seconds variable they read (e.g. `currentSeconds`) is declared in game state AND reassigned every frame/tick — never left undeclared or stale
 
 **Logic**
 * [ ] Timer: count up when `GAME_TIMER===0`, countdown + game over when `GAME_TIMER&gt;0`
 * [ ] `SHOW_FEEDBACK=false` → question closes within 150ms
 * [ ] `SHOW_FEEDBACK=true` → shows feedback text + explanation, waits `FEEDBACK_DURATION` seconds
-* [ ] No-repeat questions; pool resets after all shown
+* [ ] Free mode: each question shown at most once; one-time toast (+ optional badge) appears the moment the pool is exhausted; question overlay AND question-triggered scoring stop afterward (game keeps running in arcade mode); restart resets the used-questions tracker and the free-mode flags
 * [ ] Restart resets all state without `location.reload()`; cancels previous `animFrame`
 
 **Compatibility**
 * [ ] `&lt;html lang="he" dir="rtl"&gt;` and `&lt;meta name="viewport"&gt;`
 * [ ] No `alert/confirm/prompt`, no `localStorage/sessionStorage`
 * [ ] Touch events for mobile
+
+**Code Standards (CI/CD)**
+* [ ] Entire script wrapped in one IIFE starting with `'use strict'`
+* [ ] No `var` anywhere (only `const`/`let`); no `==`/`!=` (only `===`/`!==`)
+* [ ] No `console.*`, `debugger`, `eval`/`new Function`, `alert/confirm/prompt`, `localStorage/sessionStorage/document.cookie`
+* [ ] `addEventListener` used everywhere (no inline `on*` / `.onclick =` assignment); `textContent` used instead of `innerHTML` for any dynamic text
+* [ ] Valid HTML5/CSS; UTF-8, LF line endings, 2-space indentation, single trailing newline
 
 ## 🎮 YOUR GAME REQUEST
 </textarea>
@@ -2012,11 +2084,11 @@ Before finishing, verify every item:
           משחק לדוגמה — ראה איך נראה משחק מוכן
         </div>
         <p style="font-size:14px;color:var(--color-text-muted);line-height:1.6;">
-          <strong>חייל בורח מהרס"ר</strong> — Endless Runner צבאי שנבנה בדיוק לפי כל 20 הדרישות הטכניות.
+          <strong>חייל בורח מהרס"ר</strong> — Endless Runner צבאי שנבנה בדיוק לפי כל 21 הדרישות הטכניות.
           קפוץ מעל מכשולים, ענה על שאלות, ואל תיתפס! 😤
         </p>
         <p style="font-size:13px;color:var(--color-text-muted);margin-top:6px;">
-          לחץ "נסה בוולידטור" כדי לראות שהמשחק עובר 20/20 בדיקות, או הורד את ה-HTML לעיון בקוד.
+          לחץ "נסה בוולידטור" כדי לראות שהמשחק עובר 25/25 בדיקות, או הורד את ה-HTML לעיון בקוד.
         </p>
         <div class="demo-actions">
           <button class="btn-primary" onclick="loadDemoIntoValidator()">
@@ -2343,6 +2415,55 @@ Before finishing, verify every item:
         group: 'polish',
         explanation: 'רוב החניכים ישחקו על נייד. בלי touch events לחצות/תנועות לא יעבדו.',
         test: c => /touchstart|touchend|ontouchstart|touch-action/.test(c) || c.includes('@media')
+      },
+
+      // ── 7. אבטחה ותקני קוד (CI/CD) ──
+      {
+        label: '7a. עטיפה ב-IIFE עם \'use strict\'',
+        shortLabel: 'IIFE + \'use strict\' עוטפים את כל הקוד',
+        group: 'important',
+        explanation: 'בלי IIFE+strict mode הקוד מזהם את ה-global scope של הקמפוס ועלול להתנגש עם משתנים אחרים בעמוד.',
+        fixHint: 'עטפו את כל קוד ה-JS ב-(function () { \'use strict\'; ... })(); מיד אחרי תגית הפתיחה ולפני תגית הסגירה של ה-script.',
+        test: c => /\(\s*function\s*\(\s*\)\s*\{\s*['"]use strict['"]/.test(c)
+      },
+      {
+        label: '7b. אין הצהרות var — רק const/let',
+        shortLabel: 'ללא var (רק const/let)',
+        group: 'important',
+        explanation: '"var" יוצר scope לא צפוי (function-scope, hoisting) שגורם לבאגים קשים לאיתור. תקני CI/CD מודרניים פוסלים אותו.',
+        fixHint: 'החליפו כל "var x = ..." ב-"const x = ..." (אם הערך לא משתנה) או "let x = ..." (אם כן).',
+        test: c => !/\bvar\s+[a-zA-Z_$]/.test(c)
+      },
+      {
+        label: '7c. אין console / debugger / eval / new Function / document.cookie',
+        shortLabel: 'ללא console/debugger/eval/new Function/cookies',
+        group: 'critical',
+        explanation: 'אלו APIs מסוכנים או "מלוכלכים" שנחסמים ע"י סורקי אבטחה ו-linters: console.* משאיר לוגים ב-production, debugger עוצר את הריצה, eval/new Function מריצים קוד דינמי (סיכון אבטחה), cookies חסומים ב-iframe cross-origin.',
+        fixHint: 'הסירו את כל קריאות console.log/warn/error, debugger, eval(...), new Function(...) ו-document.cookie מהקוד הסופי.',
+        test: c => !/\bconsole\s*\.\s*(log|warn|error|info|debug)\s*\(/.test(c) &&
+                   !/\bdebugger\b/.test(c) &&
+                   !/\beval\s*\(/.test(c) &&
+                   !/\bnew\s+Function\s*\(/.test(c) &&
+                   !/document\.cookie/.test(c)
+      },
+      {
+        label: '7d. addEventListener במקום מאפייני on* / onclick=',
+        shortLabel: 'addEventListener במקום onclick=/on*',
+        group: 'polish',
+        explanation: 'הצמדת מאזינים דרך window.onload / btn.onclick = ... דורסת מאזינים קודמים ונחשבת תבנית ישנה שנפסלת ע"י linters.',
+        fixHint: 'החליפו btn.onclick = function(){...} ב-btn.addEventListener(\'click\', function(){...}).',
+        test: c => !/\.\s*on(click|load|keydown|keyup|touchstart|touchend|mousedown|mouseup)\s*=/.test(c)
+      },
+      {
+        label: '7e. textContent במקום innerHTML להזרקת תוכן דינמי',
+        shortLabel: 'textContent במקום innerHTML דינמי',
+        group: 'polish',
+        explanation: 'innerHTML עם תוכן דינמי (לדוגמה טקסט שאלה ממקור חיצוני) פותח פתח להזרקת HTML/סקריפט. textContent בטוח כי הוא לעולם לא מפענח HTML.',
+        fixHint: 'השתמשו ב-element.textContent = someText במקום element.innerHTML = someText. ניקוי (innerHTML = \'\') עדיין מותר.',
+        test: c => {
+          const assignments = c.match(/\.\s*innerHTML\s*=\s*[^;]+/g) || [];
+          return assignments.every(a => /=\s*(['"])\s*\1/.test(a));
+        }
       }
 
     ];
@@ -2352,7 +2473,8 @@ Before finishing, verify every item:
       'בדקתי על מובייל (או דפדפן מצומצם לרוחב 375px)',
       'חווית המשחק מובנת — ידעתי מה לעשות בלי הסבר',
       'אין שגיאות console (F12 → Console — נקי)',
-      'הציון מוצג בסוף המשחק'
+      'הציון מוצג בסוף המשחק',
+      'בדקתי שאין var / console / eval / שוויון רופף (==‎/!=) ושהקובץ עומד בתקני פורמט (הזחה אחידה של 2 רווחים, אין טאבים, שורת סיום בקובץ)'
     ];
 
     /* ============ COPY PROMPT ============ */
@@ -2811,8 +2933,9 @@ Before finishing, verify every item:
         '[ ] applyMoodleConfig(cfg) function exists with if (!cfg) return guard',
         '[ ] try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {} called after config vars',
         '[ ] GAME_START postMessage sent on start/restart, wrapped in try/catch',
-        '[ ] SCORE_UPDATE { isfinished: false } sent on every correct answer, in try/catch',
-        '[ ] SCORE_UPDATE { isfinished: true } sent at game over, in try/catch',
+        '[ ] SCORE_UPDATE { isfinished: false } sent on every correct answer, in try/catch — never together with isfinished:true for the same event',
+        '[ ] SCORE_UPDATE { isfinished: true } sent at game over, in try/catch, with a guard against double-fire',
+        '[ ] If reportScore()/reportGameStart() helpers are used: the seconds variable they read (e.g. currentSeconds) is declared in game state and reassigned every frame — never undefined',
         '',
         '🟡 IMPORTANT (game will behave incorrectly without these):',
         '[ ] timer field in postMessage is a variable (not hardcoded 0)',
@@ -2821,7 +2944,7 @@ Before finishing, verify every item:
         '[ ] Question mapping uses q.options||q.a and q.correct !== undefined',
         '[ ] Timer logic: count up when GAME_TIMER===0, count down + game over when GAME_TIMER>0',
         '[ ] lives initialized from MAX_LIVES (not hardcoded)',
-        '[ ] No-repeat questions; pool resets after exhausted; uses .c for correct index',
+        '[ ] Free mode: each question shown at most once; once the pool is exhausted — STOP showing/scoring questions, show a one-time toast (+ optional badge), keep gameplay running in arcade mode; restart resets the used-questions tracker and free-mode flags. Do NOT reset the pool and start a repeating round.',
         '[ ] SHOW_FEEDBACK logic with FEEDBACK_DURATION timing',
         '[ ] Restart resets all state without location.reload()',
         '',
@@ -2830,6 +2953,13 @@ Before finishing, verify every item:
         '[ ] No alert/confirm/prompt',
         '[ ] No localStorage/sessionStorage',
         '[ ] Touch events or @media responsive rules',
+        '',
+        '🔵 CODE STANDARDS / CI-CD (security + lint-cleanliness):',
+        '[ ] Entire script wrapped in one IIFE starting with \'use strict\'',
+        '[ ] No var anywhere (only const/let); no == / != (only === / !==)',
+        '[ ] No console.*, debugger, eval/new Function, alert/confirm/prompt, localStorage/sessionStorage/document.cookie',
+        '[ ] addEventListener used everywhere (no inline on* / .onclick = assignment); textContent used instead of innerHTML for dynamic text',
+        '[ ] Valid HTML5/CSS; UTF-8, LF line endings, 2-space indentation, single trailing newline',
       ].join('\n');
 
       document.getElementById('prompt-textarea').value =

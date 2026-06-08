@@ -83,10 +83,54 @@
     #feedback-msg.correct { color: #5dff88; }
     #feedback-msg.wrong   { color: #ff6b6b; }
     #explanation-text { font-size: 12px; color: #6aaa80; min-height: 14px; }
+
+    /* ---- Free Mode ---- */
+    .free-mode-toast {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 15, 30, 0.96);
+      color: #d0ffe8;
+      border: 2px solid #00c853;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 340px;
+      width: 90%;
+      z-index: 30;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 1;
+    }
+    .free-mode-toast.hidden  { display: none; }
+    .free-mode-toast.fade-out { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+
+    .free-mode-badge {
+      position: fixed;
+      top: 112px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 200, 83, 0.85);
+      color: #06150a;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+      z-index: 25;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    }
+    .free-mode-badge.hidden { display: none; }
+
     @media (max-width: 400px) {
       #hud { font-size: 12px; padding: 6px 8px; }
       .overlay-box { padding: 16px 14px; }
       .ans-btn { font-size: 13px; padding: 9px 5px; }
+      .free-mode-toast { font-size: 12px; padding: 8px 12px; }
+      .free-mode-badge { font-size: 10px; padding: 4px 10px; }
     }
   </style>
 </head>
@@ -97,6 +141,10 @@
   <div id="score-display">ניקוד: 0</div>
   <div id="timer-display">00:00</div>
 </div>
+
+<div id="free-mode-toast" class="free-mode-toast hidden">🎉 כל הכבוד! ענית על כל השאלות. המשחק ממשיך במצב חופשי 🚀</div>
+<div id="free-mode-badge" class="free-mode-badge hidden">🎓 סיימת את כל השאלות · מצב חופשי</div>
+
 <canvas id="game-canvas" width="390" height="575"></canvas>
 
 <div id="start-screen" class="overlay">
@@ -157,10 +205,12 @@
 </div>
 
 <script>
+(function () {
+'use strict';
 /* ============================================================
    CONFIG VARIABLES
 ============================================================ */
-var questionsSource = [
+let questionsSource = [
   { q: 'מה ראשי התיבות של צה"ל?',          a: ['צבא הגנה לישראל','צבא עם ישראל','צוות הגנה לאומי','צבא חיל לישראל'], c: 0, explanation: 'צה"ל = צבא הגנה לישראל' },
   { q: 'כמה שניות יש בדקה?',                a: ['30','45','60','90'],                              c: 2, explanation: '60 שניות בדקה' },
   { q: 'מה עיר הבירה של ישראל?',            a: ['תל אביב','ירושלים','חיפה','באר שבע'],             c: 1, explanation: 'ירושלים היא עיר הבירה' },
@@ -170,12 +220,12 @@ var questionsSource = [
   { q: 'כמה שעות יש ביממה?',               a: ['12','18','24','36'],                              c: 2, explanation: '24 שעות ביממה' },
   { q: 'מה קורה לחייל שפוגע במטרה?',        a: ['מקבל עונש','מקבל כבוד מהסמל','מקבל חופשה','יוצא לשטח'], c: 1, explanation: 'פגיעה במטרה = כבוד מהסמל!' }
 ];
-var MAX_LIVES         = 3;
-var GAME_TIMER        = 0;
-var SHOW_FEEDBACK     = true;
-var FEEDBACK_DURATION = 2;
-var CORRECT_FEEDBACK  = 'כל הכבוד חייל! 🎖️ הסמל מרוצה!';
-var INCORRECT_FEEDBACK = 'טעות! הסמל מאוכזב... 😤';
+let MAX_LIVES         = 3;
+let GAME_TIMER        = 0;
+let SHOW_FEEDBACK     = true;
+let FEEDBACK_DURATION = 2;
+let CORRECT_FEEDBACK  = 'כל הכבוד חייל! 🎖️ הסמל מרוצה!';
+let INCORRECT_FEEDBACK = 'טעות! הסמל מאוכזב... 😤';
 
 /* ============================================================
    MOODLE CONFIG
@@ -199,19 +249,19 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 /* ============================================================
    CANVAS & CONSTANTS
 ============================================================ */
-var canvas = document.getElementById('game-canvas');
-var ctx    = canvas.getContext('2d');
-var W = canvas.width, H = canvas.height;
-var GROUND_Y         = 415;
-var EVENTS_PER_Q     = 3;
-var WIN_SCORE        = questionsSource.length;
-var LANES            = [130, 220, 310]; // y-center of each target lane
-var _targetIdSeq     = 0;
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const GROUND_Y         = 415;
+const EVENTS_PER_Q     = 3;
+let WIN_SCORE        = questionsSource.length;
+const LANES            = [130, 220, 310]; // y-center of each target lane
+let _targetIdSeq     = 0;
 
 /* ============================================================
    GAME STATE
 ============================================================ */
-var gs = {
+const gs = {
   lives: MAX_LIVES, score: 0,
   timerMs: 0, prevTs: 0,
   running: false, paused: false,
@@ -222,16 +272,18 @@ var gs = {
   samalMoodTimer: 0,
   flashAlpha: 0,
   spawnTimer: 0,
-  nextLane: 0
+  nextLane: 0,
+  questionsExhausted: false,
+  freeModeToastShown: false
 };
-var targets   = [];
-var particles = [];
+const targets   = [];
+const particles = [];
 
 /* ============================================================
    QUESTION POOL
 ============================================================ */
 function shuffle(arr) {
-  var a = arr.slice(), i, j, t;
+  let a = arr.slice(), i, j, t;
   for (i = a.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
     t = a[i]; a[i] = a[j]; a[j] = t;
@@ -239,24 +291,33 @@ function shuffle(arr) {
   return a;
 }
 function initPool()     { gs.pool = shuffle(questionsSource); gs.poolIdx = 0; }
+
+// Free Mode: each question is shown at most once per session.
+// Once the pool is exhausted, return null instead of reshuffling —
+// callers must stop showing/scoring questions and switch to free mode.
+// Note on WIN_SCORE: a perfect player's score reaches WIN_SCORE
+// (= questionsSource.length) at the exact moment the pool empties,
+// so endGame(true) fires before nextQuestion() can ever return null
+// for them — free mode is reached only by players who answered at
+// least one question incorrectly.
 function nextQuestion() {
-  if (gs.poolIdx >= gs.pool.length) { gs.pool = shuffle(questionsSource); gs.poolIdx = 0; }
+  if (gs.poolIdx >= gs.pool.length) { gs.questionsExhausted = true; return null; }
   return gs.pool[gs.poolIdx++];
 }
 
 /* ============================================================
    SOUNDS
 ============================================================ */
-var _ac = null;
+let _ac = null;
 function getAC() { if (!_ac) try { _ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return _ac; }
 function tone(freq, dur, type, vol, delay) {
   try {
-    var a = getAC(); if (!a) return;
-    var o = a.createOscillator(), g = a.createGain();
+    let a = getAC(); if (!a) return;
+    let o = a.createOscillator(), g = a.createGain();
     o.connect(g); g.connect(a.destination);
     o.type = type || 'square';
     o.frequency.setValueAtTime(freq, a.currentTime);
-    var t = a.currentTime + (delay || 0);
+    let t = a.currentTime + (delay || 0);
     g.gain.setValueAtTime(vol || 0.18, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.start(t); o.stop(t + dur);
@@ -273,17 +334,17 @@ function sndGameOver() { [392,330,294,262].forEach(function(n,i){ tone(n,0.28,'s
 /* ============================================================
    DRAWING — BACKGROUND
 ============================================================ */
-var _stars = (function() {
-  var s = [], seed = 42;
-  for (var i = 0; i < 55; i++) {
+let _stars = (function() {
+  let s = [], seed = 42;
+  for (let i = 0; i < 55; i++) {
     seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-    var x = ((seed >>> 0) % W);
+    let x = ((seed >>> 0) % W);
     seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-    var y = ((seed >>> 0) % (GROUND_Y - 80)) + 10;
+    let y = ((seed >>> 0) % (GROUND_Y - 80)) + 10;
     seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-    var r = 0.5 + ((seed >>> 0) % 10) * 0.15;
+    let r = 0.5 + ((seed >>> 0) % 10) * 0.15;
     seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-    var br = 0.4 + ((seed >>> 0) % 60) * 0.01;
+    let br = 0.4 + ((seed >>> 0) % 60) * 0.01;
     s.push({ x: x, y: y, r: r, br: br });
   }
   return s;
@@ -291,15 +352,15 @@ var _stars = (function() {
 
 function drawBg() {
   // Night sky gradient
-  var sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  let sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
   sky.addColorStop(0,    '#050810');
   sky.addColorStop(0.55, '#0a1428');
   sky.addColorStop(1,    '#151f35');
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, GROUND_Y);
 
   // Stars
-  for (var si = 0; si < _stars.length; si++) {
-    var st = _stars[si];
+  for (let si = 0; si < _stars.length; si++) {
+    let st = _stars[si];
     ctx.fillStyle = 'rgba(255,255,255,' + st.br + ')';
     ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
   }
@@ -343,35 +404,35 @@ function drawBg() {
   // Lane track lines — subtle green tint
   ctx.setLineDash([10, 14]);
   ctx.lineWidth = 1;
-  for (var li = 0; li < LANES.length; li++) {
+  for (let li = 0; li < LANES.length; li++) {
     ctx.strokeStyle = 'rgba(0,200,80,0.09)';
     ctx.beginPath(); ctx.moveTo(0, LANES[li] + 38); ctx.lineTo(W, LANES[li] + 38); ctx.stroke();
   }
   ctx.setLineDash([]);
 
   // Ground — dark earth
-  var grd = ctx.createLinearGradient(0, GROUND_Y, 0, H);
+  let grd = ctx.createLinearGradient(0, GROUND_Y, 0, H);
   grd.addColorStop(0, '#1a2010'); grd.addColorStop(1, '#0c1208');
   ctx.fillStyle = grd; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
 
   // Ground grid lines (night vision style)
   ctx.strokeStyle = 'rgba(0,180,60,0.06)'; ctx.lineWidth = 1;
-  for (var gy = GROUND_Y + 20; gy < H; gy += 30) {
+  for (let gy = GROUND_Y + 20; gy < H; gy += 30) {
     ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
   }
 }
 
 function drawSandbags() {
-  var sbY = GROUND_Y - 10;
-  var cols = ['#1e2e12','#253818','#182410'];
+  let sbY = GROUND_Y - 10;
+  let cols = ['#1e2e12','#253818','#182410'];
   // Back row
-  for (var sx = -5; sx < W + 10; sx += 40) {
+  for (let sx = -5; sx < W + 10; sx += 40) {
     ctx.fillStyle = cols[Math.floor(sx / 40) % 3];
     ctx.beginPath(); ctx.ellipse(sx + 20, sbY - 12, 21, 12, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(0,180,60,0.12)'; ctx.lineWidth = 1; ctx.stroke();
   }
   // Front row
-  for (var sx2 = 14; sx2 < W + 14; sx2 += 40) {
+  for (let sx2 = 14; sx2 < W + 14; sx2 += 40) {
     ctx.fillStyle = '#161e0e';
     ctx.beginPath(); ctx.ellipse(sx2 + 20, sbY, 20, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(0,160,50,0.1)'; ctx.lineWidth = 1; ctx.stroke();
@@ -382,7 +443,7 @@ function drawSandbags() {
    DRAWING — TARGET
 ============================================================ */
 function drawTarget(t) {
-  var x = t.x, y = t.y, tw = t.w, th = t.h, hr = t.headR;
+  let x = t.x, y = t.y, tw = t.w, th = t.h, hr = t.headR;
   ctx.save();
 
   if (t.hit) {
@@ -431,7 +492,7 @@ function drawTarget(t) {
   ctx.fillRect(x + tw / 2 - hr - 4, y + hr - 2, (hr + 4) * 2, 4);
 
   // Bullseye — green night-sight crosshair
-  var bx = x + tw / 2, by = y + hr * 2 + th * 0.32;
+  let bx = x + tw / 2, by = y + hr * 2 + th * 0.32;
   ctx.strokeStyle = 'rgba(0,255,80,0.55)'; ctx.lineWidth = 1.2;
   ctx.beginPath(); ctx.arc(bx, by, 10, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.arc(bx, by, 5,  0, Math.PI * 2); ctx.stroke();
@@ -450,8 +511,8 @@ function drawTarget(t) {
    DRAWING — PARTICLES
 ============================================================ */
 function drawParticles() {
-  for (var i = 0; i < particles.length; i++) {
-    var p = particles[i];
+  for (let i = 0; i < particles.length; i++) {
+    let p = particles[i];
     ctx.save();
     ctx.globalAlpha = p.alpha;
     ctx.fillStyle = p.color;
@@ -464,8 +525,8 @@ function drawParticles() {
    DRAWING — SAMAL CHARACTER
 ============================================================ */
 function drawSamal() {
-  var sx = W - 72, sy = GROUND_Y + 8;
-  var mood = gs.samalMood;
+  let sx = W - 72, sy = GROUND_Y + 8;
+  let mood = gs.samalMood;
 
   // Body — dark uniform
   ctx.fillStyle = '#0e1a08'; ctx.fillRect(sx + 6, sy + 28, 38, 52);
@@ -529,7 +590,7 @@ function drawSamal() {
 
   // Speech bubble
   if (mood !== 'neutral') {
-    var bubble = mood === 'happy' ? '✓ כל הכבוד!' : '✗ לא טוב!';
+    let bubble = mood === 'happy' ? '✓ כל הכבוד!' : '✗ לא טוב!';
     ctx.fillStyle = 'rgba(0,15,8,0.88)';
     ctx.fillRect(sx - 96, sy - 14, 92, 28);
     ctx.strokeStyle = mood === 'happy' ? '#00c853' : '#cc3333';
@@ -544,13 +605,13 @@ function drawSamal() {
    DRAWING — EVENT METER & PROGRESS
 ============================================================ */
 function drawEventMeter() {
-  var filled = gs.eventCount % EVENTS_PER_Q;
-  var dotR = 7, spacing = 22, startX = 18, meterY = H - 22;
+  let filled = gs.eventCount % EVENTS_PER_Q;
+  let dotR = 7, spacing = 22, startX = 18, meterY = H - 22;
 
   ctx.fillStyle = 'rgba(0,20,10,0.6)';
   ctx.fillRect(6, H - 34, EVENTS_PER_Q * spacing + 16, 26);
 
-  for (var di = 0; di < EVENTS_PER_Q; di++) {
+  for (let di = 0; di < EVENTS_PER_Q; di++) {
     ctx.fillStyle = di < filled ? '#00e676' : 'rgba(0,180,80,0.18)';
     ctx.beginPath(); ctx.arc(startX + di * spacing, meterY, dotR, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = di < filled ? '#00ff44' : 'rgba(0,180,80,0.3)';
@@ -563,16 +624,16 @@ function drawEventMeter() {
 }
 
 function drawProgressBar() {
-  var pct = Math.min(1, gs.score / WIN_SCORE);
+  let pct = Math.min(1, gs.score / WIN_SCORE);
   ctx.fillStyle = 'rgba(0,20,10,0.55)';
   ctx.fillRect(6, H - 55, W - 12, 11);
   if (pct > 0) {
-    var grad = ctx.createLinearGradient(6, 0, W - 12, 0);
+    let grad = ctx.createLinearGradient(6, 0, W - 12, 0);
     grad.addColorStop(0, '#005c30'); grad.addColorStop(1, '#00e676');
     ctx.fillStyle = grad;
     ctx.fillRect(6, H - 55, (W - 12) * pct, 11);
   }
-  var remaining = Math.max(0, WIN_SCORE - gs.score);
+  let remaining = Math.max(0, WIN_SCORE - gs.score);
   ctx.fillStyle = 'rgba(0,230,118,0.75)'; ctx.font = '9px Courier New, monospace'; ctx.textAlign = 'center';
   ctx.fillText(remaining > 0 ? 'עוד ' + remaining + ' תשובות נכונות לסיום' : '! כמעט סיימת', W / 2, H - 45);
   ctx.textAlign = 'right';
@@ -582,19 +643,19 @@ function drawProgressBar() {
    HUD UPDATE
 ============================================================ */
 function updateHUD() {
-  var bulls = '';
-  for (var i = 0; i < MAX_LIVES; i++) bulls += (i < gs.lives ? '🔫' : '💔');
+  let bulls = '';
+  for (let i = 0; i < MAX_LIVES; i++) bulls += (i < gs.lives ? '🔫' : '💔');
   document.getElementById('lives-display').textContent = bulls || '💀';
   document.getElementById('score-display').textContent = 'ניקוד: ' + gs.score + ' / ' + WIN_SCORE;
 
-  var secs = Math.floor(gs.timerMs / 1000), displaySecs;
+  let secs = Math.floor(gs.timerMs / 1000), displaySecs;
   if (GAME_TIMER > 0) {
     displaySecs = Math.max(0, GAME_TIMER - secs);
     if (displaySecs <= 0 && gs.running && !gs.paused) { endGame(false, 'נגמר הזמן!'); return; }
-  } else {
+  } else if (GAME_TIMER === 0) {
     displaySecs = secs;
   }
-  var m = Math.floor(displaySecs / 60), s = displaySecs % 60;
+  let m = Math.floor(displaySecs / 60), s = displaySecs % 60;
   document.getElementById('timer-display').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
 
@@ -603,14 +664,14 @@ function updateHUD() {
 ============================================================ */
 function spawnTarget() {
   if (!gs.running) return;
-  var fromRight = Math.random() > 0.5;
-  var lane = gs.nextLane;
+  let fromRight = Math.random() > 0.5;
+  let lane = gs.nextLane;
   gs.nextLane = (gs.nextLane + 1) % LANES.length;
   if (Math.random() < 0.35) lane = Math.floor(Math.random() * LANES.length);
 
-  var speed = Math.min(1.4 + gs.score * 0.18 + Math.random() * 1.3, 5.8);
-  var tw = 34, hr = 10, th = 52;
-  var colors = ['#2d4020','#3a5010','#1e3018'];
+  let speed = Math.min(1.4 + gs.score * 0.18 + Math.random() * 1.3, 5.8);
+  let tw = 34, hr = 10, th = 52;
+  let colors = ['#2d4020','#3a5010','#1e3018'];
 
   targets.push({
     id: _targetIdSeq++,
@@ -628,10 +689,10 @@ function spawnTarget() {
    HIT PARTICLES
 ============================================================ */
 function spawnParticles(cx, cy) {
-  var pcolors = ['#00ff44','#7affb0','#00e676','#ffffff'];
-  for (var pi = 0; pi < 9; pi++) {
-    var angle = (pi / 9) * Math.PI * 2;
-    var spd = 2.5 + Math.random() * 3;
+  let pcolors = ['#00ff44','#7affb0','#00e676','#ffffff'];
+  for (let pi = 0; pi < 9; pi++) {
+    let angle = (pi / 9) * Math.PI * 2;
+    let spd = 2.5 + Math.random() * 3;
     particles.push({ x: cx, y: cy, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd - 1,
       r: 3 + Math.random() * 3, alpha: 1, color: pcolors[pi % 4] });
   }
@@ -653,7 +714,7 @@ function registerEvent() {
 function loop(ts) {
   if (!gs.running) return;
 
-  var dt = gs.prevTs ? Math.min(ts - gs.prevTs, 80) : 16;
+  let dt = gs.prevTs ? Math.min(ts - gs.prevTs, 80) : 16;
   gs.prevTs = ts;
 
   if (!gs.paused) {
@@ -666,7 +727,7 @@ function loop(ts) {
 
     // Spawn
     gs.spawnTimer += dt;
-    var spawnInt = Math.max(550, 2100 - gs.score * 90);
+    let spawnInt = Math.max(550, 2100 - gs.score * 90);
     if (gs.spawnTimer >= spawnInt) {
       gs.spawnTimer = 0;
       spawnTarget();
@@ -674,8 +735,8 @@ function loop(ts) {
     }
 
     // Update targets
-    for (var i = targets.length - 1; i >= 0; i--) {
-      var t = targets[i];
+    for (let i = targets.length - 1; i >= 0; i--) {
+      let t = targets[i];
       if (t.hit) {
         t.hitAlpha -= dt * 0.0028;
         if (t.hitAlpha <= 0) targets.splice(i, 1);
@@ -693,8 +754,8 @@ function loop(ts) {
     }
 
     // Update particles
-    for (var pi = particles.length - 1; pi >= 0; pi--) {
-      var p = particles[pi];
+    for (let pi = particles.length - 1; pi >= 0; pi--) {
+      let p = particles[pi];
       p.x += p.vx * (dt / 16); p.y += p.vy * (dt / 16);
       p.vy += 0.12 * (dt / 16);
       p.alpha -= dt * 0.0022;
@@ -711,7 +772,7 @@ function loop(ts) {
     ctx.fillRect(0, 0, W, H);
   }
 
-  for (var ti = 0; ti < targets.length; ti++) drawTarget(targets[ti]);
+  for (let ti = 0; ti < targets.length; ti++) drawTarget(targets[ti]);
   drawParticles();
   drawSandbags();
   drawSamal();
@@ -730,8 +791,8 @@ function shoot(cx, cy) {
   sndShoot();
 
   // Check targets back-to-front
-  for (var i = targets.length - 1; i >= 0; i--) {
-    var t = targets[i];
+  for (let i = targets.length - 1; i >= 0; i--) {
+    let t = targets[i];
     if (t.hit || t.escaped) continue;
     if (cx >= t.x - 10 && cx <= t.x + t.w + 10 && cy >= t.y - 10 && cy <= t.y + t.h + t.headR * 2 + 10) {
       t.hit = true; t.hitAlpha = 1;
@@ -751,23 +812,58 @@ function shoot(cx, cy) {
    QUESTIONS
 ============================================================ */
 function showQuestion() {
+  let q = nextQuestion();
+  if (!q) {
+    enterFreeMode();
+    gs.rafId = requestAnimationFrame(loop);
+    return;
+  }
+
   gs.paused = true;
-  var q = nextQuestion();
   document.getElementById('question-overlay').classList.remove('hidden');
   document.getElementById('question-text').textContent = q.q;
   document.getElementById('feedback-msg').textContent = '';
   document.getElementById('feedback-msg').className = '';
   document.getElementById('explanation-text').textContent = '';
 
-  var btnsEl = document.getElementById('answer-buttons');
+  let btnsEl = document.getElementById('answer-buttons');
   btnsEl.innerHTML = '';
   q.a.forEach(function(ans, idx) {
-    var btn = document.createElement('button');
+    let btn = document.createElement('button');
     btn.className = 'ans-btn'; btn.textContent = ans;
-    btn.onclick = function() { answer(idx, q); };
+    btn.addEventListener('click', function() { answer(idx, q); });
     btnsEl.appendChild(btn);
   });
   gs.rafId = requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   FREE MODE  (after every question has been shown once)
+============================================================ */
+function showFreeModeToast() {
+  let toastEl = document.getElementById('free-mode-toast');
+  toastEl.classList.remove('hidden', 'fade-out');
+  setTimeout(function() { toastEl.classList.add('fade-out'); }, 3200);
+  setTimeout(function() { toastEl.classList.add('hidden'); toastEl.classList.remove('fade-out'); }, 3700);
+}
+
+function showFreeModeBadge() {
+  document.getElementById('free-mode-badge').classList.remove('hidden');
+}
+
+function hideFreeModeUI() {
+  let toastEl = document.getElementById('free-mode-toast');
+  let badgeEl = document.getElementById('free-mode-badge');
+  toastEl.classList.add('hidden');
+  toastEl.classList.remove('fade-out');
+  badgeEl.classList.add('hidden');
+}
+
+function enterFreeMode() {
+  if (gs.freeModeToastShown) return;
+  gs.freeModeToastShown = true;
+  showFreeModeToast();
+  showFreeModeBadge();
 }
 
 function answer(chosen, q) {
@@ -777,16 +873,16 @@ function answer(chosen, q) {
     else if (i === chosen) b.classList.add('wrong');
   });
 
-  var correct = (chosen === q.c);
-  var fbEl = document.getElementById('feedback-msg');
-  var explEl = document.getElementById('explanation-text');
+  let correct = (chosen === q.c);
+  let fbEl = document.getElementById('feedback-msg');
+  let explEl = document.getElementById('explanation-text');
 
   if (correct) {
     gs.score++;
     sndCorrect();
     gs.samalMood = 'happy'; gs.samalMoodTimer = 2500;
     if (SHOW_FEEDBACK) { fbEl.textContent = CORRECT_FEEDBACK; fbEl.className = 'correct'; }
-    var _sc = Math.floor(gs.timerMs / 1000);
+    let _sc = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sc, isfinished: false }, '*'); } catch(e) {}
     if (gs.score >= WIN_SCORE) {
       document.getElementById('question-overlay').classList.add('hidden');
@@ -798,13 +894,13 @@ function answer(chosen, q) {
     sndWrong();
     gs.samalMood = 'angry'; gs.samalMoodTimer = 2500;
     if (SHOW_FEEDBACK) { fbEl.textContent = INCORRECT_FEEDBACK; fbEl.className = 'wrong'; }
-    var _sw = Math.floor(gs.timerMs / 1000);
+    let _sw = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sw, isfinished: false }, '*'); } catch(e) {}
   }
 
   if (SHOW_FEEDBACK && q.explanation) explEl.textContent = q.explanation;
 
-  var delay = SHOW_FEEDBACK ? FEEDBACK_DURATION * 1000 : 350;
+  let delay = SHOW_FEEDBACK ? FEEDBACK_DURATION * 1000 : 350;
   if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
   gs.fbTimeout = setTimeout(function() {
     document.getElementById('question-overlay').classList.add('hidden');
@@ -818,11 +914,11 @@ function answer(chosen, q) {
 ============================================================ */
 function endGame(won, reason) {
   gs.running = false; gs.paused = false;
-  var secs = Math.floor(gs.timerMs / 1000);
+  let secs = Math.floor(gs.timerMs / 1000);
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: secs, isfinished: true }, '*'); } catch(e) {}
   if (won) sndWin(); else sndGameOver();
-  var m = Math.floor(secs / 60), s = secs % 60;
-  var t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  let m = Math.floor(secs / 60), s = secs % 60;
+  let t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
   document.getElementById('gameover-title').textContent = won ? '🎖️ עברת את מבחן הסמל!' : ('😤 ' + reason);
   document.getElementById('gameover-desc').textContent  = won ? 'הסמל מרוצה ממך! חייל מקצועי!' : 'הסמל מאוכזב... נסה שוב חייל!';
   document.getElementById('final-score').textContent    = 'ניקוד: ' + gs.score + ' | זמן: ' + t;
@@ -845,6 +941,9 @@ function startGame() {
   gs.samalMood   = 'neutral'; gs.samalMoodTimer = 0;
   gs.flashAlpha  = 0;         gs.spawnTimer  = 0;
   gs.nextLane    = 0;
+  gs.questionsExhausted = false;
+  gs.freeModeToastShown = false;
+  hideFreeModeUI();
   if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
   targets.length = 0; particles.length = 0;
   _targetIdSeq   = 0;
@@ -862,12 +961,12 @@ document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', startGame);
 
 canvas.addEventListener('click', function(e) {
-  var rect = canvas.getBoundingClientRect();
+  let rect = canvas.getBoundingClientRect();
   shoot((e.clientX - rect.left) * (W / rect.width), (e.clientY - rect.top) * (H / rect.height));
 });
 canvas.addEventListener('touchstart', function(e) {
   e.preventDefault();
-  var rect = canvas.getBoundingClientRect(), touch = e.touches[0];
+  let rect = canvas.getBoundingClientRect(), touch = e.touches[0];
   shoot((touch.clientX - rect.left) * (W / rect.width), (touch.clientY - rect.top) * (H / rect.height));
 }, { passive: false });
 
@@ -875,13 +974,13 @@ canvas.addEventListener('touchstart', function(e) {
    INITIAL STATIC FRAME
 ============================================================ */
 (function() {
-  var sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  let sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
   sky.addColorStop(0, '#050810'); sky.addColorStop(1, '#151f35');
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#1a2010'; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
   // Green crosshair in center
   ctx.strokeStyle = '#00e676'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-  var cx = W / 2, cy = H / 2 - 20, cr = 28;
+  let cx = W / 2, cy = H / 2 - 20, cr = 28;
   ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cx - cr - 10, cy); ctx.lineTo(cx - cr + 8, cy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cx + cr - 8,  cy); ctx.lineTo(cx + cr + 10, cy); ctx.stroke();
@@ -890,6 +989,7 @@ canvas.addEventListener('touchstart', function(e) {
   ctx.fillStyle = 'rgba(0,230,118,0.3)'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
   ctx.textAlign = 'right';
 }());
+})();
 </script>
 </body>
 </html>
