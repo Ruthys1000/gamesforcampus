@@ -168,10 +168,52 @@
       min-height: 14px;
     }
 
+    /* ---- Free Mode ---- */
+    .free-mode-toast {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 58, 14, 0.96);
+      color: #f0e6d0;
+      border: 2px solid #5a7a30;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 340px;
+      width: 90%;
+      z-index: 30;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 1;
+    }
+    .free-mode-toast.hidden  { display: none; }
+    .free-mode-toast.fade-out { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+
+    .free-mode-badge {
+      position: fixed;
+      top: 112px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(90, 122, 48, 0.92);
+      color: #fff;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 25;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+    .free-mode-badge.hidden { display: none; }
+
     @media (max-width: 400px) {
       #hud { font-size: 12px; padding: 6px 8px; }
       .overlay-box { padding: 16px 14px; }
       .ans-btn { font-size: 13px; padding: 9px 5px; }
+      .free-mode-toast { font-size: 12px; padding: 8px 12px; }
+      .free-mode-badge { font-size: 10px; padding: 4px 10px; }
     }
   </style>
 </head>
@@ -186,6 +228,9 @@
   </div>
   <div id="timer-display">00:00</div>
 </div>
+
+<div id="free-mode-toast" class="free-mode-toast hidden">🎉 כל הכבוד! ענית על כל השאלות. המשחק ממשיך במצב חופשי 🚀</div>
+<div id="free-mode-badge" class="free-mode-badge hidden">🎓 סיימת את כל השאלות · מצב חופשי</div>
 
 <canvas id="game-canvas" width="390" height="575"></canvas>
 
@@ -226,10 +271,12 @@
 </div>
 
 <script>
+(function () {
+'use strict';
 /* ============================================================
    CONFIG VARIABLES
 ============================================================ */
-var questionsSource = [
+let questionsSource = [
   { q: 'כמה חודשים יש בשנה?',           a: ['10','11','12','13'],                              c: 2, explanation: '12 חודשים בשנה' },
   { q: 'מה עיר הבירה של ישראל?',         a: ['תל אביב','ירושלים','חיפה','באר שבע'],             c: 1, explanation: 'ירושלים היא עיר הבירה' },
   { q: 'כמה שניות יש בדקה?',             a: ['30','45','60','90'],                              c: 2, explanation: '60 שניות בדקה' },
@@ -239,12 +286,12 @@ var questionsSource = [
   { q: 'מה קורה לרס"ר כשאתה עונה נכון?', a: ['מתרגז','מתרחק','מתקרב','ישן'],                   c: 1, explanation: 'תשובה נכונה = הרס"ר מתרחק!' },
   { q: 'כמה שעות יש ביממה?',             a: ['12','18','24','36'],                              c: 2, explanation: '24 שעות ביממה' }
 ];
-var MAX_LIVES        = 3;
-var GAME_TIMER       = 0;
-var SHOW_FEEDBACK    = true;
-var FEEDBACK_DURATION = 2;
-var CORRECT_FEEDBACK  = 'כל הכבוד! הרס"ר מתרחק 💨';
-var INCORRECT_FEEDBACK = 'טעות! הרס"ר מתקרב 😤';
+let MAX_LIVES        = 3;
+let GAME_TIMER       = 0;
+let SHOW_FEEDBACK    = true;
+let FEEDBACK_DURATION = 2;
+let CORRECT_FEEDBACK  = 'כל הכבוד! הרס"ר מתרחק 💨';
+let INCORRECT_FEEDBACK = 'טעות! הרס"ר מתקרב 😤';
 
 /* ============================================================
    MOODLE CONFIG
@@ -274,18 +321,18 @@ try { applyMoodleConfig(window.parent.moodleGameConfig); } catch(e) {}
 /* ============================================================
    CANVAS & CONSTANTS
 ============================================================ */
-var canvas  = document.getElementById('game-canvas');
-var ctx     = canvas.getContext('2d');
-var W       = canvas.width;
-var H       = canvas.height;
-var GROUND  = Math.floor(H * 0.69);
-var OBS_PER_QUESTION = 3;
-var WIN_SCORE = questionsSource.length;
+const canvas  = document.getElementById('game-canvas');
+const ctx     = canvas.getContext('2d');
+const W       = canvas.width;
+const H       = canvas.height;
+const GROUND  = Math.floor(H * 0.69);
+const OBS_PER_QUESTION = 3;
+let WIN_SCORE = questionsSource.length;
 
 /* ============================================================
    GAME STATE
 ============================================================ */
-var gs = {
+const gs = {
   lives: MAX_LIVES,
   score: 0,
   timerMs: 0,
@@ -297,20 +344,22 @@ var gs = {
   pool: [],
   poolIdx: 0,
   fbTimeout: null,
-  rafId: null
+  rafId: null,
+  questionsExhausted: false,
+  freeModeToastShown: false
 };
 
-var soldier = { x: 115, y: GROUND - 46, vy: 0, jumping: false, frame: 0, frameMs: 0 };
-var obstacles = [];
-var obsTimer = 0;
-var bgScroll = 0;
-var cloudX = W;
+const soldier = { x: 115, y: GROUND - 46, vy: 0, jumping: false, frame: 0, frameMs: 0 };
+const obstacles = [];
+let obsTimer = 0;
+let bgScroll = 0;
+let cloudX = W;
 
 /* ============================================================
    QUESTION POOL
 ============================================================ */
 function shuffle(arr) {
-  var a = arr.slice(), i, j, t;
+  let a = arr.slice(), i, j, t;
   for (i = a.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
     t = a[i]; a[i] = a[j]; a[j] = t;
@@ -323,27 +372,35 @@ function initPool() {
   gs.poolIdx = 0;
 }
 
+// Free Mode: each question is shown at most once per session.
+// Once the pool is exhausted, return null instead of reshuffling —
+// callers must stop showing/scoring questions and switch to free mode.
+// Note on WIN_SCORE: a perfect player's score reaches WIN_SCORE
+// (= questionsSource.length) at the exact moment the pool empties,
+// so endGame(true) fires before nextQuestion() can ever return null
+// for them — free mode is reached only by players who answered at
+// least one question incorrectly.
 function nextQuestion() {
-  if (gs.poolIdx >= gs.pool.length) { gs.pool = shuffle(questionsSource); gs.poolIdx = 0; }
+  if (gs.poolIdx >= gs.pool.length) { gs.questionsExhausted = true; return null; }
   return gs.pool[gs.poolIdx++];
 }
 
 /* ============================================================
    SOUNDS  (Web Audio API — no external files)
 ============================================================ */
-var _ac = null;
+let _ac = null;
 function getAC() {
   if (!_ac) try { _ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
   return _ac;
 }
 function tone(freq, dur, type, vol, delay) {
   try {
-    var a = getAC(); if (!a) return;
-    var o = a.createOscillator(), g = a.createGain();
+    let a = getAC(); if (!a) return;
+    let o = a.createOscillator(), g = a.createGain();
     o.connect(g); g.connect(a.destination);
     o.type = type || 'square';
     o.frequency.setValueAtTime(freq, a.currentTime);
-    var t = a.currentTime + (delay || 0);
+    let t = a.currentTime + (delay || 0);
     g.gain.setValueAtTime(vol || 0.18, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.start(t); o.stop(t + dur);
@@ -361,7 +418,7 @@ function sndGameOver() { [392,330,294,262].forEach(function(n,i){ tone(n,0.28,'s
 ============================================================ */
 function drawBg() {
   // Sky
-  var sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+  let sky = ctx.createLinearGradient(0, 0, 0, GROUND);
   sky.addColorStop(0, '#5a8fc0');
   sky.addColorStop(1, '#aed6f1');
   ctx.fillStyle = sky;
@@ -375,7 +432,7 @@ function drawBg() {
 
   // Cloud
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  var cx = cloudX % (W + 120) - 60;
+  let cx = cloudX % (W + 120) - 60;
   ctx.beginPath(); ctx.ellipse(cx, 55, 36, 16, 0, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(cx + 28, 50, 26, 13, 0, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(cx - 22, 50, 22, 12, 0, 0, Math.PI * 2); ctx.fill();
@@ -386,14 +443,14 @@ function drawBg() {
 
   // Fence posts (scrolling)
   ctx.fillStyle = '#4a5e30';
-  var sp = 68, off = bgScroll % sp;
-  for (var px = -off; px < W; px += sp) {
+  let sp = 68, off = bgScroll % sp;
+  for (let px = -off; px < W; px += sp) {
     ctx.fillRect(px,     GROUND - 56, 7, 46);
     ctx.fillRect(px - 4, GROUND - 53, 15, 6);
   }
 
   // Ground
-  var grd = ctx.createLinearGradient(0, GROUND, 0, H);
+  let grd = ctx.createLinearGradient(0, GROUND, 0, H);
   grd.addColorStop(0, '#8B7355');
   grd.addColorStop(1, '#5e4a2a');
   ctx.fillStyle = grd;
@@ -403,14 +460,14 @@ function drawBg() {
 }
 
 function drawSoldier() {
-  var x = soldier.x, y = soldier.y;
+  let x = soldier.x, y = soldier.y;
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.beginPath();
   ctx.ellipse(x, GROUND + 3, 19, 5, 0, 0, Math.PI * 2);
   ctx.fill();
   // Legs (animated, leaning forward-right)
-  var lx = soldier.jumping ? 2 : (soldier.frame ? 9 : -5);
+  let lx = soldier.jumping ? 2 : (soldier.frame ? 9 : -5);
   ctx.strokeStyle = '#5d4e37'; ctx.lineWidth = 5; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(x + 2, y + 30); ctx.lineTo(x + 6 + lx, y + 46); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x,     y + 30); ctx.lineTo(x - 2 - lx, y + 46); ctx.stroke();
@@ -425,7 +482,7 @@ function drawSoldier() {
   ctx.beginPath(); ctx.ellipse(x + 3, y + 5, 11, 8, 0, Math.PI, 0); ctx.fill();
   ctx.fillRect(x - 8, y + 4, 24, 3);
   // Forward arm (right side — direction of travel)
-  var fa = soldier.jumping ? -6 : (soldier.frame ? -10 : 2);
+  let fa = soldier.jumping ? -6 : (soldier.frame ? -10 : 2);
   ctx.strokeStyle = '#5a6e2a'; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(x + 7, y + 16); ctx.lineTo(x + 17, y + 26 + fa); ctx.stroke();
   // Back arm
@@ -433,16 +490,16 @@ function drawSoldier() {
 }
 
 function drawObstacles() {
-  var types = ['📦', '🛢️', '🪖'];
+  let types = ['📦', '🛢️', '🪖'];
   ctx.font = '36px serif';
-  for (var i = 0; i < obstacles.length; i++) {
+  for (let i = 0; i < obstacles.length; i++) {
     ctx.fillText(types[obstacles[i].type], obstacles[i].x, obstacles[i].y + 36);
   }
 }
 
 
 function drawBarber() {
-  var bx = W - 54; // right-aligned: building occupies bx..bx+50
+  let bx = W - 54; // right-aligned: building occupies bx..bx+50
   // Building walls
   ctx.fillStyle = '#f0ddb0';
   ctx.fillRect(bx + 2, GROUND - 68, 46, 68);
@@ -461,16 +518,16 @@ function drawBarber() {
   ctx.font = 'bold 9px Arial';
   ctx.fillText('✂️  ס פ ר', bx + 7, GROUND - 74);
   // Barber pole — left of building, clipped so stripes stay inside
-  var px = bx - 6;
+  let px = bx - 6;
   ctx.save();
   ctx.beginPath();
   ctx.rect(px, GROUND - 72, 6, 72);
   ctx.clip();
   ctx.fillStyle = '#fff';
   ctx.fillRect(px, GROUND - 72, 6, 72);
-  var stripeH = 10, stripeOff = Math.floor(bgScroll * 0.5) % (stripeH * 2);
+  let stripeH = 10, stripeOff = Math.floor(bgScroll * 0.5) % (stripeH * 2);
   ctx.fillStyle = '#e74c3c';
-  for (var si = -1; si < 8; si++) {
+  for (let si = -1; si < 8; si++) {
     ctx.fillRect(px, GROUND - 72 + si * stripeH * 2 + stripeOff, 6, stripeH);
   }
   ctx.restore();
@@ -480,15 +537,15 @@ function drawBarber() {
 
 
 function drawProgressBar() {
-  var pct       = Math.min(1, gs.score / WIN_SCORE);
-  var remaining = Math.max(0, WIN_SCORE - gs.score);
+  let pct       = Math.min(1, gs.score / WIN_SCORE);
+  let remaining = Math.max(0, WIN_SCORE - gs.score);
   ctx.fillStyle = 'rgba(0,0,0,0.45)';
   ctx.fillRect(56, H - 16, W - 64, 9);
   ctx.fillStyle = pct > 0.7 ? '#5dff88' : '#f1c40f';
   ctx.fillRect(56, H - 16, (W - 64) * pct, 9);
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 9px Arial';
-  var label = remaining > 0 ? 'עוד ' + remaining + ' שאלות נכונות לספר ✂️' : '!הגע לספר';
+  let label = remaining > 0 ? 'עוד ' + remaining + ' שאלות נכונות לספר ✂️' : '!הגע לספר';
   ctx.fillText(label, 58, H - 8);
 }
 
@@ -496,14 +553,14 @@ function drawProgressBar() {
    HUD UPDATE (DOM)
 ============================================================ */
 function updateHUD() {
-  var hearts = '';
-  for (var i = 0; i < MAX_LIVES; i++) hearts += (i < gs.lives ? '❤️' : '🖤');
+  let hearts = '';
+  for (let i = 0; i < MAX_LIVES; i++) hearts += (i < gs.lives ? '❤️' : '🖤');
   document.getElementById('lives-display').textContent = hearts || '💀';
 
   document.getElementById('sgt-fill').style.width = gs.sgtProximity + '%';
 
-  var secs = Math.floor(gs.timerMs / 1000);
-  var displaySecs;
+  let secs = Math.floor(gs.timerMs / 1000);
+  let displaySecs;
   if (GAME_TIMER > 0) {
     displaySecs = Math.max(0, GAME_TIMER - secs);
     if (displaySecs <= 0 && gs.running && !gs.paused) { endGame(false, 'נגמר הזמן!'); return; }
@@ -512,7 +569,7 @@ function updateHUD() {
   } else {
     displaySecs = secs;
   }
-  var m = Math.floor(displaySecs / 60), s = displaySecs % 60;
+  let m = Math.floor(displaySecs / 60), s = displaySecs % 60;
   document.getElementById('timer-display').textContent =
     (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
@@ -523,7 +580,7 @@ function updateHUD() {
 function loop(ts) {
   if (!gs.running) return;
 
-  var dt = gs.prevTs ? Math.min(ts - gs.prevTs, 80) : 16;
+  let dt = gs.prevTs ? Math.min(ts - gs.prevTs, 80) : 16;
   gs.prevTs = ts;
 
   if (!gs.paused) {
@@ -544,7 +601,7 @@ function loop(ts) {
 
     // Obstacle spawning (speeds up with score)
     obsTimer += dt;
-    var interval = Math.max(700, 2200 - gs.score * 80);
+    let interval = Math.max(700, 2200 - gs.score * 80);
     if (obsTimer >= interval) {
       obsTimer = 0;
       obstacles.push({ x: W + 10, y: GROUND - 36, type: Math.floor(Math.random() * 3) });
@@ -552,7 +609,7 @@ function loop(ts) {
 
     // Soldier physics — dt-normalised to 60fps
     if (soldier.jumping || soldier.y < GROUND - 46) {
-      var dtF = dt / 16.67;
+      let dtF = dt / 16.67;
       soldier.vy += 0.7 * dtF;
       soldier.y  += soldier.vy * dtF;
       if (soldier.y >= GROUND - 46) {
@@ -565,13 +622,13 @@ function loop(ts) {
     if (soldier.frameMs > 220) { soldier.frame = 1 - soldier.frame; soldier.frameMs = 0; }
 
     // Move obstacles & check
-    var speed = 3 + gs.score * 0.25;
-    var sl = soldier.x - 14, sr = soldier.x + 14;
-    var sb = soldier.y + 46,  st = soldier.y + 4;
+    let speed = 3 + gs.score * 0.25;
+    let sl = soldier.x - 14, sr = soldier.x + 14;
+    let sb = soldier.y + 46,  st = soldier.y + 4;
 
-    for (var i = obstacles.length - 1; i >= 0; i--) {
+    for (let i = obstacles.length - 1; i >= 0; i--) {
       obstacles[i].x -= speed * (dt / 16);
-      var o = obstacles[i];
+      let o = obstacles[i];
       if (o.x + 38 < 0) {
         obstacles.splice(i, 1);
         gs.obstaclesCleared++;
@@ -617,7 +674,7 @@ function jump() {
 function hitObstacle() {
   gs.lives--;
   gs.sgtProximity = Math.min(100, gs.sgtProximity + 18);
-  var _secs = Math.floor(gs.timerMs / 1000);
+  let _secs = Math.floor(gs.timerMs / 1000);
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _secs, isfinished: false }, '*'); } catch(e) {}
   // count toward question trigger even on hits
   gs.obstaclesCleared++;
@@ -633,25 +690,60 @@ function hitObstacle() {
    QUESTIONS
 ============================================================ */
 function showQuestion() {
+  let q = nextQuestion();
+  if (!q) {
+    enterFreeMode();
+    gs.rafId = requestAnimationFrame(loop);
+    return;
+  }
+
   gs.paused = true;
-  var q = nextQuestion();
   document.getElementById('question-overlay').classList.remove('hidden');
   document.getElementById('question-text').textContent = q.q;
   document.getElementById('feedback-msg').textContent = '';
   document.getElementById('feedback-msg').className   = '';
   document.getElementById('explanation-text').textContent = '';
 
-  var btnsEl = document.getElementById('answer-buttons');
+  let btnsEl = document.getElementById('answer-buttons');
   btnsEl.innerHTML = '';
   q.a.forEach(function(ans, idx) {
-    var btn = document.createElement('button');
+    let btn = document.createElement('button');
     btn.className   = 'ans-btn';
     btn.textContent = ans;
-    btn.onclick     = function() { answer(idx, q); };
+    btn.addEventListener('click', function() { answer(idx, q); });
     btnsEl.appendChild(btn);
   });
 
   gs.rafId = requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   FREE MODE  (after every question has been shown once)
+============================================================ */
+function showFreeModeToast() {
+  let toastEl = document.getElementById('free-mode-toast');
+  toastEl.classList.remove('hidden', 'fade-out');
+  setTimeout(function() { toastEl.classList.add('fade-out'); }, 3200);
+  setTimeout(function() { toastEl.classList.add('hidden'); toastEl.classList.remove('fade-out'); }, 3700);
+}
+
+function showFreeModeBadge() {
+  document.getElementById('free-mode-badge').classList.remove('hidden');
+}
+
+function hideFreeModeUI() {
+  let toastEl = document.getElementById('free-mode-toast');
+  let badgeEl = document.getElementById('free-mode-badge');
+  toastEl.classList.add('hidden');
+  toastEl.classList.remove('fade-out');
+  badgeEl.classList.add('hidden');
+}
+
+function enterFreeMode() {
+  if (gs.freeModeToastShown) return;
+  gs.freeModeToastShown = true;
+  showFreeModeToast();
+  showFreeModeBadge();
 }
 
 function answer(chosen, q) {
@@ -661,16 +753,16 @@ function answer(chosen, q) {
     else if (i === chosen) b.classList.add('wrong');
   });
 
-  var correct  = (chosen === q.c);
-  var fbEl     = document.getElementById('feedback-msg');
-  var explEl   = document.getElementById('explanation-text');
+  let correct  = (chosen === q.c);
+  let fbEl     = document.getElementById('feedback-msg');
+  let explEl   = document.getElementById('explanation-text');
 
   if (correct) {
     gs.score++;
     gs.sgtProximity = Math.max(0, gs.sgtProximity - 28);
     sndCorrect();
     if (SHOW_FEEDBACK) { fbEl.textContent = CORRECT_FEEDBACK; fbEl.className = 'correct'; }
-    var _sc = Math.floor(gs.timerMs / 1000);
+    let _sc = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sc, isfinished: false }, '*'); } catch(e) {}
     if (gs.score >= WIN_SCORE) {
       document.getElementById('question-overlay').classList.add('hidden');
@@ -682,13 +774,13 @@ function answer(chosen, q) {
     gs.sgtProximity = Math.min(100, gs.sgtProximity + 22);
     sndWrong();
     if (SHOW_FEEDBACK) { fbEl.textContent = INCORRECT_FEEDBACK; fbEl.className = 'wrong'; }
-    var _sw = Math.floor(gs.timerMs / 1000);
+    let _sw = Math.floor(gs.timerMs / 1000);
     try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: _sw, isfinished: false }, '*'); } catch(e) {}
   }
 
   if (SHOW_FEEDBACK && q.explanation) explEl.textContent = q.explanation;
 
-  var delay = SHOW_FEEDBACK ? FEEDBACK_DURATION * 1000 : 350;
+  let delay = SHOW_FEEDBACK ? FEEDBACK_DURATION * 1000 : 350;
   if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
   gs.fbTimeout = setTimeout(function() {
     document.getElementById('question-overlay').classList.add('hidden');
@@ -705,12 +797,12 @@ function answer(chosen, q) {
 function endGame(won, reason) {
   gs.running = false;
   gs.paused  = false;
-  var secs = Math.floor(gs.timerMs / 1000);
+  let secs = Math.floor(gs.timerMs / 1000);
   try { window.parent.postMessage({ type: 'SCORE_UPDATE', score: gs.score, timer: secs, isfinished: true }, '*'); } catch(e) {}
   if (won) { sndWin(); } else { sndGameOver(); }
 
-  var m = Math.floor(secs / 60), s = secs % 60;
-  var t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  let m = Math.floor(secs / 60), s = secs % 60;
+  let t = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 
   document.getElementById('gameover-title').textContent = won ? '🎉 הגעת לספר!' : ('😤 ' + reason);
   document.getElementById('gameover-desc').textContent  = won ? 'מה מסתפר! הרס"ר לא הספיק לראות אותך.' : 'הרס"ר מנצח הפעם... נסה שוב!';
@@ -737,6 +829,9 @@ function startGame() {
   gs.sgtProximity    = 20;
   gs.obstaclesCleared = 0;
   gs.poolIdx         = 0;
+  gs.questionsExhausted  = false;
+  gs.freeModeToastShown  = false;
+  hideFreeModeUI();
   if (gs.fbTimeout) clearTimeout(gs.fbTimeout);
 
   soldier.y       = GROUND - 46;
@@ -778,7 +873,7 @@ canvas.addEventListener('touchstart', function(e) { e.preventDefault(); jump(); 
    INITIAL STATIC FRAME
 ============================================================ */
 (function() {
-  var sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+  let sky = ctx.createLinearGradient(0, 0, 0, GROUND);
   sky.addColorStop(0, '#5a8fc0');
   sky.addColorStop(1, '#aed6f1');
   ctx.fillStyle = sky;
@@ -790,6 +885,7 @@ canvas.addEventListener('touchstart', function(e) { e.preventDefault(); jump(); 
   ctx.font = '40px serif';
   ctx.fillText('🏃', soldier.x - 20, GROUND - 6);
 }());
+})();
 </script>
 </body>
 </html>
