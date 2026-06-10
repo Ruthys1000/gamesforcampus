@@ -1929,6 +1929,7 @@ Before finishing, verify every item:
 
 **Logic**
 * [ ] Timer: count up when `GAME_TIMER===0`, countdown + game over when `GAME_TIMER&gt;0`
+* [ ] Timer display formatted as mm:ss (e.g. 3 minutes → 3:00, not 180)
 * [ ] `SHOW_FEEDBACK=false` → question closes within 150ms
 * [ ] `SHOW_FEEDBACK=true` → shows feedback text + explanation, waits `FEEDBACK_DURATION` seconds
 * [ ] Free mode: each question shown at most once; one-time toast (+ optional badge) appears the moment the pool is exhausted; question overlay AND question-triggered scoring stop afterward (game keeps running in arcade mode); restart resets the used-questions tracker and the free-mode flags
@@ -2347,10 +2348,10 @@ Before finishing, verify every item:
       // ── 5. לוגיקת משחק ──
       {
         label: '5a. לוגיקת טיימר: GAME_TIMER===0 → ספירה עולה; GAME_TIMER>0 → ספירה יורדת ומסיים ב-0',
-        shortLabel: 'לוגיקת הטיימר (ספירה עולה/יורדת) מיושמת',
+        shortLabel: 'לוגיקת הטיימר (ספירה עולה/יורדת  + mm:ss) מיושמת',
         group: 'important',
         explanation: 'כשהמורה מגדיר זמן=60, הטיימר צריך לספור מ-60 ל-0. כשזמן=0, ספירה עולה ללא הגבלה.',
-        test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c)
+        test: c => /GAME_TIMER\s*===\s*0|GAME_TIMER\s*==\s*0/.test(c) && /GAME_TIMER\s*>\s*0/.test(c) &&  /:00|format|minutes|seconds/.test(c)
       },
       {
         label: '5b. חיים מתחילים ב-MAX_LIVES (משתנה, לא קשיח); תשובה שגויה = חיים−1; 0 חיים = game over',
@@ -2943,6 +2944,7 @@ Before finishing, verify every item:
         '[ ] cfg.showFeedback applied with "showFeedback" in cfg (not truthy)',
         '[ ] Question mapping uses q.options||q.a and q.correct !== undefined',
         '[ ] Timer logic: count up when GAME_TIMER===0, count down + game over when GAME_TIMER>0',
+        '[ ] Timer display formatted as mm:ss (e.g. 3 minutes → 3:00, not 180)',
         '[ ] lives initialized from MAX_LIVES (not hardcoded)',
         '[ ] Free mode: each question shown at most once; once the pool is exhausted — STOP showing/scoring questions, show a one-time toast (+ optional badge), keep gameplay running in arcade mode; restart resets the used-questions tracker and free-mode flags. Do NOT reset the pool and start a repeating round.',
         '[ ] SHOW_FEEDBACK logic with FEEDBACK_DURATION timing',
